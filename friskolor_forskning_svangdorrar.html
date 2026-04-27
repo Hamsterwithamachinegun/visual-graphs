@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friskolor i Sverige: Forskning &amp; Svängdörrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:     #0d1117;
+  --surf:   #161b22;
+  --card:   #21262d;
+  --bdr:    #30363d;
+  --bdr2:   #21262d;
+  --txt:    #e6edf3;
+  --muted:  #8b949e;
+  --M:      #1D6FA4;
+  --L:      #0097D7;
+  --S:      #E8112D;
+  --MP:     #53a145;
+  --lobby:  #5F5E5A;
+  --frisk:  #BA7517;
+  --bransch:#993C1D;
+  --org:    #534AB7;
+  --rad:    8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.6;}
+
+/* ── HEADER ── */
+header{padding:2.5rem 2rem 1.25rem;border-bottom:1px solid var(--bdr);max-width:920px;margin:0 auto;}
+h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.4rem,3.5vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+header p{font-size:.83rem;color:var(--muted);max-width:620px;}
+
+/* ── TABS ── */
+.tab-nav{display:flex;border-bottom:1px solid var(--bdr);padding:0 2rem;max-width:920px;margin:0 auto;overflow-x:auto;}
+.tab-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:.83rem;font-weight:500;padding:.8rem 1.1rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s,border-color .2s;}
+.tab-btn.active{color:var(--txt);border-bottom-color:var(--txt);}
+
+/* ── SECTIONS ── */
+.section{display:none;max-width:920px;margin:0 auto;padding:1.75rem 2rem 3rem;}
+.section.active{display:block;}
+
+/* ── CHAPTER NAV ── */
+.ch-nav{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1.25rem;}
+.ch-nav button{flex-shrink:0;background:var(--card);border:1px solid var(--bdr);color:var(--txt);font-family:inherit;font-size:.83rem;padding:.25rem .65rem;border-radius:4px;cursor:pointer;}
+.ch-nav button:hover{background:var(--bdr);}
+.ch-body{flex:1;}
+.ch-title{font-size:.875rem;font-weight:500;margin-bottom:.25rem;}
+.ch-text{font-size:.78rem;color:var(--muted);line-height:1.55;}
+
+/* ── DOTS ── */
+.dots{display:flex;gap:5px;align-items:center;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--bdr);transition:background .2s;}
+.dot.on{background:var(--txt);}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);align-items:center;}
+.lsq{width:9px;height:9px;border-radius:2px;display:inline-block;flex-shrink:0;}
+
+/* ── INFO PANEL ── */
+.info-panel{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:.8rem 1rem;margin-top:1rem;min-height:52px;font-size:.83rem;line-height:1.55;color:var(--muted);}
+
+/* ── SOURCE FOOTER ── */
+.src{font-size:.7rem;color:var(--muted);margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--bdr);line-height:1.65;}
+
+/* ── FORSKNING ── */
+.mbtn-row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;}
+.mbtn{background:var(--card);border:1px solid var(--bdr);color:var(--muted);font-family:inherit;font-size:.78rem;padding:.3rem .8rem;border-radius:100px;cursor:pointer;transition:all .2s;}
+.mbtn.on{background:var(--txt);color:var(--bg);border-color:var(--txt);font-weight:500;}
+.ap-btn{background:var(--card);border:1px solid var(--bdr);color:var(--txt);font-family:inherit;font-size:.78rem;padding:.3rem .8rem;border-radius:100px;cursor:pointer;margin-left:auto;}
+.ap-btn.playing{border-color:var(--MP);color:var(--MP);}
+.chart-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem 1.25rem .75rem;margin-bottom:.75rem;}
+.insight{background:var(--card);border-left:3px solid var(--txt);border-radius:0 4px 4px 0;padding:.65rem .9rem;font-size:.8rem;margin-top:.9rem;line-height:1.55;}
+
+/* ── RESEARCH CARDS ── */
+.rcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:.6rem;margin-top:1.25rem;}
+.rc{background:var(--surf);border:1px solid var(--bdr);border-left:3px solid var(--bdr);border-radius:var(--rad);padding:.875rem;}
+.rc.neg{border-left-color:var(--S);}
+.rc.pos{border-left-color:var(--MP);}
+.rc.neut{border-left-color:var(--frisk);}
+.rc.lobby{border-left-color:var(--org);}
+.rc-src{font-size:.68rem;color:var(--muted);margin-bottom:.3rem;}
+.rc-ttl{font-size:.82rem;font-weight:500;margin-bottom:.3rem;line-height:1.4;}
+.rc-det{font-size:.75rem;color:var(--muted);line-height:1.5;}
+
+/* ── PROFILE CARDS ── */
+.svcard{display:flex;margin-bottom:7px;border-radius:var(--rad);overflow:hidden;background:var(--surf);border:1px solid var(--bdr);cursor:pointer;transition:opacity .35s ease,box-shadow .15s;}
+.svcard:hover{box-shadow:0 0 0 1px var(--muted);}
+.svcard.dim{opacity:.07;pointer-events:none;}
+.svcard.hl{box-shadow:0 0 0 2px var(--org);}
+.svstrip{width:5px;flex-shrink:0;}
+.svbody{display:flex;flex-wrap:wrap;gap:5px 12px;padding:9px 13px;flex:1;align-items:flex-start;}
+.svperson{min-width:155px;flex:1;}
+.svphead{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px;}
+.badge{display:inline-block;color:#fff;font-size:.68rem;font-weight:600;padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.svname{font-weight:500;font-size:.85rem;}
+.svprev{font-size:.72rem;color:var(--muted);}
+.svconns{flex:2;min-width:180px;display:flex;flex-direction:column;gap:4px;}
+.svconn{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+.arr{color:var(--muted);font-size:.85rem;flex-shrink:0;}
+.typetag{font-size:.67rem;font-weight:500;padding:2px 5px;border-radius:3px;color:#fff;flex-shrink:0;}
+.orgname{font-size:.85rem;font-weight:500;}
+.role{font-size:.72rem;color:var(--muted);}
+.retbadge{font-size:.67rem;padding:2px 6px;border-radius:3px;background:rgba(83,74,183,.22);color:#a29bfe;flex-shrink:0;}
+.party-label{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:4px;margin:1rem 0 .45rem;display:inline-block;color:#fff;letter-spacing:.04em;}
+
+/* ── TIMELINE SVG text ── */
+svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
+
+/* ── ARGUMENT / MOTARGUMENT ── */
+.arg-card{border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:1.75rem;}
+.arg-header{background:var(--surf);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--bdr);}
+.arg-num{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:var(--muted);flex-shrink:0;width:2rem;text-align:center;}
+.arg-header-title{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.arg-claim{background:rgba(186,117,23,.07);border-left:4px solid #BA7517;padding:1.25rem 1.5rem;}
+.arg-claim-lbl{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#BA7517;margin-bottom:.5rem;}
+.arg-claim-txt{font-size:1rem;font-weight:500;font-style:italic;line-height:1.55;color:var(--txt);}
+.arg-claim-sub{font-size:.78rem;color:rgba(230,180,80,.8);margin-top:.5rem;line-height:1.5;}
+.arg-sep{background:var(--card);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.75rem;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);}
+.arg-sep::before,.arg-sep::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.arg-sep span{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.arg-counter{background:rgba(83,161,69,.06);border-left:4px solid #53a145;padding:1.25rem 1.5rem;}
+.arg-counter-lbl{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#53a145;margin-bottom:.5rem;}
+.arg-counter-txt{font-size:.9rem;line-height:1.7;color:var(--txt);}
+.study-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.85rem;}
+.chip{font-size:.68rem;background:var(--card);border:1px solid var(--bdr);border-radius:100px;padding:2px 9px;color:var(--muted);}
+
+/* ── KÄLLKORT ── */
+.src-group{margin-bottom:2rem;}
+.src-group-hdr{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.45rem 0 .6rem;border-bottom:1px solid var(--bdr);margin-bottom:.75rem;}
+.src-row{display:flex;align-items:flex-start;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--bdr2);}
+.src-row:last-child{border-bottom:none;}
+.src-meta{flex:1;min-width:0;}
+.src-title{font-size:.875rem;font-weight:500;line-height:1.4;margin-bottom:.2rem;}
+.src-auth{font-size:.75rem;color:var(--muted);line-height:1.5;}
+.src-desc{font-size:.75rem;color:var(--muted);margin-top:.3rem;line-height:1.5;}
+.src-link{flex-shrink:0;display:inline-flex;align-items:center;gap:.35rem;background:var(--card);border:1px solid var(--bdr);border-radius:6px;color:var(--txt);text-decoration:none;font-size:.75rem;font-weight:500;padding:.35rem .75rem;white-space:nowrap;transition:background .15s,border-color .15s;}
+.src-link:hover{background:var(--bdr);border-color:var(--muted);}
+.src-nolnk{flex-shrink:0;font-size:.72rem;color:var(--muted);padding:.35rem 0;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Friskolor i Sverige: Forskning &amp; Svängdörrar</h1>
+  <p>Interaktiv översikt: 10 forskningsstudier om friskolors effekter, samt dokumenterade karriärövergångar mellan politik och friskoleindustrin 2013–2025.</p>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('forskning',this)">Forskning</button>
+  <button class="tab-btn" onclick="showTab('profiler',this)">Svängdörrar: Profiler</button>
+  <button class="tab-btn" onclick="showTab('tidslinje',this)">Svängdörrar: Tidslinje</button>
+  <button class="tab-btn" onclick="showTab('argument',this)">Argument &amp; Motargument</button>
+  <button class="tab-btn" onclick="showTab('kallor',this)">Källor</button>
+</nav>
+
+<!-- ══════════════════════════════════════ FORSKNING ══════════════════════════════════════ -->
+<section id="forskning" class="section active">
+
+  <div class="mbtn-row" style="margin-bottom:.9rem;">
+    <button class="mbtn on" onclick="setM(0,this)">Gymnasiebetyg</button>
+    <button class="mbtn" onclick="setM(1,this)">Nationella prov</button>
+    <button class="mbtn" onclick="setM(2,this)">Högskoleprestationer</button>
+    <button class="mbtn" onclick="setM(3,this)">Livsinkomst</button>
+    <button class="ap-btn" id="apBtn" onclick="toggleAP()">▶ Autoplay</button>
+  </div>
+
+  <div class="chart-wrap">
+    <p style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;font-weight:500;" id="chartLabel">GYMNASIEBETYG: kommunal skola = 100 (referenspunkt)</p>
+    <p style="font-size:.7rem;color:var(--muted);margin-bottom:.75rem;font-style:italic;line-height:1.5;" id="chartNote"></p>
+    <canvas id="rc" height="210"></canvas>
+    <div class="insight" id="insight"></div>
+  </div>
+
+  <div class="chart-wrap" style="margin-top:0;">
+    <p style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem;font-weight:500;">MARKNADSANDEL: Andel elever i fristående skolor 1993–2023 (approx. SCB/Skolverket)</p>
+    <canvas id="mc" height="160"></canvas>
+  </div>
+
+  <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;margin:1.75rem 0 .9rem;">Forskningsöversikt: 10 studier</h2>
+  <div class="rcards" id="rcards"></div>
+
+  <p class="src">Forskning: Petter Berg (HHS, 2026) · Jonas Vlachos (IFN, 2018) · Hinnerich &amp; Vlachos · Böhlmark &amp; Lindahl (IFAU, 2012/2015) · Böhlmark, Holmlund &amp; Lindahl (IFAU, 2015) · Holmlund m.fl. (IFAU, 2014) · Skolverket &amp; UKÄ (2024) · Sveriges Lärare &amp; ISR (2024) · Karin Edmark (IFAU, 2014). Marknadsandelsdata: SCB/Skolverket (approximativa).</p>
+</section>
+
+<!-- ══════════════════════════════════════ PROFILER ══════════════════════════════════════ -->
+<section id="profiler" class="section">
+
+  <div class="ch-nav">
+    <button onclick="prevPCh()">←</button>
+    <div class="ch-body">
+      <div class="ch-title" id="pcht"></div>
+      <div class="ch-text" id="pchx"></div>
+    </div>
+    <button onclick="nextPCh()">→</button>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem;">
+    <div class="dots" id="pdots"></div>
+    <div class="legend">
+      <span class="legend"><span class="lsq" style="background:var(--lobby);"></span>Lobbyfirma</span>
+      <span class="legend"><span class="lsq" style="background:var(--frisk);"></span>Friskolekoncern</span>
+      <span class="legend"><span class="lsq" style="background:var(--bransch);"></span>Branschorg</span>
+      <span class="legend"><span class="lsq" style="background:var(--org);"></span>Kommission</span>
+    </div>
+  </div>
+
+  <div id="profcards"></div>
+  <div class="info-panel" id="pip">Klicka på ett kort för mer information om personen och kopplingens bakgrund.</div>
+  <p class="src">Tankesmedjan Balans (2022–2024) · Lobbykollen.se (Reformisterna, 2023–) · Dagens ETC (2022) · Altinget (2025) · Sebhatu &amp; Wennberg om AcadeMedias politiska strategi.</p>
+</section>
+
+<!-- ══════════════════════════════════════ TIDSLINJE ══════════════════════════════════════ -->
+<section id="tidslinje" class="section">
+
+  <div class="ch-nav">
+    <button onclick="prevTCh()">←</button>
+    <div class="ch-body">
+      <div class="ch-title" id="tcht"></div>
+      <div class="ch-text" id="tchx"></div>
+    </div>
+    <button onclick="nextTCh()">→</button>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem;">
+    <div class="dots" id="tdots"></div>
+    <div class="legend">
+      <span style="display:flex;align-items:center;gap:3px;font-size:.72rem;color:var(--muted);"><span style="display:inline-block;width:18px;height:4px;border-radius:1px;background:var(--muted);opacity:.4;"></span>Politisk roll</span>
+      <span class="legend"><span class="lsq" style="background:var(--lobby);"></span>Lobbyfirma</span>
+      <span class="legend"><span class="lsq" style="background:var(--frisk);"></span>Friskolekoncern</span>
+      <span class="legend"><span class="lsq" style="background:var(--bransch);"></span>Branschorg</span>
+      <span class="legend"><span class="lsq" style="background:var(--org);"></span>Kommission</span>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <svg id="tl" viewBox="0 0 740 445" style="min-width:540px;width:100%;" role="img">
+      <title>Svängdörrar 2013–2025: tidslinje</title>
+    </svg>
+  </div>
+
+  <div class="info-panel" id="tip">Klicka på en rad för detaljer om personen och kopplingens bakgrund.</div>
+  <p class="src">Alla kopplingar dokumenterade i offentliga källor. Övergångsår approximativa där exakt datum ej publicerats. Tankesmedjan Balans (2022–2024) · Lobbykollen.se · Dagens ETC (2022) · Altinget (2025) · Sebhatu &amp; Wennberg.</p>
+</section>
+
+<!-- ══════════════════════════════════════ ARGUMENT & MOTARGUMENT ══════════════════════════════════════ -->
+<section id="argument" class="section">
+
+  <p style="font-size:.83rem;color:var(--muted);margin-bottom:1.75rem;max-width:660px;line-height:1.65;">
+    Nedan visas de fem vanligaste argumenten från friskoleindustrins lobbyister, följt av ett faktabaserat motargument. Påståendena är autentiska; det är ordagrant den argumentation som återkommer i debattartiklar, remissvar och pressmeddelanden från Friskolornas Riksförbund och närstående organisationer.
+  </p>
+
+  <div id="argcards"></div>
+
+  <p class="src">Källor till motargumenten: Petter Berg (HHS, 2026) · Vlachos (IFN, 2018) · Hinnerich &amp; Vlachos · Böhlmark, Holmlund &amp; Lindahl (IFAU, 2015) · Skolverket &amp; UKÄ (2024) · Sveriges Lärare &amp; ISR (2024) · Sebhatu &amp; Wennberg (2022).</p>
+</section>
+
+<!-- ══════════════════════════════════════ KÄLLOR ══════════════════════════════════════ -->
+<section id="kallor" class="section">
+
+  <p style="font-size:.83rem;color:var(--muted);margin-bottom:1.75rem;max-width:660px;line-height:1.65;">
+    Samtliga källor som materialet bygger på. Klicka på en länk för att läsa originalkällan. Icke-länkade rapporter är tillgängliga via sökning på respektive lärosätes eller myndighets webbplats.
+  </p>
+
+  <div id="kallcontainer"></div>
+
+  <p class="src">Länkarna kontrollerades april 2026. Observera att akademiska working papers kan uppdateras eller byta URL. Sök på titeln om en länk är trasig.</p>
+
+  <p style="font-size:.78rem;color:var(--muted);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--bdr);">
+    Gjord av André Lundberg, med hjälp av <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" style="color:var(--muted);text-underline-offset:3px;">Claude.ai</a>.
+  </p>
+</section>
+
+<script>
+// ══════════════════════ TAB NAV ══════════════════════
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════════════════ HELPERS ══════════════════════
+function buildDots(id, n, cur) {
+  document.getElementById(id).innerHTML =
+    Array.from({length:n},(_,i)=>`<div class="dot${i===cur?' on':''}"></div>`).join('');
+}
+function updateDots(id, n, cur) {
+  document.querySelectorAll('#'+id+' .dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+}
+
+// ══════════════════════ CHART.JS SETUP ══════════════════════
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+
+// ── ROSLING BAR CHART ──
+const MEASURES = [
+  { lbl:'GYMNASIEBETYG: kommunal skola = 100 (referenspunkt)',
+    note:'Index: om kommunal skola = 100 och en stapel visar 108, har den skolan 8% högre betyg.',
+    data:[100,104,108], yMin:88, yMax:120,
+    colors:d=>d>100?'rgba(186,117,23,.7)':'rgba(139,148,158,.35)',
+    borders:d=>d>100?'#BA7517':'#8b949e',
+    barLabels:['100\n(referens)','+4%','+8%'],
+    overlay:'Friskolor ser bättre ut...',
+    insight:'⚠ Vinstdrivande skolor sätter högre betyg, men måttet är missvisande. Betygssättningen sker internt och ger friskolorna ekonomiska incitament att ge generösa betyg (Vlachos, IFN 2018).' },
+  { lbl:'NATIONELLA PROV: externt rättade, kommunal = 100',
+    note:'Samma skala som betygsfliken. Här rättas proven av någon annan än den egna skolan.',
+    data:[100,100.3,100.2], yMin:88, yMax:120,
+    colors:_=>'rgba(139,148,158,.35)',
+    borders:_=>'#8b949e',
+    barLabels:['100\n(referens)','+0,3%','+0,2%'],
+    overlay:'...men gapet försvinner vid extern rättning',
+    insight:'✓ Extern rättning raderar gapet. Hinnerich & Vlachos: när nationella prov rättas externt försvinner skillnaderna. Det är betygssättning, inte kunskaper, som skiljer sig åt.' },
+  { lbl:'HÖGSKOLEPRESTATIONER: första läsåret, kommunal = 100',
+    note:'Samma skala. Mäter hur många högskolepoäng studenter klarar av under sitt första år.',
+    data:[100,95.8,93.6], yMin:88, yMax:120,
+    colors:d=>d<100?'rgba(232,17,45,.65)':'rgba(139,148,158,.35)',
+    borders:d=>d<100?'#E8112D':'#8b949e',
+    barLabels:['100\n(referens)','−4,2 pp','−6,4 pp'],
+    overlay:'Högskolresultaten avslöjar verkligheten',
+    insight:'✗ Högskoleprestationer avslöjar sanningen: elever från vinstdrivande friskolor presterar 6,4 procentenheter (pp) sämre under 1:a högskolåret, trots lika gymnasiebetyg (Skolverket & UKÄ, 2024). Mönstret replikerar sedan 2005.' },
+  { lbl:'LIVSINKOMST: kausalstudie, kommunal = 100',
+    note:'Samma skala. En skillnad på 2% i livsinkomst låter liten men motsvarar ~200 000 kr över ett helt arbetsliv.',
+    data:[100,99.5,98], yMin:88, yMax:120,
+    colors:d=>d<100?'rgba(232,17,45,.65)':'rgba(139,148,158,.35)',
+    borders:d=>d<100?'#E8112D':'#8b949e',
+    barLabels:['100\n(referens)','−0,5%','−2%'],
+    overlay:'Konsekvensen: 200 000 kr lägre livsinkomst',
+    insight:'✗ Kausalstudie (Berg, HHS 2026): elever i vinstdrivande friskolor tjänar 2% (~200 000 kr) lägre livsinkomst, orsakat av lägre andel behöriga lärare. Notera: samma skala som betygsflikens, men verkligheten är den omvända.' },
+];
+
+let curM = 0, apTimer = null;
+let curBarLabels = ['','',''], curOverlay = '';
+
+// Plugin: stor overlay-text i diagramytan
+const overlayPlugin = {
+  id:'overlayText',
+  afterDraw(chart) {
+    if (!curOverlay) return;
+    const {ctx, chartArea} = chart;
+    ctx.save();
+    ctx.font = 'italic 500 17px IBM Plex Sans, Georgia, serif';
+    ctx.fillStyle = 'rgba(230,237,243,0.13)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(curOverlay, (chartArea.left+chartArea.right)/2, chartArea.top+14);
+    ctx.restore();
+  }
+};
+
+// Plugin: annoterade värden ovanpå staplarna med mörk bakgrund för läsbarhet
+const barLabelPlugin = {
+  id:'barLabels',
+  afterDatasetsDraw(chart) {
+    if (!curBarLabels.length) return;
+    const {ctx, chartArea} = chart;
+    const meta = chart.getDatasetMeta(0);
+    meta.data.forEach((bar, j) => {
+      const raw = curBarLabels[j]; if (!raw) return;
+      const v = chart.data.datasets[0].data[j];
+      const accentColor = j===0 ? '#8b949e' : v>100 ? '#BA7517' : '#E8112D';
+      const lines = raw.split('\n');
+      ctx.save();
+      ctx.font = '600 11px IBM Plex Sans, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const lineH = 14;
+      const totalH = lines.length * lineH;
+      // Klipplåsning: håll etiketten innanför diagramytan
+      const startY = Math.max(bar.y - 12 - totalH, chartArea.top + 4);
+      // Mät bredaste raden
+      let maxW = 0;
+      lines.forEach(ln => { maxW = Math.max(maxW, ctx.measureText(ln).width); });
+      // Nästan solid mörk bakgrund
+      ctx.fillStyle = 'rgba(13,17,23,0.96)';
+      ctx.fillRect(bar.x - maxW/2 - 6, startY - 4, maxW + 12, totalH + 8);
+      // Färgad topplinje som ger färgkodning utan att offra läsbarhet
+      ctx.fillStyle = accentColor;
+      ctx.fillRect(bar.x - maxW/2 - 6, startY - 4, maxW + 12, 2);
+      // Vit text för maximal kontrast
+      ctx.fillStyle = '#e6edf3';
+      lines.forEach((ln, li) => { ctx.fillText(ln, bar.x, startY + li*lineH); });
+      ctx.restore();
+    });
+  }
+};
+
+// Plugin: streckad referenslinje vid y=100, etikett högerplacerad för att undvika krock
+const refLinePlugin = {
+  id:'refLine',
+  afterDatasetsDraw(chart) {
+    const {ctx, chartArea, scales} = chart;
+    const y = scales.y.getPixelForValue(100);
+    if (y < chartArea.top || y > chartArea.bottom) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(139,148,158,0.45)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,5]);
+    ctx.beginPath();
+    ctx.moveTo(chartArea.left, y);
+    ctx.lineTo(chartArea.right, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = '500 10px IBM Plex Sans, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(139,148,158,0.7)';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('referens (100)', chartArea.right - 4, y - 3);
+    ctx.restore();
+  }
+};
+
+const rCtx = document.getElementById('rc').getContext('2d');
+const rChart = new Chart(rCtx, {
+  type:'bar',
+  data:{
+    labels:['Kommunal','Idéburen','Vinstdrivande'],
+    datasets:[{label:'',data:MEASURES[0].data,backgroundColor:[],borderColor:[],borderWidth:2,borderRadius:5}]
+  },
+  options:{
+    responsive:true,
+    animation:{duration:650,easing:'easeInOutQuart'},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(1)} (index)`}}},
+    scales:{
+      y:{grid:{color:'#21262d'},ticks:{font:{size:10}}},
+      x:{grid:{display:false},ticks:{font:{size:12,weight:'500'},color:['#8b949e','#8b949e','#BA7517']}}
+    }
+  },
+  plugins:[overlayPlugin, barLabelPlugin, refLinePlugin]
+});
+
+function setM(i, btn) {
+  curM = i;
+  const m = MEASURES[i];
+  curBarLabels = m.barLabels;
+  curOverlay = m.overlay;
+  rChart.data.datasets[0].data = m.data;
+  rChart.data.datasets[0].backgroundColor = m.data.map(m.colors);
+  rChart.data.datasets[0].borderColor = m.data.map(m.borders);
+  rChart.update();
+  document.getElementById('insight').textContent = m.insight;
+  document.getElementById('chartLabel').textContent = m.lbl;
+  document.getElementById('chartNote').textContent = m.note;
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  else document.querySelectorAll('.mbtn')[i].classList.add('on');
+}
+setM(0, null);
+
+function toggleAP() {
+  const btn = document.getElementById('apBtn');
+  if(apTimer){clearInterval(apTimer);apTimer=null;btn.textContent='▶ Autoplay';btn.classList.remove('playing');}
+  else{apTimer=setInterval(()=>setM((curM+1)%4,null),2800);btn.textContent='⏹ Stopp';btn.classList.add('playing');}
+}
+
+// ── MARKET SHARE LINE ──
+new Chart(document.getElementById('mc').getContext('2d'),{
+  type:'line',
+  data:{
+    labels:[1993,1995,1997,1999,2001,2003,2005,2007,2009,2011,2013,2015,2017,2019,2021,2023],
+    datasets:[{
+      label:'% i fristående skolor',
+      data:[1,2,2.5,3.5,5,6.5,9,11.5,14.5,18,21,23.5,25,26.5,27.5,28],
+      borderColor:'#BA7517',backgroundColor:'rgba(186,117,23,.12)',borderWidth:2,fill:true,
+      tension:.4,pointRadius:3,pointBackgroundColor:'#BA7517'
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y}%`}}},
+    scales:{
+      y:{min:0,max:32,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#21262d'}},
+      x:{grid:{display:false},ticks:{font:{size:10},maxTicksLimit:8}}
+    }
+  }
+});
+
+// ── RESEARCH CARDS ──
+const RCARDS=[
+  {src:'Petter Berg, Handelshögskolan i Stockholm (2026)',
+   t:'Elever i vinstdrivande friskolor tjänar i snitt 200 000 kr mindre under sitt liv',
+   d:'Berg har gjort en studie som kan visa orsak och verkan, inte bara samband. Han följde elever i Storstockholm från 1992 till 2022. Förklaringen verkar vara att vinstdrivande skolor sparar pengar på lärare, vilket ger sämre faktiska kunskaper och i längden lägre lön.',
+   cls:'neg'},
+  {src:'Jonas Vlachos, Institutet för Näringslivsforskning (2018)',
+   t:'Vinstdrivande friskolor sätter systematiskt högre betyg än eleverna förtjänar',
+   d:'Vlachos har granskat forskning från 2005 och framåt, och alla studier pekar åt samma håll. Friskolor sätter generösare betyg än kommunala skolor utan att eleverna faktiskt kan mer. Friskolor som drivs som aktiebolag är generösast.',
+   cls:'neg'},
+  {src:'Hinnerich & Vlachos',
+   t:'Betygsskillnaderna försvinner när nationella prov rättas av en annan skola',
+   d:'När en extern rättare bedömer proven, i stället för den egna skolan, försvinner betygsgapet helt. Det är ett starkt bevis för att skillnaden handlar om hur betyg sätts, inte om att eleverna faktiskt kan mer.',
+   cls:'neg'},
+  {src:'Böhlmark & Lindahl, IFAU (2012 och 2015)',
+   t:'Fler fristående skolor i en kommun höjer genomsnittsresultaten för alla elever',
+   d:'Konkurrens från fristående skolor verkar pressa kommunala skolor att bli bättre. Effekten syns dock först efter ungefär tio år. OBS: studien mäter kommuner som helhet och skiljer inte ut vinstdrivande friskolor specifikt.',
+   cls:'pos'},
+  {src:'Böhlmark, Holmlund & Lindahl, IFAU (2015)',
+   t:'Friskoleexpansionen har bidragit till att skolor blivit mer segregerade',
+   d:'Ungefär 18 procent av den ökade skillnaden mellan skolor kan kopplas till att fler elever valt fristående skolor. Effekten kvarstår även när man tar hänsyn till att bostadsområden blivit mer segregerade.',
+   cls:'neg'},
+  {src:'Holmlund m.fl., IFAU (2014)',
+   t:'Ökade kunskapsklyftor mellan elever förklaras delvis av ökad skolsegregation',
+   d:'Resultaten skiljer sig mer mellan skolor i dag än för 30 år sedan. En viktig orsak är att elever i högre grad sorteras på olika skolor utifrån sin bakgrund, ett mönster som förstärkts i takt med friskoleexpansionen.',
+   cls:'neg'},
+  {src:'Skolverket och Universitetskanslersämbetet (2024)',
+   t:'Friskolielever klarar högskolans första år sämre, trots lika gymnasiebetyg',
+   d:'Elever från vinstdrivande friskolor presterar 6,4 procentenheter sämre under sitt första högskoleår jämfört med elever från kommunala skolor med samma gymnasiebetyg. Från idéburna friskolor är skillnaden 4,2 procentenheter. Mönstret har funnits i data sedan 2005.',
+   cls:'neg'},
+  {src:'Sveriges Lärare och Institutet för Skolledarutveckling (2024)',
+   t:'Vinstdrivande skolor har i snitt 1,5 fler elever per lärare',
+   d:'I år 6 och år 9 är klasserna större i vinstdrivande friskolor än i andra skolor. Skolor utan vinstintresse har också lärare med högre utbildning i genomsnitt.',
+   cls:'neg'},
+  {src:'Karin Edmark, IFAU (2014)',
+   t:'Inget bevis för att elever med svag bakgrund väljer sämre skolor',
+   d:'Forskarens analyser visar inte att elever från hem med låg utbildning eller inkomst gör sämre skolval än andra. Däremot gör betygsinflationen det svårt att tolka resultaten, eftersom betygen inte längre speglar kunskaperna lika pålitligt.',
+   cls:'neut'},
+  {src:'Friskolornas Riksförbund',
+   t:'Påstår att ingen forskning visar sämre resultat för aktiebolagsskolor',
+   d:'Det påståendet stämmer bara om man använder betyg som mätmått och bortser från forskning om betygsinflation, Bergs livsinkomststudie och rapporten från Skolverket och UKÄ om högskoleprestationer.',
+   cls:'lobby'},
+];
+const rg=document.getElementById('rcards');
+RCARDS.forEach(c=>{
+  rg.innerHTML+=`<div class="rc ${c.cls}"><div class="rc-src">${c.src}</div><div class="rc-ttl">${c.t}</div><div class="rc-det">${c.d}</div></div>`;
+});
+
+
+// ══════════════════════ PROFILE CARDS ══════════════════════
+const PDATA=[
+  {id:'tolgfors',name:'Sten Tolgfors',party:'M',pc:'var(--M)',prev:'F.d. försvarsminister',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Rud Pedersen',role:'lobbyist'}],cats:['lobby'],
+   det:'F.d. försvarsminister (M). Lobbyist på Rud Pedersen fr. 2013. Bl.a. debattartikel om hot mot friskolor på landsbygden. Inga karenstider mellan regeringsuppdrag och lobbyistroll. Källa: Balans (2022).'},
+  {id:'thorstensson',name:'Göran Thorstensson',party:'M',pc:'var(--M)',prev:'Statsministerns nära vän, M-tjänsteman',
+   conns:[{tc:'var(--frisk)',type:'Friskolekoncern',org:'Watma',role:'styrelseledamot'}],cats:['friskola'],
+   det:'Statsminister Kristerssons nära personliga vän. Styrelseledamot i Watma fr. 2022 med uppdrag att opinionsbilda mot sänkt skolpeng. Källa: Altinget (2025).'},
+  {id:'hokmark',name:'Gunnar Hökmark',party:'M',pc:'var(--M)',prev:'F.d. EU-parlamentariker',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Kreab',role:'konsult'},{tc:'var(--org)',type:'Kommission',org:'Valfrihetskomm.',role:'ordförande'}],cats:['lobby','kommission'],
+   det:'Lämnade EU-parlamentet 2014, gick till Kreab. Ordförande för Valfrihetskommissionen, vars enda syfte är att stärka och försvara vinstdrivande välfärd. Källa: Balans (2022).'},
+  {id:'ollen',name:'Joakim Ollén',party:'M',pc:'var(--M)',prev:'Förtroendevald (M), Stockholm',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Ehrenberg & Soerensen',role:'lobbyist'},{tc:'var(--bransch)',type:'Branschorg',org:'Friskolor. RF',role:'styrelseledamot (parallellt)'}],cats:['lobby','bransch'],
+   det:'Tre roller i samma fråga: lobbyist, styrelseledamot i Friskolornas Riksförbund (representerar Kunskapsporten), och kommunpolitiker (M) i Stockholm, parallellt. Källa: Lobbykollen.se.'},
+  {id:'hamilton',name:'Ulla Hamilton',party:'M',pc:'var(--M)',prev:'Kommunpolitiker (M), Stockholm',
+   conns:[{tc:'var(--bransch)',type:'Branschorg',org:'Friskolor. RF',role:'VD'}],cats:['bransch'],
+   extra:'kvarstår i kommunfullmäktige (M) parallellt',
+   det:'VD för Friskolornas Riksförbund fr. ~2016. Kvarstår som kommunpolitiker (M) i Stockholm parallellt. Lobbyar och tar politiska beslut om skolan i samma stad utan karenstid. Lyckades stoppa förslag om sänkt skolpeng 2022. Källa: Balans (2022).'},
+  {id:'uvell',name:'Markus Uvell',party:'M',pc:'var(--M)',prev:'Politisk kommentator (M)',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Nordic Public Affairs',role:'styrelse/opinion'}],cats:['lobby'],
+   det:'Nordic PA. Krönika "Kritiken mot friskolorna drivs av avundsjuka". Bolaget fick bidrag från IES-grundarnas (H&B Bergström) stiftelse och är betald av dem han försvarar. Källa: Balans (2024).'},
+  {id:'edholm',name:'Lotta Edholm',party:'L',pc:'var(--L)',prev:'Skolborgarråd i Stockholm',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Tenelius Holm',role:'lobbyist',ret:'↩ återvänder som Skolminister 2022'}],cats:['lobby'],
+   det:'Skolborgarråd (L) → Tenelius Holm (~4 månader) → Skolminister i Tidö-regeringen. Komplett svängdörr med direkt policyåterverkan: lobbyistens uppdrag bli statlig skolpolitik. Källa: ETC (2022), Balans (2022).'},
+  {id:'stern',name:'Stefan Stern',party:'S',pc:'var(--S)',prev:'Socialdemokratisk opinionsbildare',
+   conns:[{tc:'var(--lobby)',type:'Lobbyfirma',org:'Nordstjernan',role:'kommunikatör'},{tc:'var(--org)',type:'Kommission',org:'Valfrihetskomm.',role:'ledamot'}],cats:['lobby','kommission'],
+   det:'Kommunikatör på Nordstjernan. Ledamot i Valfrihetskommissionen sida vid sida med Hökmark (M) och Valtersson (MP). Visar hur industrin aktivt sökt S-profiler för tvärpolitisk legitimitet. Källa: Balans (2022).'},
+  {id:'ljunggren',name:'Stig B. Ljunggren',party:'S',pc:'var(--S)',prev:'Socialdemokratisk debattör',
+   conns:[{tc:'var(--frisk)',type:'Friskolekoncern',org:'AcadeMedia',role:'advisory board'}],cats:['friskola'],
+   det:'Advisory board i AcadeMedia fr. ~2018. Forskning (Sebhatu & Wennberg) visar att AcadeMedia systematiskt sökte S-profiler för att försvåra politisk kritik och stärka legitimiteten.'},
+  {id:'valtersson',name:'Mikaela Valtersson',party:'MP',pc:'var(--MP)',prev:'F.d. riksdagsledamot (MP)',
+   conns:[{tc:'var(--frisk)',type:'Friskolekoncern',org:'Kunskapsskolan',role:'chef ext. relationer'},{tc:'var(--org)',type:'Kommission',org:'Valfrihetskomm.',role:'ledamot'}],cats:['friskola','kommission'],
+   det:'Chef för externa relationer (= lobbying) på Kunskapsskolan. Ledamot i Valfrihetskommissionen sida vid sida med Hökmark (M) och Stern (S). Källa: Balans (2022).'},
+];
+
+const PCHAPS=[
+  {t:'1/4: Moderaterna: sex direkta roller',x:'Sex moderata profiler med dokumenterade roller i lobbyfirmor, friskolekoncernernas styrelser eller branschorganisationer. Klicka på ett kort för detaljer.',f:d=>d.party==='M',hl:false},
+  {t:'2/4: Liberalerna: svängdörren rakt in i statsapparaten',x:'Edholm (L) gick från skolborgarråd → Tenelius Holm (~4 mån) → Skolminister. Komplett svängdörr med direkt policyåterverkan.',f:d=>d.party==='M'||d.party==='L',hl:false},
+  {t:'3/4: S och MP i samma ekosystem',x:'Friskoleindustrin har strategiskt sökt S- och MP-profiler. Nätverket är partiöverskridande och svårt att avfärda som enbart "högerflums".',f:_=>true,hl:false},
+  {t:'4/4: Valfrihetskommissionen: M, S och MP sida vid sida',x:'Hökmark (M), Stern (S) och Valtersson (MP) sitter alla i Valfrihetskommissionen, vars enda syfte är att försvara vinstdrivande välfärd.',f:d=>d.cats.includes('kommission'),hl:true},
+];
+let pCur=0;
+
+function buildProfCards(){
+  const groups=[
+    {lbl:'Moderaterna (M)',clr:'#1D6FA4',pts:['M']},
+    {lbl:'Liberalerna (L)',clr:'#0097D7',pts:['L']},
+    {lbl:'Socialdemokraterna (S)',clr:'#E8112D',pts:['S']},
+    {lbl:'Miljöpartiet (MP)',clr:'#53a145',pts:['MP']},
+  ];
+  let h='';
+  groups.forEach(g=>{
+    const ms=PDATA.filter(p=>g.pts.includes(p.party));
+    if(!ms.length)return;
+    h+=`<div><span class="party-label" style="background:${g.clr};">${g.lbl}</span></div>`;
+    ms.forEach(p=>{
+      const ch=p.conns.map((c,i)=>{
+        const ar=i===0?'→':(c.role.includes('parallellt')?'+':'→');
+        const rb=c.ret?`<span class="retbadge">${c.ret}</span>`:'';
+        return `<div class="svconn"><span class="arr">${ar}</span><span class="typetag" style="background:${c.tc};">${c.type}</span><span class="orgname">${c.org}</span><span class="role">${c.role}</span>${rb}</div>`;
+      }).join('');
+      const ex=p.extra?`<div class="svconn"><span class="arr">+</span><span style="font-size:.72rem;color:var(--muted);">${p.extra}</span></div>`:'';
+      h+=`<div class="svcard" id="pc-${p.id}" data-party="${p.party}" data-cats="${p.cats.join(',')}" onclick="showPC('${p.id}')">
+        <div class="svstrip" style="background:${p.pc};"></div>
+        <div class="svbody">
+          <div class="svperson">
+            <div class="svphead"><span class="badge" style="background:${p.pc};">${p.party}</span><span class="svname">${p.name}</span></div>
+            <div class="svprev">${p.prev}</div>
+          </div>
+          <div class="svconns">${ch}${ex}</div>
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('profcards').innerHTML=h;
+  buildDots('pdots',PCHAPS.length,pCur);
+}
+
+function applyPCh(){
+  const c=PCHAPS[pCur];
+  document.getElementById('pcht').textContent=c.t;
+  document.getElementById('pchx').textContent=c.x;
+  updateDots('pdots',PCHAPS.length,pCur);
+  document.querySelectorAll('.svcard').forEach(el=>{
+    const d={party:el.dataset.party,cats:el.dataset.cats.split(',')};
+    const vis=c.f(d);
+    el.classList.toggle('dim',!vis);
+    el.classList.toggle('hl',!!(c.hl&&vis));
+  });
+}
+function prevPCh(){pCur=Math.max(0,pCur-1);applyPCh();}
+function nextPCh(){pCur=Math.min(PCHAPS.length-1,pCur+1);applyPCh();}
+function showPC(id){
+  const p=PDATA.find(x=>x.id===id);if(!p)return;
+  document.getElementById('pip').innerHTML=`<strong>${p.name}</strong> <span style="background:${p.pc};color:white;padding:1px 7px;border-radius:3px;font-size:.68rem;">${p.party}</span><br><span style="color:var(--muted);">${p.det}</span>`;
+}
+
+
+// ══════════════════════ TIMELINE ══════════════════════
+const TLDATA=[
+  {id:'tolgfors',name:'Tolgfors',full:'Sten Tolgfors',party:'M',pc:'#1D6FA4',wave:1,trans:2013,tl:'2013',
+   bars:[{x0:2013,x1:2025,lbl:'Rud Pedersen, lobbyist',tc:'#5F5E5A'}],
+   det:'F.d. försvarsminister (M). Lobbyist på Rud Pedersen fr. 2013. Källa: Balans (2022).'},
+  {id:'hokmark',name:'Hökmark',full:'Gunnar Hökmark',party:'M',pc:'#1D6FA4',wave:1,trans:2014,tl:'2014',
+   bars:[{x0:2014,x1:2025,lbl:'Kreab / Valfrihetskomm. (ordf.)',tc:'#534AB7'}],
+   det:'Lämnade EU-parlamentet 2014 → Kreab. Ordförande Valfrihetskommissionen. Källa: Balans (2022).'},
+  {id:'valtersson',name:'Valtersson',full:'Mikaela Valtersson',party:'MP',pc:'#53a145',wave:1,trans:2015,tl:'2015',
+   bars:[{x0:2015,x1:2025,lbl:'Kunskapsskolan / Valfrihetskomm.',tc:'#BA7517'}],
+   det:'Lämnade riksdagen 2014. Chef ext. relationer Kunskapsskolan fr. 2015. Ledamot Valfrihetskommissionen. Källa: Balans (2022).'},
+  {id:'hamilton',name:'Hamilton',full:'Ulla Hamilton',party:'M',pc:'#1D6FA4',wave:2,trans:2016,tl:'~2016',
+   bars:[{x0:2016,x1:2025,lbl:'VD Friskolor.RF (+ kvarstår politiker)',tc:'#993C1D'}],
+   det:'VD Friskolornas RF fr. ~2016. Kvarstår som kommunpolitiker (M) parallellt. Stoppar 2022 sänkt-skolpeng-förslag. Källa: Balans (2022).'},
+  {id:'ljunggren',name:'Ljunggren',full:'Stig B. Ljunggren',party:'S',pc:'#E8112D',wave:2,trans:2018,tl:'~2018',
+   bars:[{x0:2018,x1:2022,lbl:'AcadeMedia (adv.board)',tc:'#BA7517'}],
+   det:'Advisory board AcadeMedia fr. ~2018. AcadeMedia sökte systematiskt S-profiler för legitimitet (Sebhatu & Wennberg).'},
+  {id:'stern',name:'Stern',full:'Stefan Stern',party:'S',pc:'#E8112D',wave:2,trans:2018,tl:'~2018',
+   bars:[{x0:2018,x1:2025,lbl:'Nordstjernan / Valfrihetskomm.',tc:'#534AB7'}],
+   det:'Kommunikatör Nordstjernan. Ledamot Valfrihetskommissionen med Hökmark (M) och Valtersson (MP). Källa: Balans (2022).'},
+  {id:'uvell',name:'Uvell',full:'Markus Uvell',party:'M',pc:'#1D6FA4',wave:2,trans:2019,tl:'~2019',
+   bars:[{x0:2019,x1:2025,lbl:'Nordic PA / opinion',tc:'#5F5E5A'}],
+   det:'Nordic PA fr. ~2019. Bidrag från IES-grundarnas stiftelse. Källa: Balans (2024).'},
+  {id:'ollen',name:'Ollén',full:'Joakim Ollén',party:'M',pc:'#1D6FA4',wave:2,trans:2019,tl:'~2019',
+   bars:[{x0:2019,x1:2025,lbl:'Ehrenberg + Friskolor.RF',tc:'#993C1D'}],
+   det:'Lobbyist Ehrenberg & Soerensen + styrelseledamot Friskolornas RF + kommunpolitiker (M). Tre roller. Källa: Lobbykollen.se.'},
+  {id:'thorstensson',name:'Thorstensson',full:'Göran Thorstensson',party:'M',pc:'#1D6FA4',wave:3,trans:2022,tl:'2022',
+   bars:[{x0:2022,x1:2025,lbl:'Watma (styrelse)',tc:'#BA7517'}],
+   det:'Statsministerns nära vän. Styrelseledamot Watma fr. 2022 med uppdrag att opinionsbilda mot sänkt skolpeng. Källa: Altinget (2025).'},
+  {id:'edholm',name:'Edholm',full:'Lotta Edholm',party:'L',pc:'#0097D7',wave:3,trans:2022,tl:'2022',
+   bars:[{x0:2022,x1:2022.42,lbl:'',tc:'#5F5E5A'},{x0:2022.42,x1:2025,lbl:'↩ Skolminister',tc:'#0097D7'}],
+   det:'Skolborgarråd (L) → Tenelius Holm (~4 mån, se den lilla grå stapeln) → Skolminister (nov 2022). Komplett svängdörr. Källa: ETC (2022), Balans (2022).'},
+];
+
+const TCHAPS=[
+  {t:'1/4: Fas 1: pionjärerna 2013–2015',x:'Tolgfors (M) direkt till Rud Pedersen. Hökmark (M) till Kreab + Valfrihetskommissionen. Valtersson (MP) till Kunskapsskolan. De tre första.',w:[1]},
+  {t:'2/4: Fas 2: 2016–2019. S och MP tillkommer.',x:'Hamilton (M) som VD men kvarstår politiker. Och nu: Ljunggren och Stern (S) i advisory boards och kommissioner. Friskoleindustrin söker aktivt tvärpolitisk legitimitet.',w:[2]},
+  {t:'3/4: Fas 3: 2022. Direkt statsåterverkan.',x:'Thorstensson i Watmas styrelse. Edholm: skolborgarråd → Tenelius Holm (~4 mån) → Skolminister. Se den lilla grå stapeln; det är lobbytiden.',w:[3]},
+  {t:'4/4: Helheten: ett decennium, fyra partier',x:'Det samlade mönstret 2013–2025: tio profiler, M, S, L och MP, utan karenstider och utan insyn och utan substantiell reform trots 70–80% folkopposition.',w:[1,2,3]},
+];
+let tCur=0;
+
+const NS='http://www.w3.org/2000/svg';
+const YR0=2012, PPY=37, TLX=158;
+function xY(yr){return TLX+(yr-YR0)*PPY;}
+
+function buildTL(){
+  const svg=document.getElementById('tl');
+  svg.innerHTML='<title>Svängdörrar 2013–2025: tidslinje</title>';
+
+  function mk(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+  function tx(s,a){const e=mk('text',a);e.textContent=s;return e;}
+
+  // Grid
+  for(let yr=2012;yr<=2025;yr++){
+    const x=xY(yr);
+    svg.appendChild(mk('line',{x1:x,y1:28,x2:x,y2:440,
+      stroke:yr%2===0?'#30363d':'#21262d',
+      'stroke-width':yr%2===0?.8:.35,
+      'stroke-dasharray':yr%2===0?'':'2 5'}));
+    if(yr%2===0)svg.appendChild(tx(String(yr),{x,y:21,'text-anchor':'middle','font-size':10,fill:'#8b949e'}));
+  }
+
+  // Compute row y values with gaps between phases
+  const ROW_Y=[];
+  let ry=48, prevW=0;
+  TLDATA.forEach(p=>{
+    if(p.wave!==prevW){if(prevW>0)ry+=16;prevW=p.wave;}
+    ROW_Y.push(ry);
+    ry+=41;
+  });
+
+  // Phase separators & labels
+  const phases=[{w:1,label:'Fas 1\n2013–15'},{w:2,label:'Fas 2\n2016–19'},{w:3,label:'Fas 3\n2022'}];
+  phases.forEach(ph=>{
+    const rows=TLDATA.filter(p=>p.wave===ph.w);
+    if(!rows.length)return;
+    const firstIdx=TLDATA.indexOf(rows[0]);
+    const lastIdx=TLDATA.indexOf(rows[rows.length-1]);
+    const midY=(ROW_Y[firstIdx]+ROW_Y[lastIdx])/2;
+    svg.appendChild(tx(ph.label.split('\n')[0],{x:TLX-12,y:midY-6,'text-anchor':'end','font-size':10,fill:'#8b949e','font-style':'italic'}));
+    svg.appendChild(tx(ph.label.split('\n')[1],{x:TLX-12,y:midY+7,'text-anchor':'end','font-size':9,fill:'#534AB7'}));
+    // separator line before each phase (except first)
+    if(firstIdx>0){
+      const sepY=ROW_Y[firstIdx]-10;
+      svg.appendChild(mk('line',{x1:TLX-5,y1:sepY,x2:738,y2:sepY,stroke:'#30363d','stroke-width':.6,'stroke-dasharray':'4 6'}));
+    }
+  });
+
+  // Rows
+  TLDATA.forEach((p,ri)=>{
+    const y=ROW_Y[ri];
+    const g=mk('g',{id:'tl-'+p.id,'data-wave':p.wave,style:'cursor:pointer;transition:opacity .35s ease;'});
+
+    // Party dot
+    g.appendChild(mk('circle',{cx:TLX-17,cy:y,r:5,fill:p.pc}));
+
+    // Name label
+    g.appendChild(tx(p.name,{x:TLX-24,y,'text-anchor':'end','font-size':10,fill:'#e6edf3',dy:'.35em'}));
+
+    // Pre-bar (political, faint)
+    const pw=xY(p.trans)-TLX;
+    if(pw>0)g.appendChild(mk('rect',{x:TLX,y:y-4,width:pw,height:8,fill:p.pc,opacity:.2,rx:2}));
+
+    // Post-bars (new role)
+    p.bars.forEach(b=>{
+      const bx=xY(b.x0),bw=Math.max(xY(b.x1)-bx,3);
+      g.appendChild(mk('rect',{x:bx,y:y-11,width:bw,height:22,fill:b.tc,rx:3}));
+      if(b.lbl)g.appendChild(tx(b.lbl,{x:bx+7,y,'font-size':10,fill:'white',dy:'.35em','pointer-events':'none'}));
+    });
+
+    // Transition dot (on top)
+    g.appendChild(mk('circle',{cx:xY(p.trans),cy:y,r:6,fill:p.pc,stroke:'#0d1117','stroke-width':2.5}));
+
+    // Year label above dot
+    g.appendChild(tx(p.tl,{x:xY(p.trans),y:y-15,'text-anchor':'middle','font-size':10,fill:p.pc,'font-weight':500}));
+
+    // Edholm annotation (tiny bar label)
+    if(p.id==='edholm'){
+      const tx2=xY(2022),tw=xY(2022.42)-tx2;
+      g.appendChild(tx('Tenelius Holm',{x:tx2+tw/2+2,y:y+19,'text-anchor':'middle','font-size':8.5,fill:'#8b949e','pointer-events':'none'}));
+    }
+
+    g.addEventListener('click',()=>{
+      document.getElementById('tip').innerHTML=
+        `<strong>${p.full}</strong> <span style="background:${p.pc};color:white;padding:1px 7px;border-radius:3px;font-size:.68rem;">${p.party}</span><br><span style="color:#8b949e;">${p.det}</span>`;
+    });
+    svg.appendChild(g);
+  });
+
+  buildDots('tdots',TCHAPS.length,tCur);
+}
+
+function applyTCh(){
+  const c=TCHAPS[tCur];
+  document.getElementById('tcht').textContent=c.t;
+  document.getElementById('tchx').textContent=c.x;
+  updateDots('tdots',TCHAPS.length,tCur);
+  document.querySelectorAll('[id^="tl-"]').forEach(g=>{
+    g.style.opacity=c.w.includes(parseInt(g.dataset.wave))?'1':'0.07';
+  });
+}
+function prevTCh(){tCur=Math.max(0,tCur-1);applyTCh();}
+function nextTCh(){tCur=Math.min(TCHAPS.length-1,tCur+1);applyTCh();}
+
+// ══════════════════════ ARGUMENT & MOTARGUMENT ══════════════════════
+const ARGS=[
+  {
+    claim:'Valfrihet är en rättighet. Alla familjer ska kunna välja skola utifrån sina egna värderingar och behov.',
+    claimSub:'Kärnargumentet i Friskolornas Riksförbunds kommunikation sedan 1990-talet.',
+    counter:'Valfriheten är ojämnt fördelad och <strong>gynnar dem som redan har mest resurser</strong>. Forskning visar att det framförallt är barn till välutbildade och välbeställda föräldrar som i praktiken utnyttjar möjligheten att byta skola. Elever med svagare socioekonomisk bakgrund väljer i lägre grad bort sin närmaste skola. Det innebär att ett system som påstår sig ge alla lika möjligheter i praktiken <strong><em>förstärker de skillnader som redan finns</em></strong>. De skolor som tappar resursstarka elever riskerar samtidigt att försämras, eftersom elevsammansättningen påverkar skolans resultat.',
+    chips:['Böhlmark, Holmlund & Lindahl (IFAU 2015)','Holmlund m.fl. (IFAU 2014)','Edmark (IFAU 2014)'],
+  },
+  {
+    claim:'Konkurrens höjer kvaliteten för alla. När kommunala skolor tvingas konkurrera om elever blir de bättre.',
+    claimSub:'Argumentet bygger på en marknadsliberal logik och hänvisar ofta till Böhlmark & Lindahls forskning.',
+    counter:'Den forskning som lobbyn citerar mäter genomsnittet för hela kommuner och <strong>skiljer inte ut vinstdrivande friskolor specifikt</strong>. Den visar alltså inte att vinstdrivande skolor är bättre, utan att viss konkurrens under vissa förutsättningar kan höja ett kommungenomsnitt. Samtidigt visar annan forskning att betygsinflationen gör att de synliga resultaten inte speglar faktiska kunskaper. När man i stället mäter vad eleverna faktiskt kan och tjänar efter skolan, vilket Skolverket, UKÄ och Berg gör, är bilden den omvända: <strong><em>elever från vinstdrivande friskolor klarar sig sämre, trots att de lämnat gymnasiet med högre betyg.</em></strong>',
+    chips:['Böhlmark & Lindahl (IFAU 2012/2015)','Skolverket & UKÄ (2024)','Vlachos (IFN 2018)','Berg (HHS 2026)'],
+  },
+  {
+    claim:'Fristående skolor erbjuder pedagogisk mångfald som det offentliga inte kan tillhandahålla.',
+    claimSub:'Används ofta för att försvara hela systemet, med hänvisning till waldorf- och montessoriskolor.',
+    counter:'Argumentet stämde bättre för 30 år sedan. I dag domineras friskolemarkanden av ett fåtal stora koncerner, AcadeMedia, Kunskapsskolan och liknande, som tillsammans svarar för en majoritet av alla friskoleplatser. De <strong>erbjuder i huvudsak vanlig skolundervisning utan profilerad pedagogik</strong>. Mångfaldsargumentet används alltså för att försvara <em>ett system som till stor del ser ut precis som det påstår sig vara ett alternativ till</em>. Att tillåta vinstuttag för att skydda plats för waldorfpedagogik är som att avskaffa hastighetsgränser för att taxibilar ibland måste köra snabbt.',
+    chips:['SCB/Skolverket (marknadsdata 2023)','Sebhatu & Wennberg (2022)'],
+  },
+  {
+    claim:'Det finns ingen forskning som visar att aktiebolagsskolor ger sämre resultat.',
+    claimSub:'Friskolornas Riksförbunds direkta motargument mot forskning och mediagranskning.',
+    counter:'Påståendet kräver att man gör tre saker samtidigt: använder betyg som enda mätmått, ignorerar att betygen är uppblåsta och inte mäter kunskaper, och bortser från högskolestudien och livsinkomststudien som mäter faktiska utfall efter skoltiden. Det är ungefär som att hävda att en bil är bränslesnål genom att mäta hur länge motorn går men inte räkna med att bilen faktiskt körs. Vlachos konstaterade 2018 att <strong><em>samtliga studier sedan 2005 pekar åt samma håll</em></strong>. Berg visade 2026 att skillnaderna syns i livsinkomsten. Skolverket och UKÄ visade 2024 att <strong>de syns redan i högskolans första år</strong>.',
+    chips:['Vlachos (IFN 2018)','Hinnerich & Vlachos','Skolverket & UKÄ (2024)','Berg (HHS 2026)'],
+  },
+  {
+    claim:'Privata aktörer använder skattepengar effektivare. Vinsten är ett tecken på att man levererat mer än man fått betalt för.',
+    claimSub:'Standardargumentet för vinstuttag i välfärden, återkommer i debatt om både skola och vård.',
+    counter:'Sveriges Lärare och ISR:s rapport från 2024 visar exakt var effektiviseringen sker: vinstdrivande skolor har <strong>1,5 fler elever per lärare och en lägre andel utbildade lärare</strong>. Pengarna sparas alltså genom att ge varje elev mindre undervisning och sämre utbildade lärare. Berg visade 2026 att priset för den effektiviseringen bärs av eleverna: de tjänar i snitt <strong><em>200 000 kronor mindre under sitt liv</em></strong>. Skattemedlen används inte till en bättre verksamhet. De tas ut som vinst och lämnar skolan.',
+    chips:['Sveriges Lärare & ISR (2024)','Berg (HHS 2026)','Vlachos (IFN 2018)'],
+  },
+];
+
+function buildArgCards(){
+  const el=document.getElementById('argcards');
+  el.innerHTML=ARGS.map((a,i)=>`
+    <div class="arg-card">
+      <div class="arg-header">
+        <span class="arg-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="arg-header-title">Lobbypåstående ${i+1} av ${ARGS.length}</span>
+      </div>
+      <div class="arg-claim">
+        <div class="arg-claim-lbl">Lobbyn hävdar:</div>
+        <div class="arg-claim-txt">"${a.claim}"</div>
+        <div class="arg-claim-sub">${a.claimSub}</div>
+      </div>
+      <div class="arg-sep"><span>Forskningen svarar</span></div>
+      <div class="arg-counter">
+        <div class="arg-counter-lbl">Vad forskningen faktiskt visar:</div>
+        <div class="arg-counter-txt">${a.counter}</div>
+        <div class="study-chips">${a.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════ KÄLLOR ══════════════════════
+const KALLOR=[
+  {
+    group:'Akademisk forskning',
+    items:[
+      {title:'Schooling for Profit: Long-run Effects of Private Providers in Public Education',
+       auth:'Petter Berg, Handelshögskolan i Stockholm (2026)',
+       desc:'Kausalstudie på 400 000 elever i Storstockholm 1995–2022. Visar att vinstdrivande friskoleelever tjänar 2% (~200 000 kr) lägre livsinkomst. Mekanismen är lägre andel behöriga lärare.',
+       url:'https://efn.se/ny-forskning-eleverna-betalar-for-vinsten-i-skolan',
+       lnktxt:'Läs på EFN'},
+      {title:'Trust-Based Evaluation in a Market-Oriented School System',
+       auth:'Jonas Vlachos, Institutet för Näringslivsforskning (2018)',
+       desc:'Visar att samtliga friskolegrupper sätter systematiskt högre betyg än kommunala skolor, kontrollerat för nationella provresultat. Aktiebolagsskolor är generösast.',
+       url:'https://www.su.se/nationalekonomiska-institutionen/nyheter/det-beh%C3%B6vs-en-extern-reglering-av-betygs%C3%A4ttning-1.723099',
+       lnktxt:'Läs på SU'},
+      {title:'Extern rättning av nationella prov och betygsskillnader mellan skolor',
+       auth:'Björn Tyrefors Hinnerich & Jonas Vlachos',
+       desc:'Visar att betygsgapet mellan kommunala skolor och friskolor försvinner när nationella prov rättas externt. Starkt bevis för betygsinflation, inte faktisk kunskapsskillnad.',
+       url:null},
+      {title:'Har den växande friskolesektorn varit bra för elevernas utbildningsresultat?',
+       auth:'Anders Böhlmark & Mikael Lindahl, IFAU (2012)',
+       desc:'Positiva genomsnittseffekter på kommunal nivå. Används ofta av lobbyn som stöd, men mäter inte vinstdrivande specifikt och visar effekter ett decennium efter reformen.',
+       url:'https://www.ifau.se/Forskning/Publikationer/Rapporter/2012/Har-den-vaxande-friskolesektorn-varit-bra-for-elevernas-utbildningsresultat-pa-kort-och-lang-sikt-/',
+       lnktxt:'Läs på IFAU'},
+      {title:'Skolsegregation och skolval',
+       auth:'Anders Böhlmark, Helena Holmlund & Mikael Lindahl, IFAU (2015)',
+       desc:'Friskoleexpansion kan kopplas till ~18% av den ökade skolsegregationen, efter kontroll för boendesegregation.',
+       url:'https://www.ifau.se/globalassets/pdf/se/2015/r-2015-05-Skolsegregation-och-skolval.pdf',
+       lnktxt:'Ladda ner PDF'},
+      {title:'Decentralisering, skolval och fristående skolor: resultat och likvärdighet i svensk skola',
+       auth:'Helena Holmlund m.fl., IFAU (2014)',
+       desc:'Ökade resultatskillnader beror på ökad skolsegregation som i sin tur drivs av skolval och friskoleexpansion. Inkluderar Karin Edmarks analyser av familjebakgrundens roll.',
+       url:'https://www.ifau.se/globalassets/pdf/se/2014/r-2014-25-decentralisering-skolval-och-friskolor.pdf',
+       lnktxt:'Ladda ner PDF'},
+    ]
+  },
+  {
+    group:'Myndighetsrapporter',
+    items:[
+      {title:'Till högskolan från gymnasieskolan: studenternas prestationer det första studieåret',
+       auth:'Skolverket & Universitetskanslersämbetet (2024)',
+       desc:'Elever från vinstdrivande friskolor presterar 6,4 procentenheter sämre under första högskolåret jämfört med kommunalskoleelever med samma gymnasiebetyg. Mönstret har funnits sedan 2005.',
+       url:'https://www.skolverket.se/publikationsserier/ovrigt-material/2024/till-hogskolan-fran-gymnasieskolan---studenternas-prestationer-det-forsta-studiearet',
+       lnktxt:'Läs på Skolverket'},
+      {title:'Till högskolan från gymnasieskolan (PDF)',
+       auth:'Skolverket & UKÄ (2024)',
+       desc:'Direktlänk till rapportens PDF.',
+       url:'https://www.uka.se/download/18.44b70bc18de87661d8be409/1709738156562/Till%20h%C3%B6gskolan%20fr%C3%A5n%20gymnasieskolan.pdf',
+       lnktxt:'Ladda ner PDF'},
+      {title:'Friskolors drivkraft: lärartäthet och lärarkvalitet i vinstdrivande och icke-vinstdrivande skolor',
+       auth:'Sveriges Lärare & Institutet för Skolledarutveckling (2024)',
+       desc:'Vinstdrivande skolor har 1,5 fler elever per lärare i år 6 och år 9. Lägre andel utbildade lärare jämfört med icke-vinstdrivande.',
+       url:'https://www.sverigeslarare.se/',
+       lnktxt:'Sveriges Lärare'},
+    ]
+  },
+  {
+    group:'Lobbyism och svängdörrar',
+    items:[
+      {title:'Vinstskolelobbyn och politiken',
+       auth:'Tankesmedjan Balans / Marcus Larsson (2022)',
+       desc:'Kartläggning av dokumenterade kopplingar mellan politiker, lobbyfirmor och friskolekoncerner. Grundmaterialet för svängdörrssektionerna i det här dokumentet.',
+       url:'https://tankesmedjanbalans.se/vinstskolelobbyn-och-politiken/',
+       lnktxt:'Läs på Balans'},
+      {title:'Lobbykollen: ministermöten med välfärdskoncerner',
+       auth:'Reformisterna (2023–)',
+       desc:'Systematisk insamling och redovisning av begärda handlingar om ministermöten med välfärdslobbyister. 70+ dokumenterade möten.',
+       url:'https://lobbykollen.se/',
+       lnktxt:'lobbykollen.se'},
+      {title:'Lobbyisterna som ritade om Skolsverige',
+       auth:'Dagens ETC (2022)',
+       desc:'Journalistisk granskning av svängdörrar och lobbyistiska kopplingar i friskolesektorn.',
+       url:'https://www.etc.se/',
+       lnktxt:'Dagens ETC'},
+      {title:'Balans granskning av välfärdslobbyism (2024)',
+       auth:'Tankesmedjan Balans / Marcus Larsson (2024)',
+       desc:'Uppföljning och fördjupning av 2022 års granskning, med fler dokumenterade kopplingar och analys av reformhinder.',
+       url:'https://tankesmedjanbalans.se/',
+       lnktxt:'Läs på Balans'},
+    ]
+  },
+  {
+    group:'Mediebevakning av forskningen',
+    items:[
+      {title:'Ny forskning: Eleverna betalar för vinsten i skolan',
+       auth:'EFN Finansmagasinet (april 2026)',
+       desc:'Tillgänglig artikel om Bergs avhandling med citat från Berg och Vlachos.',
+       url:'https://efn.se/ny-forskning-eleverna-betalar-for-vinsten-i-skolan',
+       lnktxt:'Läs på EFN'},
+      {title:'Ny forskning: Elever från vinstdrivande friskolor tjänar mindre',
+       auth:'Sveriges Radio (april 2026)',
+       desc:'SR-inslag med Petter Berg om studiens resultat och metod.',
+       url:'https://www.sverigesradio.se/artikel/ny-forskning-elever-fran-vinstdrivande-friskolor-tjanar-mindre',
+       lnktxt:'Lyssna/läs på SR'},
+      {title:'School Choice and Earnings: Insights from Sweden',
+       auth:'Thomas B. Fordham Institute (december 2025)',
+       desc:'Engelsk genomgång av Bergs studie för en internationell publik.',
+       url:'https://fordhaminstitute.org/national/commentary/school-choice-and-earnings-insights-sweden',
+       lnktxt:'Läs på Fordham'},
+    ]
+  },
+];
+
+function buildKallor(){
+  const el=document.getElementById('kallcontainer');
+  el.innerHTML=KALLOR.map(g=>`
+    <div class="src-group">
+      <div class="src-group-hdr">${g.group}</div>
+      ${g.items.map(s=>`
+        <div class="src-row">
+          <div class="src-meta">
+            <div class="src-title">${s.title}</div>
+            <div class="src-auth">${s.auth}</div>
+            ${s.desc?`<div class="src-desc">${s.desc}</div>`:''}
+          </div>
+          ${s.url
+            ?`<a class="src-link" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.lnktxt} ↗</a>`
+            :`<span class="src-nolnk">Ej tillgänglig digitalt</span>`}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ══════════════════════ INIT ══════════════════════
+buildProfCards();
+applyPCh();
+buildTL();
+applyTCh();
+buildArgCards();
+buildKallor();
+</script>
+</body>
+</html>
