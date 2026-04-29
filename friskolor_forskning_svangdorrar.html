@@ -109,6 +109,13 @@ header p{font-size:.83rem;color:var(--muted);max-width:620px;}
 /* ── TIMELINE SVG text ── */
 svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
 
+/* ── SUBFLIKAR ── */
+.sub-nav{display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--bdr);padding-bottom:.75rem;}
+.sub-btn{background:none;border:1px solid var(--bdr);color:var(--muted);font-family:inherit;font-size:.83rem;font-weight:500;padding:.4rem 1.1rem;border-radius:100px;cursor:pointer;transition:all .2s;}
+.sub-btn.active{background:var(--txt);color:var(--bg);border-color:var(--txt);}
+.sub-content{display:none;}
+.sub-content.active{display:block;}
+
 /* ── ARGUMENT / MOTARGUMENT ── */
 .arg-card{border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:1.75rem;}
 .arg-header{background:var(--surf);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--bdr);}
@@ -150,8 +157,8 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
 
 <nav class="tab-nav">
   <button class="tab-btn active" onclick="showTab('forskning',this)">Forskning</button>
-  <button class="tab-btn" onclick="showTab('profiler',this)">Svängdörrar: Profiler</button>
-  <button class="tab-btn" onclick="showTab('tidslinje',this)">Svängdörrar: Tidslinje</button>
+  <button class="tab-btn" onclick="showTab('svangdorrar',this)">Svängdörrar</button>
+  <button class="tab-btn" onclick="showTab('systemet',this)">Systemet</button>
   <button class="tab-btn" onclick="showTab('argument',this)">Argument &amp; Motargument</button>
   <button class="tab-btn" onclick="showTab('kallor',this)">Källor</button>
 </nav>
@@ -185,9 +192,16 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
   <p class="src">Forskning: Petter Berg (HHS, 2026) · Jonas Vlachos (IFN, 2018) · Hinnerich &amp; Vlachos · Böhlmark &amp; Lindahl (IFAU, 2012/2015) · Böhlmark, Holmlund &amp; Lindahl (IFAU, 2015) · Holmlund m.fl. (IFAU, 2014) · Skolverket &amp; UKÄ (2024) · Sveriges Lärare &amp; ISR (2024) · Karin Edmark (IFAU, 2014). Marknadsandelsdata: SCB/Skolverket (approximativa).</p>
 </section>
 
-<!-- ══════════════════════════════════════ PROFILER ══════════════════════════════════════ -->
-<section id="profiler" class="section">
+<!-- ══════════════════════════════════════ SVÄNGDÖRRAR ══════════════════════════════════════ -->
+<section id="svangdorrar" class="section">
 
+  <div class="sub-nav">
+    <button class="sub-btn active" id="sub-profiler" onclick="showSub('profiler',this)">Profiler</button>
+    <button class="sub-btn" id="sub-tidslinje" onclick="showSub('tidslinje',this)">Tidslinje</button>
+  </div>
+
+  <!-- SUBSECTION: PROFILER -->
+  <div id="sub-profiler-content" class="sub-content active">
   <div class="ch-nav">
     <button onclick="prevPCh()">←</button>
     <div class="ch-body">
@@ -210,11 +224,10 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
   <div id="profcards"></div>
   <div class="info-panel" id="pip">Klicka på ett kort för mer information om personen och kopplingens bakgrund.</div>
   <p class="src">Tankesmedjan Balans (2022–2024) · Lobbykollen.se (Reformisterna, 2023–) · Dagens ETC (2022) · Altinget (2025) · Sebhatu &amp; Wennberg om AcadeMedias politiska strategi.</p>
-</section>
+  </div>
 
-<!-- ══════════════════════════════════════ TIDSLINJE ══════════════════════════════════════ -->
-<section id="tidslinje" class="section">
-
+  <!-- SUBSECTION: TIDSLINJE -->
+  <div id="sub-tidslinje-content" class="sub-content">
   <div class="ch-nav">
     <button onclick="prevTCh()">←</button>
     <div class="ch-body">
@@ -243,6 +256,89 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
 
   <div class="info-panel" id="tip">Klicka på en rad för detaljer om personen och kopplingens bakgrund.</div>
   <p class="src">Alla kopplingar dokumenterade i offentliga källor. Övergångsår approximativa där exakt datum ej publicerats. Tankesmedjan Balans (2022–2024) · Lobbykollen.se · Dagens ETC (2022) · Altinget (2025) · Sebhatu &amp; Wennberg.</p>
+  </div>
+
+</section>
+
+<!-- ══════════════════════════════════════ SYSTEMET ══════════════════════════════════════ -->
+<section id="systemet" class="section">
+
+  <div class="sub-nav">
+    <button class="sub-btn active" id="sub-data-btn" onclick="showSub('data',this)">Lärar- och elevdata</button>
+    <button class="sub-btn" id="sub-spiral-btn" onclick="showSub('spiral',this)">Spiralen</button>
+    <button class="sub-btn" id="sub-pisa-btn" onclick="showSub('pisa',this)">PISA och invandring</button>
+  </div>
+
+  <!-- ── SUBFLIK 1: DATA ── -->
+  <div id="sub-data-content" class="sub-content active">
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:1.25rem;max-width:660px;line-height:1.65;">
+      Två dokumenterade mönster i svensk skola: erfarna lärare samlas i privilegierade skolor, och resurskrävande elever undviks av vinstdrivande friskolor. Båda mönstren förstärker varandra.
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.5rem;">
+
+      <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem;">
+        <p style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">Lärarsortering</p>
+        <div id="teacher-bars"></div>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.85rem;line-height:1.55;">
+          Källa: Skolverket (2023), Skolinspektionen (2017), Leah Glassow — Göteborgs universitet (2023)
+        </p>
+      </div>
+
+      <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem;">
+        <p style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">Elevsortering</p>
+        <div id="pupil-bars"></div>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.85rem;line-height:1.55;">
+          Källa: Skolinspektionsgranskning av 30 friskolor (2022), Mats Hammarstedt m.fl.
+        </p>
+      </div>
+
+    </div>
+
+    <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.1rem 1.25rem;max-width:660px;">
+      <p style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">Vad forskningen säger</p>
+      <p style="font-size:.83rem;line-height:1.65;color:var(--txt);">
+        Leah Glassows avhandling (GU, 2023) som jämförde 46 länder visar att välutbildade och erfarna lärare i Sverige <strong>allt oftare</strong> arbetar med socioekonomiskt privilegierade elever. Trenden har gått åt fel håll sedan 1999. Skolverket konstaterar att rektorsomsättningen dessutom är högre på utsatta skolor, vilket försvårar långsiktig kompetensutveckling. Glassow betonar dock att lärarsorteringen är <em>ett</em> problem men inte det viktigaste; det är den sociala segregationen i sig som driver kunskapsklyftor mest.
+      </p>
+    </div>
+
+    <p class="src" style="margin-top:1.25rem;">Skolverket: Bedömning av läget i skolväsendet (2023) · Skolinspektionen: Lärarresurser och likvärdighet (2017) · Leah Glassow, Göteborgs universitet (2023) · Sveriges Lärare (2025): 7 av 10 lärare i utsatta skolor saknar förutsättningar att möta alla elevers behov · Hammarstedt m.fl. om elevsortering i friskolor.</p>
+  </div>
+
+  <!-- ── SUBFLIK 2: SPIRALEN ── -->
+  <div id="sub-spiral-content" class="sub-content">
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:1.25rem;max-width:660px;line-height:1.65;">
+      Elevsortering och lärarsortering verkar inte oberoende — de förstärker varandra i ett självförstärkande kretslopp. Diagrammet visar de två parallella spiralerna som systemet producerar.
+    </p>
+    <div id="spiral-container" style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--rad);overflow:hidden;"></div>
+    <p class="src" style="margin-top:1rem;">Syntes baserad på: Böhlmark, Holmlund & Lindahl (IFAU 2015) · Holmlund m.fl. (IFAU 2014) · Leah Glassow (GU 2023) · Skolinspektionen (2022) · Sveriges Lärare (2025).</p>
+  </div>
+
+  <!-- ── SUBFLIK 3: PISA OCH INVANDRING ── -->
+  <div id="sub-pisa-content" class="sub-content">
+
+    <!-- Rubrik och svar -->
+    <div style="margin-bottom:1.5rem;">
+      <h2 style="font-family:'Playfair Display',Georgia,serif;font-size:1.25rem;font-weight:700;line-height:1.3;margin-bottom:.75rem;max-width:620px;">Stämmer det att det är invandringen som sänkt svenska skolresultat — och inte friskolesystemet?</h2>
+      <div style="background:var(--surf);border-left:4px solid var(--txt);border-radius:0 var(--rad) var(--rad) 0;padding:.9rem 1.1rem;max-width:660px;">
+        <p style="font-size:.875rem;line-height:1.7;color:var(--txt);margin:0;"><strong>Delvis.</strong> Invandringen förklarar en del av genomsnittstappet. Men infödda elevers resultat är tillbaka på 2000-nivå. Det som försämrats är systemets förmåga att hantera elever med svaga förutsättningar — och det är där friskolereformens segregerande effekter syns tydligast.</p>
+      </div>
+    </div>
+
+    <!-- Annoterat linjediagram -->
+    <div class="chart-wrap" style="margin-bottom:1.5rem;">
+      <p style="font-size:.72rem;color:var(--muted);margin-bottom:.25rem;font-weight:500;">PISA MATEMATIK — relativa resultat 2000–2022, år 2000 = 100</p>
+      <p style="font-size:.7rem;color:var(--muted);margin-bottom:.75rem;font-style:italic;">Två linjer: det svenska genomsnittet och enbart infödda elevers resultat.</p>
+      <div style="position:relative;">
+        <canvas id="pisa-line-chart" height="260"></canvas>
+      </div>
+    </div>
+
+    <div id="pisa-myth-cards"></div>
+
+    <p class="src" style="margin-top:1.5rem;">Källor: Skolverket PISA-analys (2012, 2023) · Leah Glassow (GU 2023) · OECD PISA 2022 Country Note: Canada · Statistics Canada (2021, 2025) · Gabriel Heller Sahlgren, Timbro (2022) · Ulf Fredriksson, Stockholms universitet.</p>
+  </div>
+
 </section>
 
 <!-- ══════════════════════════════════════ ARGUMENT & MOTARGUMENT ══════════════════════════════════════ -->
@@ -279,6 +375,13 @@ function showTab(id, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showSub(id, btn) {
+  document.querySelectorAll('.sub-content').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sub-'+id+'-content').classList.add('active');
   btn.classList.add('active');
 }
 
@@ -801,29 +904,49 @@ const ARGS=[
     counter:'Sveriges Lärare och ISR:s rapport från 2024 visar exakt var effektiviseringen sker: vinstdrivande skolor har <strong>1,5 fler elever per lärare och en lägre andel utbildade lärare</strong>. Pengarna sparas alltså genom att ge varje elev mindre undervisning och sämre utbildade lärare. Berg visade 2026 att priset för den effektiviseringen bärs av eleverna: de tjänar i snitt <strong><em>200 000 kronor mindre under sitt liv</em></strong>. Skattemedlen används inte till en bättre verksamhet. De tas ut som vinst och lämnar skolan.',
     chips:['Sveriges Lärare & ISR (2024)','Berg (HHS 2026)','Vlachos (IFN 2018)'],
   },
+  {
+    claim:'Mitt barn mår bättre i en skola med likasinnade elever. Det är inte mitt ansvar att lösa samhällets problem.',
+    claimSub:'Inte ett lobbypåstående. Det är en rationalisering som många välmenande föräldrar gör i det tysta.',
+    type:'parent',
+    counter:'Det är förståeligt. Men forskningen om så kallade <strong>peer effects</strong> visar att elevers resultat påverkas direkt av vilka de går i skolan med. En klass med starkare genomsnittliga kamrater höjer resultaten för alla, inklusive de svagare eleverna. Det asymmetriska är att <strong><em>förlusten för starka elever i en heterogen klass är liten, men vinsten för svagare elever är stor</em></strong>. Det innebär att ditt barn förlorar lite på en blandad klass, men någon annans barn vinner mycket. Det finns också forskning som tyder på att homogena klasser med enbart resursstarka elever inte är optimala för social kompetens och förmåga att fungera i en heterogen arbetsmiljö senare i livet. Segregationen kostar alltså inte bara samhället i stort. Den kostar i förlängningen även de barn som segregerats bort från mångfalden.',
+    chips:['Hanushek m.fl. om peer effects','Böhlmark, Holmlund & Lindahl (IFAU 2015)','Holmlund m.fl. (IFAU 2014)'],
+  },
 ];
 
 function buildArgCards(){
   const el=document.getElementById('argcards');
-  el.innerHTML=ARGS.map((a,i)=>`
-    <div class="arg-card">
-      <div class="arg-header">
-        <span class="arg-num">${String(i+1).padStart(2,'0')}</span>
-        <span class="arg-header-title">Lobbypåstående ${i+1} av ${ARGS.length}</span>
+  el.innerHTML=ARGS.map((a,i)=>{
+    const isParent = a.type === 'parent';
+    const claimBg   = isParent ? 'rgba(83,74,183,.09)'  : 'rgba(186,117,23,.07)';
+    const claimBdr  = isParent ? '#534AB7'              : '#BA7517';
+    const claimLbl  = isParent ? 'Oroliga föräldrar hävdar:' : 'Lobbyn hävdar:';
+    const claimLblC = isParent ? '#a29bfe'              : '#BA7517';
+    const claimSubC = isParent ? 'rgba(162,155,254,.75)': 'rgba(230,180,80,.8)';
+    const sepLbl    = isParent ? 'Forskningen nyanserar' : 'Forskningen svarar';
+    const counterBg = isParent ? 'rgba(83,74,183,.06)'  : 'rgba(83,161,69,.06)';
+    const counterBdr= isParent ? '#534AB7'              : '#53a145';
+    const counterLbl= isParent ? '#a29bfe'              : '#53a145';
+    const headerBg  = isParent ? 'rgba(83,74,183,.08)'  : 'var(--surf)';
+    return `
+    <div class="arg-card" style="${isParent?'border-color:rgba(83,74,183,.35);':''}">
+      <div class="arg-header" style="background:${headerBg};">
+        <span class="arg-num" style="${isParent?'color:#a29bfe;':''}">${String(i+1).padStart(2,'0')}</span>
+        <span class="arg-header-title">${isParent ? 'Föräldraperspektivet' : `Påstående ${i+1} av ${ARGS.length}`}</span>
+        ${isParent ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(83,74,183,.25);color:#a29bfe;padding:2px 8px;border-radius:100px;font-weight:500;">Inte ett lobbypåstående</span>' : ''}
       </div>
-      <div class="arg-claim">
-        <div class="arg-claim-lbl">Lobbyn hävdar:</div>
+      <div class="arg-claim" style="background:${claimBg};border-left-color:${claimBdr};">
+        <div class="arg-claim-lbl" style="color:${claimLblC};">${claimLbl}</div>
         <div class="arg-claim-txt">"${a.claim}"</div>
-        <div class="arg-claim-sub">${a.claimSub}</div>
+        <div class="arg-claim-sub" style="color:${claimSubC};">${a.claimSub}</div>
       </div>
-      <div class="arg-sep"><span>Forskningen svarar</span></div>
-      <div class="arg-counter">
-        <div class="arg-counter-lbl">Vad forskningen faktiskt visar:</div>
+      <div class="arg-sep"><span>${sepLbl}</span></div>
+      <div class="arg-counter" style="background:${counterBg};border-left-color:${counterBdr};">
+        <div class="arg-counter-lbl" style="color:${counterLbl};">Vad forskningen faktiskt visar:</div>
         <div class="arg-counter-txt">${a.counter}</div>
         <div class="study-chips">${a.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════ KÄLLOR ══════════════════════
@@ -927,6 +1050,70 @@ const KALLOR=[
        lnktxt:'Läs på Fordham'},
     ]
   },
+  {
+    group:'Lärarsortering och elevsortering',
+    items:[
+      {title:'Teacher allocation and student performance: A comparative study across 46 countries',
+       auth:'Leah Glassow, Göteborgs universitet (2023)',
+       desc:'Avhandling som visar att välutbildade och erfarna lärare i Sverige allt oftare arbetar med socioekonomiskt privilegierade elever. Trenden har gått åt fel håll sedan 1999. En av få studier som jämför lärarsortering systematiskt i ett internationellt perspektiv.',
+       url:'https://www.vilarare.se/nyheter/forskning/forskning-larare-fordelas-alltmer-ojamlikt-i-svensk-skola/',
+       lnktxt:'Läs sammanfattning'},
+      {title:'Lärarresurser: att verka för likvärdighet i utbildningen',
+       auth:'Skolinspektionen (2017)',
+       desc:'Kvalitetsgranskning som visar att kommuner behöver stärka arbetet med att attrahera behöriga och erfarna lärare till skolor med svagare socioekonomiska förutsättningar.',
+       url:'https://www.skolinspektionen.se/beslut-rapporter/publikationer/kvalitetsgranskning/2017/lararresurser--att-verka-for-likvardighet-i-utbildningen/',
+       lnktxt:'Läs på Skolinspektionen'},
+      {title:'Skolverkets bedömning av läget i skolväsendet 2023',
+       auth:'Skolverket (2023)',
+       desc:'Konstaterar att det finns färre behöriga och erfarna lärare på skolor med mindre gynnsamma socioekonomiska förutsättningar, och att rektorsomsättningen är högre på dessa skolor.',
+       url:'https://www.skolverket.se/publikationsserier/ovrigt-material/2023/skolverkets-bedomning-av-laget-i-skolvasendet-2023',
+       lnktxt:'Läs på Skolverket'},
+      {title:'Forskning visar: barn med diagnos välkomnas inte av skolor',
+       auth:'Mats Hammarstedt m.fl. / Skolvärlden (2020)',
+       desc:'Forskning visar att friskolor i något högre utsträckning än kommunala väljer bort elever med en diagnos. Studien kopplas till ekonomiska incitament i vinstdrivande system.',
+       url:'https://skolvarlden.se/artiklar/forskning-visar-barn-med-diagnos-valkomnas-inte-av-skolor',
+       lnktxt:'Läs på Skolvärlden'},
+      {title:'Skolinspektionsgranskning: urval av elever i 30 friskolor',
+       auth:'Skolinspektionen (2022)',
+       desc:'Brister i elevantagning hos 24 av 30 granskade friskolor. Hälften begärde in otillåten information om elevers stödbehov eller modersmål.',
+       url:'https://www.vilarare.se/nyheter/friskolor/friskolor-kritiseras-for-hur-de-antar-elever/',
+       lnktxt:'Läs sammanfattning'},
+      {title:'Den ojämlika skolan sviker elever i utsatta områden',
+       auth:'Sveriges Lärare (2025)',
+       desc:'Sju av tio lärare som arbetar med elever från socioekonomiskt svaga hem uppger att de har ganska eller mycket dåliga förutsättningar att tillgodose alla elevers behov.',
+       url:'https://www.sverigeslarare.se/om-oss/opinion-debatt/ordforandeblogg/den-ojamlika-skolan-sviker-elever-i-utsatta-omraden/',
+       lnktxt:'Läs på Sveriges Lärare'},
+    ]
+  },
+  {
+    group:'PISA, invandring och peer effects',
+    items:[
+      {title:'Likvärdigheten i PISA: förändringar och förklaringar',
+       auth:'Gabriel Heller Sahlgren, Timbro (2017)',
+       desc:'Analys av hur elevsammansättning förklarar en stor del av de svenska PISA-resultaten. Visar att infödda elevers resultat låg kvar på 2000-nivå när man kontrollerar för sammansättning.',
+       url:'https://www.svensktnaringsliv.se/bilder_och_dokument/jr1bcy_2131990-likvardighet_i_pisa_webbpdf_1007576.html/BINARY/2131990-Likvardighet_i_PISA_webb.pdf',
+       lnktxt:'Ladda ner PDF'},
+      {title:'Kunskapsskolans återkomst',
+       auth:'Gabriel Heller Sahlgren, Timbro (2022)',
+       desc:'Visar att bland elever med svensk bakgrund var resultaten i PISA 2018 tillbaka på 2000-nivå. Hela det kvarvarande resultattappet förklaras av förändrad elevsammansättning.',
+       url:'https://timbro.se/valferd/kunskapsskolans-aterkomst/',
+       lnktxt:'Läs på Timbro'},
+      {title:'PISA 2022 Results: Immigrant background and student performance',
+       auth:'OECD (2023)',
+       desc:'I Kanada presterade invandrarbarn 12 poäng bättre än infödda elever i matematik 2022. Andelen elever med invandrarbakgrund var 34%. Visar att hög invandring inte nödvändigtvis sänker skolresultat.',
+       url:'https://www.oecd.org/en/publications/pisa-2022-results-volume-i_53f23881-en/full-report/immigrant-background-and-student-performance_f469d45e.html',
+       lnktxt:'Läs på OECD'},
+      {title:'Portrait of the Arab Populations in Canada',
+       auth:'Statistics Canada (2025)',
+       desc:'Visar att arabbefolkningen i Kanada uppgår till 795 000 personer och inkluderar stora grupper från Libanon, Syrien, Marocko, Irak och Egypten. Bemöter föreställningen att Kanadas invandrare enbart är välutbildade sydasiater.',
+       url:'https://www150.statcan.gc.ca/n1/pub/89-657-x/89-657-x2025005-eng.htm',
+       lnktxt:'Läs på Statistics Canada'},
+      {title:'Teachers, Schools, and Academic Achievement',
+       auth:'Eric Hanushek m.fl. (2005, Econometrica)',
+       desc:'Grundläggande studie om peer effects: elevers resultat påverkas av vilka de går i skolan med. Förlusten för starka elever i heterogena klasser är liten; vinsten för svagare elever är stor.',
+       url:null},
+    ]
+  },
 ];
 
 function buildKallor(){
@@ -950,6 +1137,329 @@ function buildKallor(){
   `).join('');
 }
 
+// ══════════════════════ SYSTEMET ══════════════════════
+
+function buildBar(label, segments, total, note) {
+  const pct = v => (v/total*100).toFixed(1);
+  const segs = segments.map(s =>
+    `<div style="width:${pct(s.v)}%;background:${s.c};height:100%;border-radius:2px;position:relative;" title="${s.label}: ${s.v}%"></div>`
+  ).join('');
+  return `
+    <div style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem;">
+        <span style="font-weight:500;">${label}</span>
+        ${note?`<span style="color:var(--muted);font-size:.7rem;">${note}</span>`:''}
+      </div>
+      <div style="height:22px;display:flex;gap:2px;border-radius:3px;overflow:hidden;background:var(--card);">${segs}</div>
+      <div style="display:flex;gap:10px;margin-top:.35rem;flex-wrap:wrap;">
+        ${segments.map(s=>`<span style="font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:${s.c};display:inline-block;"></span>${s.label}: ${s.v}%</span>`).join('')}
+      </div>
+    </div>`;
+}
+
+function buildSystemet() {
+  // ── LÄRARSORTERING ──
+  document.getElementById('teacher-bars').innerHTML = [
+    buildBar('Andel behöriga lärare — gynnsam socioekonomisk profil', [
+      {label:'Behöriga',v:85,c:'#53a145'},{label:'Obehöriga',v:15,c:'#30363d'}], 100),
+    buildBar('Andel behöriga lärare — utsatt socioekonomisk profil', [
+      {label:'Behöriga',v:68,c:'#E8112D'},{label:'Obehöriga',v:32,c:'#30363d'}], 100, 'ca 17 pp lägre'),
+    buildBar('Lärartäthet — vinstdrivande friskola (åk 6 & 9)', [
+      {label:'Elever/lärare rel. kommunal',v:100,c:'#BA7517'}], 100, '+1,5 elever/lärare mer än kommunal'),
+  ].join('');
+
+  // ── ELEVSORTERING ──
+  document.getElementById('pupil-bars').innerHTML = [
+    buildBar('Friskolor med brister i elevantagning', [
+      {label:'Brister dokumenterade',v:80,c:'#E8112D'},{label:'Inga brister',v:20,c:'#30363d'}], 100, 'av 30 granskade (Skolinspektionen 2022)'),
+    buildBar('Friskolor som begär otillåten info om elev', [
+      {label:'Begär info om stödbehov/modersmål',v:50,c:'#BA7517'},{label:'Gör det inte',v:50,c:'#30363d'}], 100),
+    buildBar('Friskolor som inte tar emot elever med funktionsnedsättning', [
+      {label:'Avvisar',v:10,c:'#E8112D'},{label:'Tar emot',v:90,c:'#30363d'}], 100, 'UR/Skolfront-undersökning'),
+  ].join('');
+
+  // ── SPIRALEN ──
+  const NS = 'http://www.w3.org/2000/svg';
+  const sc = document.getElementById('spiral-container');
+  const svg = document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 700 520');
+  svg.style.width='100%';
+
+  function mk(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+  function tx(s,a){const e=mk('text',a);e.textContent=s;return e;}
+  function mtml(lines,a){
+    const e=mk('text',a);
+    lines.forEach((l,i)=>{
+      const t=document.createElementNS(NS,'tspan');
+      t.textContent=l;t.setAttribute('x',a.x);t.setAttribute('dy',i===0?'0':'1.35em');
+      e.appendChild(t);
+    });
+    return e;
+  }
+
+  // Defs: markörer + animationsklasser
+  const defs=mk('defs',{});
+
+  ['53a145','E8112D'].forEach(hex=>{
+    const m=mk('marker',{id:`arr-${hex}`,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:6,markerHeight:6,orient:'auto'});
+    const p=mk('path',{d:'M1 2L8 5L1 8',fill:'none',stroke:'#'+hex,'stroke-width':1.8,'stroke-linecap':'round','stroke-linejoin':'round'});
+    m.appendChild(p);defs.appendChild(m);
+  });
+
+  // CSS-animation för streck
+  const style=document.createElementNS(NS,'style');
+  style.textContent=`
+    .spiral-path{stroke-dasharray:1000;stroke-dashoffset:1000;animation:drawPath 2.2s ease forwards;}
+    .spiral-path:nth-child(1){animation-delay:.1s}
+    .spiral-path:nth-child(2){animation-delay:.5s}
+    .spiral-path:nth-child(3){animation-delay:.9s}
+    .spiral-path:nth-child(4){animation-delay:1.3s}
+    .spiral-path:nth-child(5){animation-delay:.1s}
+    .spiral-path:nth-child(6){animation-delay:.5s}
+    .spiral-path:nth-child(7){animation-delay:.9s}
+    .spiral-path:nth-child(8){animation-delay:1.3s}
+    @keyframes drawPath{to{stroke-dashoffset:0}}
+  `;
+  defs.appendChild(style);
+  svg.appendChild(defs);
+
+  // Bakgrundshalvor
+  svg.appendChild(mk('rect',{x:0,y:0,width:350,height:520,rx:0,fill:'rgba(83,161,69,.05)'}));
+  svg.appendChild(mk('rect',{x:350,y:0,width:350,height:520,fill:'rgba(232,17,45,.05)'}));
+  svg.appendChild(mk('line',{x1:350,y1:0,x2:350,y2:520,stroke:'rgba(139,148,158,.25)','stroke-dasharray':'5 6','stroke-width':.8}));
+
+  // Noder: ikon, rubrik, två textrader
+  // Ikoner som unicode i SVG text
+  const LNODES=[
+    {y:75, num:1, lines:['Resursstarka elever','väljer attraktiv skola']},
+    {y:185,num:2, lines:['Mer resurser per elev','(skolpeng följer eleven)']},
+    {y:295,num:3, lines:['Kan anställa erfarna','behöriga lärare']},
+    {y:405,num:4, lines:['Skolan upplevs ännu','mer attraktiv']},
+    {y:490,num:5, lines:['Spiralen fortsätter uppåt','']},
+  ];
+  const RNODES=[
+    {y:75, num:1, lines:['Elever med svagare','förutsättningar koncentreras']},
+    {y:185,num:2, lines:['Skolan tappar resurser','när elever lämnar']},
+    {y:295,num:3, lines:['Svårare rekrytera','erfarna lärare']},
+    {y:405,num:4, lines:['Skolan upplevs som','svagare alternativ']},
+    {y:490,num:5, lines:['Spiralen fortsätter nedåt','']},
+  ];
+
+  // Böjda pilar — x-kurvar svagt inåt mot mitten
+  const LX=205, RX=495;
+  const LCURVE=210, RCURVE=490; // böjpunkter, svagt inåt
+
+  function drawCurvedArrow(x, curve, nodes, clr, grp) {
+    const g=mk('g',{});
+    nodes.forEach((n,i)=>{
+      if(i>=nodes.length-1) return;
+      const y1=n.y+26, y2=nodes[i+1].y-26;
+      const mid=(y1+y2)/2;
+      // Böjer mot mitten
+      const cx = x===LX ? curve+10 : curve-10;
+      const p=mk('path',{
+        d:`M${x} ${y1} C${cx} ${mid} ${cx} ${mid} ${x} ${y2}`,
+        fill:'none',stroke:'#'+clr,'stroke-width':2,
+        'marker-end':`url(#arr-${clr})`,
+        class:'spiral-path',opacity:.85
+      });
+      g.appendChild(p);
+    });
+    svg.appendChild(g);
+  }
+
+  function drawNode(x, n, clr) {
+    const bw=152, bh=52, bx=x-bw/2, by=n.y-bh/2;
+    // Skugga
+    svg.appendChild(mk('rect',{x:bx+2,y:by+2,width:bw,height:bh,rx:8,fill:'rgba(0,0,0,.25)'}));
+    // Bakgrund
+    svg.appendChild(mk('rect',{x:bx,y:by,width:bw,height:bh,rx:8,
+      fill:'var(--card)',stroke:'#'+clr,'stroke-width':1.5}));
+    // Numrerad cirkel — utanför boxen till vänster med mer luft
+    svg.appendChild(mk('circle',{cx:bx-22,cy:n.y,r:13,fill:'#'+clr,opacity:.95}));
+    const numT=mk('text',{x:bx-22,y:n.y,'text-anchor':'middle','dominant-baseline':'central',
+      'font-size':12,'font-weight':700,fill:'white'});
+    numT.textContent=n.num;
+    svg.appendChild(numT);
+    // Text — centrerad i boxen
+    const visibleLines = n.lines.filter(l=>l.length>0);
+    const t=mtml(visibleLines,{x:x,y:n.y-(visibleLines.length-1)*9,
+      'text-anchor':'middle','font-size':10.5,fill:'var(--txt)','dominant-baseline':'middle'});
+    svg.appendChild(t);
+  }
+
+  // Rita pilar först (bakom noder)
+  drawCurvedArrow(LX, LCURVE, LNODES, '53a145', 'l');
+  drawCurvedArrow(RX, RCURVE, RNODES, 'E8112D', 'r');
+
+  // Rita noder ovanpå
+  LNODES.forEach(n=>drawNode(LX,n,'53a145'));
+  RNODES.forEach(n=>drawNode(RX,n,'E8112D'));
+
+  svg.appendChild(mk('path',{d:`M${LX+76} 75 C350 75 350 75 ${RX-76} 75`,
+    fill:'none',stroke:'rgba(139,148,158,.5)','stroke-width':1,'stroke-dasharray':'3 5'}));
+  const lbl=mk('rect',{x:300,y:18,width:100,height:16,rx:3,fill:'var(--card)'});
+  svg.appendChild(lbl);
+  svg.appendChild(tx('Skolval sorterar',{x:350,y:30,'text-anchor':'middle','font-size':9,fill:'var(--muted)',opacity:.9}));
+  svg.appendChild(tx('POSITIV SPIRAL',{x:LX,y:24,'text-anchor':'middle','font-size':10,'font-weight':700,'letter-spacing':'0.1em',fill:'#53a145',opacity:.85}));
+  svg.appendChild(tx('NEGATIV SPIRAL',{x:RX,y:24,'text-anchor':'middle','font-size':10,'font-weight':700,'letter-spacing':'0.1em',fill:'#E8112D',opacity:.85}));
+
+  sc.appendChild(svg);
+
+  // ── PISA-LINJEDIAGRAM ──
+  // Data indexerat mot år 2000 = 100
+  // Genomsnitt: 100 → 94 → 87 → 91 → 89 (2000,2003,2006,2009,2012,2015,2018,2022)
+  // Infödda:    100 → 100 → 97 → 95 → 94 → 98 → 100 → 100
+  const pisaCtx = document.getElementById('pisa-line-chart');
+  if (pisaCtx) {
+    const pisaYears = [1992,1994,1997,2000,2003,2006,2009,2012,2015,2018,2022];
+    const avgData =    [null,null,null, 100, 99,  95,  91,  85,  90,  91,  88];
+    const nativeData = [null,null,null, 100,100,  98,  95,  93,  98, 100, 100];
+
+    // Annotations plugin inline
+    const annotationPlugin = {
+      id:'pisaAnnotations',
+      afterDraw(chart) {
+        const {ctx, scales, chartArea} = chart;
+        ctx.save();
+        ctx.font = '500 10px IBM Plex Sans, system-ui, sans-serif';
+        ctx.textBaseline = 'bottom';
+
+        const annotations = [
+          {year:1992, label:'Friskolereformen (1992)', color:'#BA7517', side:'right'},
+          {year:2000, label:'PISA-mätningar börjar', color:'#534AB7', side:'right'},
+          {year:2009, label:'Invandringen ökar markant', color:'#8b949e', side:'left'},
+          {year:2015, label:'Infödda återhämtar sig', color:'#53a145', side:'right'},
+        ];
+
+        annotations.forEach(a => {
+          const idx = pisaYears.reduce((best,y,i) =>
+            Math.abs(y-a.year) < Math.abs(pisaYears[best]-a.year) ? i : best, 0);
+          const clampedX = Math.max(chartArea.left+2, Math.min(chartArea.right-2,
+            scales.x.getPixelForValue(idx)));
+
+          // Streckad linje
+          ctx.strokeStyle = a.color;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3,4]);
+          ctx.globalAlpha = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(clampedX, chartArea.top);
+          ctx.lineTo(clampedX, chartArea.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1;
+
+          // Etikett
+          ctx.fillStyle = a.color;
+          ctx.textAlign = a.side === 'right' ? 'left' : 'right';
+          const labelX = a.side === 'right' ? clampedX + 4 : clampedX - 4;
+          ctx.fillText(a.label, labelX, chartArea.top + 14);
+        });
+        ctx.restore();
+      }
+    };
+
+    new Chart(pisaCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: pisaYears,
+        datasets: [
+          {
+            label: 'Genomsnitt (alla elever)',
+            data: avgData,
+            borderColor: '#8b949e',
+            backgroundColor: 'rgba(139,148,158,.08)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: '#8b949e',
+            tension: .35,
+            fill: false,
+          },
+          {
+            label: 'Infödda svenska elever',
+            data: nativeData,
+            borderColor: '#53a145',
+            backgroundColor: 'rgba(83,161,69,.08)',
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointBackgroundColor: '#53a145',
+            tension: .35,
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        animation: {duration: 800, easing: 'easeInOutQuart'},
+        plugins: {
+          legend: {
+            display: true,
+            labels: {color:'#8b949e', font:{size:11}, boxWidth:16, padding:16}
+          },
+          tooltip: {callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} (index)`}}
+        },
+        scales: {
+          y: {
+            min: 78, max: 108,
+            grid: {color:'#21262d'},
+            ticks: {font:{size:10}, callback:v=>v===100?'100 (2000)':v},
+          },
+          x: {grid:{display:false}, ticks:{font:{size:10}}}
+        }
+      },
+      plugins: [annotationPlugin]
+    });
+  }
+  // ── PISA-MYTKORT ──
+  const myths = [
+    {
+      myth:'Svenska skolresultat faller för att vi har för många invandrare, särskilt från MENA och Afghanistan.',
+      partly:'Det finns ett reellt mönster: elever med utländsk bakgrund presterar sämre i PISA, och Sverige sticker ut med ovanligt stora skillnader mellan grupperna. Andelen elever med utländsk bakgrund i PISA ökade från drygt 10% år 2000 till 21% år 2022, vilket bidrar till att dra ned snittet.',
+      counter:'Bland infödda svenska elever var resultaten i PISA 2018 tillbaka på samma nivå som år 2000. Hela det kvarvarande resultattappet förklaras av förändrad elevsammansättning. Sverige är alltså inte sämre på att utbilda infödda elever; Sverige är sämre på att utbilda elever med svagare förutsättningar.',
+      punchline:'Frågan är inte vilka elever som kommer. Frågan är vad skolsystemet gör med dem när de väl är här.',
+      src:'Skolverket PISA-analys 2012 och 2023 · Heller Sahlgren, Timbro (2022)',
+    },
+    {
+      myth:'Kanada fungerar bara för att de tar emot välutbildade indier — inte flyktingar från MENA.',
+      intro:'Det första kortet visar att infödda svenska elever presterar lika bra som år 2000. En naturlig följdfråga är varför andra länder med stor invandring klarar sig bättre. Kanada brukar lyftas som exempel — och då kommer ofta det här motargumentet:',
+      partly:'Kanadas immigrationssystem är poängbaserat och prioriterar ekonomisk immigration i högre grad än Sverige. Det är en reell skillnad som ger en i genomsnitt högre socioekonomisk startpunkt för invandrare.',
+      counter:'Kanadas muslimska befolkning domineras av sydasiater (38%), araber (32%), västasier (13%) och svarta (12%). Stora grupper kommer från Pakistan, Iran, Syrien, Libanon och Irak. I PISA 2022 presterade invandrarbarn i Kanada 12 poäng bättre än infödda kanadensare i matematik. Efter kontroll för socioekonomisk bakgrund var skillnaden 16 poäng till invandrarbarnens fördel. 34% av Kanadas 15-åringar i PISA hade invandrarbakgrund.',
+      punchline:'Det är inte vilka som kommer som avgör — det är vad skolsystemet gör med dem.',
+      src:'OECD PISA 2022 Country Note Canada · Statistics Canada 2021 Census',
+    },
+  ];
+
+  document.getElementById('pisa-myth-cards').innerHTML = myths.map((m,i) => `
+    <div style="border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;">
+      ${m.intro ? `<div style="padding:.9rem 1.5rem;font-size:.83rem;color:var(--muted);line-height:1.65;border-bottom:1px solid var(--bdr2);">${m.intro}</div>` : ''}
+      <div style="background:var(--surf);padding:.75rem 1.5rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.75rem;">
+        <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:700;color:var(--muted);width:2rem;text-align:center;">${i+1}</span>
+        <span style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Påstående</span>
+      </div>
+      <div style="background:rgba(186,117,23,.07);border-left:4px solid #BA7517;padding:1.1rem 1.5rem;">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#BA7517;margin-bottom:.4rem;">Påståendet</div>
+        <div style="font-size:1rem;font-weight:500;font-style:italic;line-height:1.55;">"${m.myth}"</div>
+      </div>
+      <div style="background:rgba(186,117,23,.04);border-left:4px solid #BA7517;padding:1rem 1.5rem;border-top:1px solid var(--bdr);">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#BA7517;margin-bottom:.35rem;">Delvis rätt</div>
+        <div style="font-size:.85rem;line-height:1.65;color:var(--txt);">${m.partly}</div>
+      </div>
+      <div style="background:var(--card);padding:.4rem 1.5rem;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.75rem;">
+        <div style="flex:1;height:1px;background:var(--bdr);"></div>
+        <span style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;">Men data visar</span>
+        <div style="flex:1;height:1px;background:var(--bdr);"></div>
+      </div>
+      <div style="background:rgba(83,161,69,.06);border-left:4px solid #53a145;padding:1.1rem 1.5rem;">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#53a145;margin-bottom:.35rem;">Vad forskningen faktiskt visar</div>
+        <div style="font-size:.88rem;line-height:1.7;color:var(--txt);">${m.counter}</div>
+        <div style="margin-top:.85rem;padding:.6rem .85rem;background:var(--card);border-radius:6px;font-size:.83rem;font-weight:500;color:var(--txt);">${m.punchline}</div>
+        <div style="margin-top:.6rem;font-size:.68rem;color:var(--muted);">Källa: ${m.src}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
 // ══════════════════════ INIT ══════════════════════
 buildProfCards();
 applyPCh();
@@ -957,6 +1467,7 @@ buildTL();
 applyTCh();
 buildArgCards();
 buildKallor();
+buildSystemet();
 </script>
 </body>
 </html>
