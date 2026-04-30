@@ -90,6 +90,32 @@ header p{font-size:.83rem;color:var(--muted);max-width:620px;}
 .svcard:hover{box-shadow:0 0 0 1px var(--muted);}
 .svcard.dim{opacity:.07;pointer-events:none;}
 .svcard.hl{box-shadow:0 0 0 2px var(--org);}
+
+/* Valfrihetskommissionen-wrapper */
+#valfrihet-group{
+  border-radius:10px;
+  border:2px solid transparent;
+  background:transparent;
+  transition:border-color .6s ease,box-shadow .6s ease;
+  margin-bottom:.5rem;
+  padding:0;
+}
+#valfrihet-group.glowing{
+  border-color:#534AB7;
+  box-shadow:0 0 0 1px rgba(83,74,183,.3), 0 0 18px 4px rgba(83,74,183,.22), 0 0 36px 8px rgba(83,74,183,.1);
+  animation:kommPulse 2.8s ease-in-out infinite;
+}
+@keyframes kommPulse{
+  0%,100%{box-shadow:0 0 0 1px rgba(83,74,183,.3), 0 0 18px 4px rgba(83,74,183,.22), 0 0 36px 8px rgba(83,74,183,.1);}
+  50%{box-shadow:0 0 0 1px rgba(83,74,183,.5), 0 0 26px 8px rgba(83,74,183,.32), 0 0 48px 14px rgba(83,74,183,.16);}
+}
+#valfrihet-group .svcard{margin-bottom:4px;border-radius:6px;}
+#valfrihet-group .svcard:last-child{margin-bottom:0;}
+#valfrihet-label{
+  font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:#a29bfe;padding:.5rem .75rem .35rem;display:none;
+}
+#valfrihet-group.glowing #valfrihet-label{display:block;}
 .svstrip{width:5px;flex-shrink:0;}
 .svbody{display:flex;flex-wrap:wrap;gap:5px 12px;padding:9px 13px;flex:1;align-items:flex-start;}
 .svperson{min-width:155px;flex:1;}
@@ -179,6 +205,22 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
     <p style="font-size:.7rem;color:var(--muted);margin-bottom:.75rem;font-style:italic;line-height:1.5;" id="chartNote"></p>
     <canvas id="rc" height="210"></canvas>
     <div class="insight" id="insight"></div>
+    <div id="chartExtra"></div>
+    <div id="compoundWrap" style="display:none;margin-top:1rem;">
+      <div style="background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:1rem 1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem;">
+          <p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;">ACKUMULERAD EFFEKT 2005–2045</p>
+          <div style="display:flex;gap:1rem;font-size:.68rem;color:var(--muted);align-items:center;flex-wrap:wrap;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#E8112D;opacity:.85;"></span>Dokumenterat (2005–2026)</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#E8112D;opacity:.35;border:1px dashed #E8112D;"></span>Projektion (2027–2045)</span>
+          </div>
+        </div>
+        <canvas id="compoundChart" height="220"></canvas>
+      <p style="font-size:.68rem;color:var(--muted);margin-top:.75rem;line-height:1.55;border-top:1px solid var(--bdr2);padding-top:.6rem;">
+          Varje stapel = antal kohorter i arbetslivet som simultant bär sin livsinkomstförlust på 200 000 kr. Steady state nås ~2045 då de första stora friskolekullarna går i pension. Projektionen antar oförändrat antal avgångselever från vinstdrivande gymnasiefriskolor. OBS: Bergs 2%-siffra gäller all exponering för vinstdrivande skolor, inte enbart gymnasiet. Gymnasieavgångare används här som approximation. Källa: Berg (HHS 2026), Skolverket 2024.
+        </p>
+      </div>
+    </div>
   </div>
 
   <div class="chart-wrap" style="margin-top:0;">
@@ -255,6 +297,32 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
   </div>
 
   <div class="info-panel" id="tip">Klicka på en rad för detaljer om personen och kopplingens bakgrund.</div>
+
+  <div id="trotthet-card" style="display:none;margin-top:1.25rem;border:1px solid rgba(139,148,158,.3);border-radius:12px;overflow:hidden;">
+    <div style="background:rgba(139,148,158,.06);padding:.75rem 1.5rem;border-bottom:1px solid rgba(139,148,158,.2);display:flex;align-items:center;gap:.75rem;">
+      <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;font-weight:700;color:#8b949e;display:none;"></span>
+      <span style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8b949e;">Lobbyns spelbok: Strategi 10</span>
+      <span style="margin-left:auto;font-size:.68rem;background:rgba(139,148,158,.18);color:#8b949e;padding:2px 8px;border-radius:100px;font-weight:500;">Inte ett argument</span>
+    </div>
+    <div style="background:rgba(139,148,158,.06);border-left:4px solid #8b949e;padding:1.1rem 1.5rem;">
+      <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8b949e;margin-bottom:.4rem;">Trötthetstrategin</div>
+      <div style="font-size:1rem;font-weight:500;font-style:italic;line-height:1.55;color:var(--txt);">"Man behöver inte vinna varje debatt. Man behöver bara se till att ingenting händer."</div>
+    </div>
+    <div style="background:var(--card);padding:.4rem 1.5rem;display:flex;align-items:center;gap:.75rem;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">
+      <div style="flex:1;height:1px;background:var(--bdr);"></div>
+      <span style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;">Vad tidslinjen visar</span>
+      <div style="flex:1;height:1px;background:var(--bdr);"></div>
+    </div>
+    <div style="background:rgba(139,148,158,.04);border-left:4px solid #8b949e;padding:1.1rem 1.5rem;">
+      <div style="font-size:.88rem;line-height:1.7;color:var(--txt);">Tidslinjen ovan visar ett decennium av lobbying. Men det handlar inte bara om att ha rätt kontakter eller säga rätt saker. Det handlar om att se till att klockan tickar. Varje utredning som tar ett år extra, varje remissrunda som läggs till, varje ny rapport som beställs innan man "kan ta ställning" är en vinst för dem som vill att ingenting förändras. 70–80% av Sveriges befolkning har velat begränsa vinsterna i välfärden sedan tidigt 2010-tal. <strong>Den opinionen har inte förändrats.</strong> Det som har förändrats är hur länge frågan kunnat hållas i ett evigt utredningsläge. <strong><em>Trötthetstrategin kräver inga argument. Den kräver bara tid.</em></strong></div>
+      <div style="margin-top:.85rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+        <span class="chip">Lobbykollen.se (70+ dokumenterade ministermöten)</span>
+        <span class="chip">Balans — "Vinstskolelobbyn och politiken" (2022)</span>
+        <span class="chip">Opinionsdata: Novus/SVT 2012–2024</span>
+      </div>
+    </div>
+  </div>
+
   <p class="src">Alla kopplingar dokumenterade i offentliga källor. Övergångsår approximativa där exakt datum ej publicerats. Tankesmedjan Balans (2022–2024) · Lobbykollen.se · Dagens ETC (2022) · Altinget (2025) · Sebhatu &amp; Wennberg.</p>
   </div>
 
@@ -350,6 +418,52 @@ svg#tl text{font-family:'IBM Plex Sans',system-ui,sans-serif;}
 
   <div id="argcards"></div>
 
+  <!-- LOBBYNS SPELBOK — easter egg -->
+  <div id="spelbok-card" style="border:1px solid rgba(139,148,158,.25);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;margin-top:.5rem;">
+    <div style="background:rgba(139,148,158,.05);padding:.85rem 1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+      <div style="flex:1;">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8b949e;margin-bottom:.2rem;">Lobbyns spelbok</div>
+        <div style="font-size:.83rem;color:var(--txt);line-height:1.5;">Kortarterna 1–8 på den här fliken och strategi 10 på Svängdörrar-fliken är dokumenterade tekniker. Men spelboken är längre.</div>
+      </div>
+      <button onclick="toggleSpelbok()" id="spelbok-btn" style="
+        background:transparent;
+        border:1px solid #534AB7;
+        color:#a29bfe;
+        font-family:inherit;
+        font-size:.75rem;
+        font-weight:500;
+        padding:.4rem 1rem;
+        border-radius:100px;
+        cursor:pointer;
+        animation:spelbokPulse 2.5s ease-in-out infinite;
+        white-space:nowrap;
+        flex-shrink:0;
+      ">Vilka är strategierna 1–9?</button>
+    </div>
+
+    <div id="spelbok-content" style="display:none;">
+      <div style="padding:1rem 1.5rem;border-top:1px solid rgba(139,148,158,.2);">
+        <p style="font-size:.72rem;color:#8b949e;margin-bottom:1rem;line-height:1.55;">Dessa strategier identifierades under en analys av lobbyisternas kommunikation. De används sällan isolerade — de kombineras och växlar beroende på vem som lyssnar. Strategi 2 och 10 har egna kort på sidan.</p>
+        <div id="spelbok-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+  @keyframes spelbokPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(83,74,183,0),border-color:rgba(83,74,183,.5);}
+    50%{box-shadow:0 0 8px 3px rgba(83,74,183,.3);}
+  }
+  #spelbok-btn{transition:background .2s,color .2s;}
+  #spelbok-btn.open{animation:none;background:rgba(83,74,183,.15);border-color:#534AB7;}
+  .sb-item{display:flex;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(139,148,158,.1);align-items:flex-start;}
+  .sb-item:last-child{border-bottom:none;}
+  .sb-num{font-size:.7rem;font-weight:700;color:#8b949e;min-width:1.5rem;padding-top:.1rem;flex-shrink:0;}
+  .sb-name{font-size:.8rem;font-weight:600;color:var(--txt);margin-bottom:.15rem;}
+  .sb-desc{font-size:.75rem;color:#8b949e;line-height:1.5;}
+  .sb-tag{font-size:.65rem;background:rgba(83,74,183,.2);color:#a29bfe;padding:1px 7px;border-radius:100px;margin-left:.5rem;vertical-align:middle;}
+  </style>
+
   <p class="src">Källor till motargumenten: Petter Berg (HHS, 2026) · Vlachos (IFN, 2018) · Hinnerich &amp; Vlachos · Böhlmark, Holmlund &amp; Lindahl (IFAU, 2015) · Skolverket &amp; UKÄ (2024) · Sveriges Lärare &amp; ISR (2024) · Sebhatu &amp; Wennberg (2022).</p>
 </section>
 
@@ -409,7 +523,7 @@ const MEASURES = [
     overlay:'Friskolor ser bättre ut...',
     insight:'⚠ Vinstdrivande skolor sätter högre betyg, men måttet är missvisande. Betygssättningen sker internt och ger friskolorna ekonomiska incitament att ge generösa betyg (Vlachos, IFN 2018).' },
   { lbl:'NATIONELLA PROV: externt rättade, kommunal = 100',
-    note:'Samma skala som betygsfliken. Här rättas proven av någon annan än den egna skolan.',
+    note:'Approximerade indexvärden baserade på Hinnerich & Vlachos fynd. Exakta siffror ej publicerade i original; vad studien visar är att gapet försvinner, inte exakta tal.',
     data:[100,100.3,100.2], yMin:88, yMax:120,
     colors:_=>'rgba(139,148,158,.35)',
     borders:_=>'#8b949e',
@@ -426,12 +540,34 @@ const MEASURES = [
     insight:'✗ Högskoleprestationer avslöjar sanningen: elever från vinstdrivande friskolor presterar 6,4 procentenheter (pp) sämre under 1:a högskolåret, trots lika gymnasiebetyg (Skolverket & UKÄ, 2024). Mönstret replikerar sedan 2005.' },
   { lbl:'LIVSINKOMST: kausalstudie, kommunal = 100',
     note:'Samma skala. En skillnad på 2% i livsinkomst låter liten men motsvarar ~200 000 kr över ett helt arbetsliv.',
-    data:[100,99.5,98], yMin:88, yMax:120,
+    data:[100,null,98], yMin:88, yMax:120,
     colors:d=>d<100?'rgba(232,17,45,.65)':'rgba(139,148,158,.35)',
     borders:d=>d<100?'#E8112D':'#8b949e',
-    barLabels:['100\n(referens)','−0,5%','−2%'],
+    barLabels:['100\n(referens)','ej belagt','−2%'],
     overlay:'Konsekvensen: 200 000 kr lägre livsinkomst',
-    insight:'✗ Kausalstudie (Berg, HHS 2026): elever i vinstdrivande friskolor tjänar 2% (~200 000 kr) lägre livsinkomst, orsakat av lägre andel behöriga lärare. Notera: samma skala som betygsflikens, men verkligheten är den omvända.' },
+    insight:'✗ Kausalstudie (Berg, HHS 2026): elever i vinstdrivande friskolor tjänar 2% (~200 000 kr) lägre livsinkomst. Bergs studie mäter vinstdrivande specifikt. Siffra för idéburna friskolor saknar motsvarande kausalbelägg och visas därför ej.',
+    extra:`<div style="margin-top:1rem;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:1rem 1.25rem;">
+      <p style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">SKALAN BAKOM SIFFRAN</p>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:center;">
+        <div style="text-align:center;flex:1;min-width:80px;">
+          <div style="font-size:1.4rem;font-weight:700;color:#E8112D;line-height:1.1;">200 000 kr</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem;line-height:1.4;">per elev<br>förlorad livsinkomst</div>
+        </div>
+        <div style="color:var(--bdr);font-size:1.4rem;">×</div>
+        <div style="text-align:center;flex:1;min-width:80px;">
+          <div style="font-size:1.4rem;font-weight:700;color:#E8112D;line-height:1.1;">26 700</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem;line-height:1.4;">avgångselever/år<br>vinstdriv. gymnasium</div>
+        </div>
+        <div style="color:var(--bdr);font-size:1.4rem;">=</div>
+        <div style="text-align:center;flex:1.5;min-width:100px;background:var(--card);border-radius:6px;padding:.6rem .75rem;border:1px solid #E8112D44;">
+          <div style="font-size:1.6rem;font-weight:700;color:#E8112D;line-height:1.1;">~5,3 mdr kr</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem;line-height:1.4;">förlorad livsinkomst<br>per avgångskull — varje år</div>
+        </div>
+      </div>
+      <p style="font-size:.68rem;color:var(--muted);margin-top:.75rem;line-height:1.5;border-top:1px solid var(--bdr2);padding-top:.6rem;">367 000 gymnasieelever × 28% i friskola × 78% vinstdrivande = ~80 000 / 3 år = 26 700 per avgångskull. Källa: Skolverket 2024, Berg HHS 2026. Approximation.</p>
+      <button onclick="toggleCompound()" id="compoundBtn" style="margin-top:.75rem;background:var(--card);border:1px solid var(--bdr);color:var(--txt);font-family:inherit;font-size:.78rem;padding:.4rem 1rem;border-radius:100px;cursor:pointer;">Visa ackumulerad effekt över tid →</button>
+    </div>`
+  },
 ];
 
 let curM = 0, apTimer = null;
@@ -544,6 +680,7 @@ function setM(i, btn) {
   rChart.data.datasets[0].borderColor = m.data.map(m.borders);
   rChart.update();
   document.getElementById('insight').textContent = m.insight;
+  document.getElementById('chartExtra').innerHTML = m.extra || '';
   document.getElementById('chartLabel').textContent = m.lbl;
   document.getElementById('chartNote').textContent = m.note;
   document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('on'));
@@ -554,8 +691,8 @@ setM(0, null);
 
 function toggleAP() {
   const btn = document.getElementById('apBtn');
-  if(apTimer){clearInterval(apTimer);apTimer=null;btn.textContent='▶ Autoplay';btn.classList.remove('playing');}
-  else{apTimer=setInterval(()=>setM((curM+1)%4,null),2800);btn.textContent='⏹ Stopp';btn.classList.add('playing');}
+  if(apTimer){clearInterval(apTimer);apTimer=null;btn.textContent='Autoplay';btn.classList.remove('playing');}
+  else{apTimer=setInterval(()=>setM((curM+1)%4,null),2800);btn.textContent='Stopp';btn.classList.add('playing');}
 }
 
 // ── MARKET SHARE LINE ──
@@ -679,30 +816,41 @@ function buildProfCards(){
     {lbl:'Socialdemokraterna (S)',clr:'#E8112D',pts:['S']},
     {lbl:'Miljöpartiet (MP)',clr:'#53a145',pts:['MP']},
   ];
-  let h='';
+
+  function cardHTML(p){
+    const ch=p.conns.map((c,i)=>{
+      const ar=i===0?'→':(c.role.includes('parallellt')?'+':'→');
+      const rb=c.ret?`<span class="retbadge">${c.ret}</span>`:'';
+      return `<div class="svconn"><span class="arr">${ar}</span><span class="typetag" style="background:${c.tc};">${c.type}</span><span class="orgname">${c.org}</span><span class="role">${c.role}</span>${rb}</div>`;
+    }).join('');
+    const ex=p.extra?`<div class="svconn"><span class="arr">+</span><span style="font-size:.72rem;color:var(--muted);">${p.extra}</span></div>`:'';
+    return `<div class="svcard" id="pc-${p.id}" data-party="${p.party}" data-cats="${p.cats.join(',')}" onclick="showPC('${p.id}')">
+      <div class="svstrip" style="background:${p.pc};"></div>
+      <div class="svbody">
+        <div class="svperson">
+          <div class="svphead"><span class="badge" style="background:${p.pc};">${p.party}</span><span class="svname">${p.name}</span></div>
+          <div class="svprev">${p.prev}</div>
+        </div>
+        <div class="svconns">${ch}${ex}</div>
+      </div>
+    </div>`;
+  }
+
+  // Valfrihetskommissionen-wrapper överst
+  const kommMembers = PDATA.filter(p=>p.cats.includes('kommission'));
+  let h = `<div id="valfrihet-group">
+    <div id="valfrihet-label">Valfrihetskommissionen — M, S och MP</div>
+    ${kommMembers.map(cardHTML).join('')}
+  </div>`;
+
+  // Sedan partigrupperna (exklusive kommissionsmedlemmar som redan visas)
   groups.forEach(g=>{
     const ms=PDATA.filter(p=>g.pts.includes(p.party));
     if(!ms.length)return;
     h+=`<div><span class="party-label" style="background:${g.clr};">${g.lbl}</span></div>`;
-    ms.forEach(p=>{
-      const ch=p.conns.map((c,i)=>{
-        const ar=i===0?'→':(c.role.includes('parallellt')?'+':'→');
-        const rb=c.ret?`<span class="retbadge">${c.ret}</span>`:'';
-        return `<div class="svconn"><span class="arr">${ar}</span><span class="typetag" style="background:${c.tc};">${c.type}</span><span class="orgname">${c.org}</span><span class="role">${c.role}</span>${rb}</div>`;
-      }).join('');
-      const ex=p.extra?`<div class="svconn"><span class="arr">+</span><span style="font-size:.72rem;color:var(--muted);">${p.extra}</span></div>`:'';
-      h+=`<div class="svcard" id="pc-${p.id}" data-party="${p.party}" data-cats="${p.cats.join(',')}" onclick="showPC('${p.id}')">
-        <div class="svstrip" style="background:${p.pc};"></div>
-        <div class="svbody">
-          <div class="svperson">
-            <div class="svphead"><span class="badge" style="background:${p.pc};">${p.party}</span><span class="svname">${p.name}</span></div>
-            <div class="svprev">${p.prev}</div>
-          </div>
-          <div class="svconns">${ch}${ex}</div>
-        </div>
-      </div>`;
-    });
+    ms.forEach(p=>{h+=cardHTML(p);});
   });
+
   document.getElementById('profcards').innerHTML=h;
   buildDots('pdots',PCHAPS.length,pCur);
 }
@@ -712,11 +860,25 @@ function applyPCh(){
   document.getElementById('pcht').textContent=c.t;
   document.getElementById('pchx').textContent=c.x;
   updateDots('pdots',PCHAPS.length,pCur);
+
+  const isKommChapter = c.hl; // kapitel 4/4 har hl:true
+
+  // Glödande ram
+  const vg = document.getElementById('valfrihet-group');
+  if(vg) {
+    if(isKommChapter){
+      // Liten fördröjning för mjuk intonad animation
+      setTimeout(()=>vg.classList.add('glowing'), 80);
+    } else {
+      vg.classList.remove('glowing');
+    }
+  }
+
   document.querySelectorAll('.svcard').forEach(el=>{
     const d={party:el.dataset.party,cats:el.dataset.cats.split(',')};
     const vis=c.f(d);
     el.classList.toggle('dim',!vis);
-    el.classList.toggle('hl',!!(c.hl&&vis));
+    el.classList.toggle('hl',false); // Hanteras nu av wrapper istället
   });
 }
 function prevPCh(){pCur=Math.max(0,pCur-1);applyPCh();}
@@ -868,6 +1030,9 @@ function applyTCh(){
   document.querySelectorAll('[id^="tl-"]').forEach(g=>{
     g.style.opacity=c.w.includes(parseInt(g.dataset.wave))?'1':'0.07';
   });
+  // Visa trötthetkortet bara i sista kapitlet
+  const tc = document.getElementById('trotthet-card');
+  if(tc) tc.style.display = tCur===3 ? 'block' : 'none';
 }
 function prevTCh(){tCur=Math.max(0,tCur-1);applyTCh();}
 function nextTCh(){tCur=Math.min(TCHAPS.length-1,tCur+1);applyTCh();}
@@ -895,7 +1060,7 @@ const ARGS=[
   {
     claim:'Det finns ingen forskning som visar att aktiebolagsskolor ger sämre resultat.',
     claimSub:'Friskolornas Riksförbunds direkta motargument mot forskning och mediagranskning.',
-    counter:'Påståendet kräver att man gör tre saker samtidigt: använder betyg som enda mätmått, ignorerar att betygen är uppblåsta och inte mäter kunskaper, och bortser från högskolestudien och livsinkomststudien som mäter faktiska utfall efter skoltiden. Det är ungefär som att hävda att en bil är bränslesnål genom att mäta hur länge motorn går men inte räkna med att bilen faktiskt körs. Vlachos konstaterade 2018 att <strong><em>samtliga studier sedan 2005 pekar åt samma håll</em></strong>. Berg visade 2026 att skillnaderna syns i livsinkomsten. Skolverket och UKÄ visade 2024 att <strong>de syns redan i högskolans första år</strong>.',
+    counter:'Påståendet kräver att man gör tre saker samtidigt: använder betyg som enda mätmått, ignorerar att betygen är uppblåsta och inte mäter kunskaper, och bortser från högskolestudien och livsinkomststudien som mäter faktiska utfall efter skoltiden. Det är ungefär som att hävda att en bil är bränslesnål genom att mäta hur länge motorn går men inte räkna med att bilen faktiskt körs. Vlachos konstaterade 2018 att <strong><em>samtliga studier av betygskvalitet och faktiska kunskaper sedan 2005 pekar åt samma håll</em></strong>. Berg visade 2026 att skillnaderna syns i livsinkomsten. Skolverket och UKÄ visade 2024 att <strong>de syns redan i högskolans första år</strong>.',
     chips:['Vlachos (IFN 2018)','Hinnerich & Vlachos','Skolverket & UKÄ (2024)','Berg (HHS 2026)'],
   },
   {
@@ -907,15 +1072,22 @@ const ARGS=[
   {
     claim:'Allt annat går att upphandla — vägar, sophämtning, IT. Varför skulle inte skola fungera på samma sätt?',
     claimSub:'Ett principiellt ekonomiskt argument från public choice-teorin. Vanligt i högerorienterade debattartiklar och ibland från Centerpartiet.',
-    counter:'Upphandling fungerar bra när man kan specificera exakt vad man vill ha, mäta om man fått det, och byta leverantör utan stora förluster om man inte är nöjd. Vägar uppfyller alla tre kraven. Skola uppfyller inget av dem. Ekonomer kallar utbildning ett <strong>"credence good"</strong> — en tjänst vars kvalitet du inte kan bedöma ens efter att du konsumerat den. Du vet inte om din skola var bra förrän ditt barn är 35. Det skapar tre strukturella problem som inte finns vid vägbyggen: leverantören kontrollerar sitt eget kvalitetsmått (betygen), byteskostnaden är ett helt barndomsår, och informationsasymmetrin gynnar alltid säljaren. Vlachos 2018-studie är titulerad just "Trust-based evaluation in a market-oriented school system" — hans slutsats är att skolan är en kvasi-marknad som saknar marknadens grundförutsättningar. <strong><em>Chile var det enda land som gick längre än Sverige i att låta vinstdrivande skolor ta skattepengar. Chile avskaffade systemet 2016 på grund av de sociala konsekvenserna. Sverige är nu ensamt kvar.</em></strong>',
+    counter:'Upphandling fungerar bra när man kan specificera exakt vad man vill ha, mäta om man fått det, och byta leverantör utan stora förluster om man inte är nöjd. Vägar uppfyller alla tre kraven. Skola uppfyller inget av dem. Ekonomer kallar utbildning ett <strong>"credence good"</strong> — en tjänst vars kvalitet du inte kan bedöma ens efter att du konsumerat den. Du vet inte om din skola var bra förrän ditt barn är 35. Det skapar tre strukturella problem som inte finns vid vägbyggen: leverantören kontrollerar sitt eget kvalitetsmått (betygen), byteskostnaden är ett helt barndomsår, och informationsasymmetrin gynnar alltid säljaren. Vlachos 2018-studie är titulerad just "Trust-based evaluation in a market-oriented school system" — hans slutsats är att skolan är en kvasi-marknad som saknar marknadens grundförutsättningar. <strong><em>Chile var det enda land som gick längre än Sverige i att tillåta obegränsade vinstuttag i skattefinansierade skolor. Chile avskaffade systemet 2016 på grund av de sociala konsekvenserna. Sverige är i dag det enda landet i OECD som tillåter obegränsade vinstuttag i skattefinansierade skolor.</em></strong>',
     chips:['Vlachos, "Trust-based evaluation" (IFN 2018)','Kerschbamer & Sutter, CESifo (2017) om credence goods','Berg (HHS 2026)','Skolverket: "En bild av skolmarknaden"'],
   },
   {
     claim:'Mitt barn mår bättre i en skola med likasinnade elever. Det är inte mitt ansvar att lösa samhällets problem.',
     claimSub:'Inte ett lobbypåstående. Det är en rationalisering som många välmenande föräldrar gör av kärlek till sitt barn.',
     type:'parent',
-    counter:'Det är ett förståeligt val, och det bygger på en rimlig känsla. Men frågan är om det faktiskt är rätt för ditt barn. Ditt barn kommer att tillbringa hela sitt vuxna liv tillsammans med människor från alla möjliga bakgrunder: på jobbet, i bostadsområdet, i vänskaper och relationer. Barn som växer upp i väldigt homogena miljöer har forskning visat har svårare att navigera den världen senare. Det handlar inte om att offra ditt barn för andras skull. Det handlar om vad som faktiskt förbereder ditt barn bäst. Vad säger forskningen om den akademiska förlusten av en blandad klass? <strong><em>Den är minimal.</em></strong> Starka elever tappar lite i betygsgenomsnitt men vinner i social kompetens, samarbetsförmåga och förmåga att fungera med människor som inte är precis som de själva. Det är egenskaper som arbetsmarknaden 2040 troligen kommer att värdera högre än ett toppbetyg från en homogen klass.',
+    counter:'Det är ett förståeligt val, och det bygger på en rimlig känsla. Men frågan är om det faktiskt är rätt för ditt barn. Ditt barn kommer att tillbringa hela sitt vuxna liv tillsammans med människor från alla möjliga bakgrunder: på jobbet, i bostadsområdet, i vänskaper och relationer. Barn som växer upp i väldigt homogena miljöer har forskning visat har svårare att navigera den världen senare. Det handlar inte om att offra ditt barn för andras skull. Det handlar om vad som faktiskt förbereder ditt barn bäst. Vad säger forskningen om den akademiska förlusten av en blandad klass? <strong><em>Den är liten för starka elever.</em></strong> Peer effects-forskning (Hanushek m.fl.) visar att högpresterande elever i blandade klasser tappar marginellt i betygsgenomsnitt, men svagare elever vinner proportionellt mycket mer. Samtidigt vinner de starka eleverna i social kompetens och samarbetsförmåga. Det är inte ett argument om samhällsansvar. Det är ett argument om vad som faktiskt är bra för ditt barn på lång sikt.',
     chips:['Hanushek m.fl. om peer effects','Böhlmark, Holmlund & Lindahl (IFAU 2015)','Forskning om social kompetens och heterogena miljöer'],
+  },
+  {
+    claim:'Det handlar om barnens rätt att välja. Vi vill inte ha ett system där politiker bestämmer vilken skola ditt barn ska gå i.',
+    claimSub:'Inte ett faktapåstående. En retorisk teknik som används för att byta ämne när fakta inte hjälper lobbyn.',
+    type:'rhetorical',
+    counter:'Lägg märke till vad som händer i den här debatten. När någon tar upp <strong>betygsinflation</strong> svarar lobbyn med valfrihet. När någon tar upp <strong>livsinkomst</strong> svarar de med mångfald. När någon tar upp <strong>segregation</strong> svarar de med att motparten vill ha "ett Sovjet-system". Inget faktapåstående besvarades. Ingen siffra ifrågasattes. Samtalet hamnade på ett helt annat ställe. Det är ingen slump. <strong><em>Man behöver inte vinna en debatt om siffror om man kan flytta samtalet till värderingar där alla har rätt.</em></strong> Nästa gång du läser en debattartikel eller ser ett TV-inslag om friskolor, kolla vad frågan var och vad svaret handlade om. Ofta är det två helt olika saker.',
+    chips:['Tankesmedjan Balans (2022–2024)','Lobbykollen.se','George Lakoff — Framing the debate'],
   },
 ];
 
@@ -923,22 +1095,31 @@ function buildArgCards(){
   const el=document.getElementById('argcards');
   el.innerHTML=ARGS.map((a,i)=>{
     const isParent = a.type === 'parent';
-    const claimBg   = isParent ? 'rgba(83,74,183,.09)'  : 'rgba(186,117,23,.07)';
-    const claimBdr  = isParent ? '#534AB7'              : '#BA7517';
-    const claimLbl  = isParent ? 'Oroliga föräldrar hävdar:' : 'Lobbyn hävdar:';
-    const claimLblC = isParent ? '#a29bfe'              : '#BA7517';
-    const claimSubC = isParent ? 'rgba(162,155,254,.75)': 'rgba(230,180,80,.8)';
-    const sepLbl    = isParent ? 'Forskningen nyanserar' : 'Forskningen svarar';
-    const counterBg = isParent ? 'rgba(83,74,183,.06)'  : 'rgba(83,161,69,.06)';
-    const counterBdr= isParent ? '#534AB7'              : '#53a145';
-    const counterLbl= isParent ? '#a29bfe'              : '#53a145';
-    const headerBg  = isParent ? 'rgba(83,74,183,.08)'  : 'var(--surf)';
+    const isRhet   = a.type === 'rhetorical';
+    const claimBg   = isParent ? 'rgba(83,74,183,.09)' : isRhet ? 'rgba(139,148,158,.08)' : 'rgba(186,117,23,.07)';
+    const claimBdr  = isParent ? '#534AB7' : isRhet ? '#8b949e' : '#BA7517';
+    const claimLbl  = isParent ? 'Oroliga föräldrar hävdar:' : isRhet ? 'Den retoriska tekniken:' : 'Lobbyn hävdar:';
+    const claimLblC = isParent ? '#a29bfe' : isRhet ? '#8b949e' : '#BA7517';
+    const claimSubC = isParent ? 'rgba(162,155,254,.75)' : isRhet ? 'rgba(139,148,158,.75)' : 'rgba(230,180,80,.8)';
+    const sepLbl    = isParent ? 'Forskningen nyanserar' : isRhet ? 'Vad som faktiskt händer' : 'Forskningen svarar';
+    const counterBg = isParent ? 'rgba(83,74,183,.06)' : isRhet ? 'rgba(139,148,158,.06)' : 'rgba(83,161,69,.06)';
+    const counterBdr= isParent ? '#534AB7' : isRhet ? '#8b949e' : '#53a145';
+    const counterLbl= isParent ? '#a29bfe' : isRhet ? '#8b949e' : '#53a145';
+    const headerBg  = isParent ? 'rgba(83,74,183,.08)' : isRhet ? 'rgba(139,148,158,.06)' : 'var(--surf)';
+    const headerBorder = isParent ? 'border-color:rgba(83,74,183,.35);' : isRhet ? 'border-color:rgba(139,148,158,.3);' : '';
+    const numColor = isParent ? 'color:#a29bfe;' : isRhet ? 'color:#8b949e;' : '';
+    const headerTag = isParent
+      ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(83,74,183,.25);color:#a29bfe;padding:2px 8px;border-radius:100px;font-weight:500;">Inte ett lobbypåstående</span>'
+      : isRhet
+      ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(139,148,158,.18);color:#8b949e;padding:2px 8px;border-radius:100px;font-weight:500;">Retorisk teknik</span>'
+      : '';
+    const headerTitle = isParent ? 'Föräldraperspektivet' : isRhet ? 'Mönstret att känna igen' : `Påstående ${i+1} av ${ARGS.length}`;
     return `
-    <div class="arg-card" style="${isParent?'border-color:rgba(83,74,183,.35);':''}">
+    <div class="arg-card" style="${headerBorder}">
       <div class="arg-header" style="background:${headerBg};">
-        <span class="arg-num" style="${isParent?'color:#a29bfe;':''}">${String(i+1).padStart(2,'0')}</span>
-        <span class="arg-header-title">${isParent ? 'Föräldraperspektivet' : `Påstående ${i+1} av ${ARGS.length}`}</span>
-        ${isParent ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(83,74,183,.25);color:#a29bfe;padding:2px 8px;border-radius:100px;font-weight:500;">Inte ett lobbypåstående</span>' : ''}
+        <span class="arg-num" style="${numColor}">${String(i+1).padStart(2,'0')}</span>
+        <span class="arg-header-title">${headerTitle}</span>
+        ${headerTag}
       </div>
       <div class="arg-claim" style="background:${claimBg};border-left-color:${claimBdr};">
         <div class="arg-claim-lbl" style="color:${claimLblC};">${claimLbl}</div>
@@ -1166,10 +1347,10 @@ function buildBar(label, segments, total, note) {
 function buildSystemet() {
   // ── LÄRARSORTERING ──
   document.getElementById('teacher-bars').innerHTML = [
-    buildBar('Andel behöriga lärare — gynnsam socioekonomisk profil', [
-      {label:'Behöriga',v:85,c:'#53a145'},{label:'Obehöriga',v:15,c:'#30363d'}], 100),
-    buildBar('Andel behöriga lärare — utsatt socioekonomisk profil', [
-      {label:'Behöriga',v:68,c:'#E8112D'},{label:'Obehöriga',v:32,c:'#30363d'}], 100, 'ca 17 pp lägre'),
+    buildBar('Andel behöriga lärare — gynnsam socioekonomisk profil (ungefärligt)', [
+      {label:'Behöriga',v:85,c:'#53a145'},{label:'Obehöriga',v:15,c:'#30363d'}], 100, 'approx. Skolverket 2023'),
+    buildBar('Andel behöriga lärare — utsatt socioekonomisk profil (ungefärligt)', [
+      {label:'Behöriga',v:68,c:'#E8112D'},{label:'Obehöriga',v:32,c:'#30363d'}], 100, 'ca 17 pp lägre, approx. Skolverket 2023'),
     buildBar('Lärartäthet — vinstdrivande friskola (åk 6 & 9)', [
       {label:'Elever/lärare rel. kommunal',v:100,c:'#BA7517'}], 100, '+1,5 elever/lärare mer än kommunal'),
   ].join('');
@@ -1180,8 +1361,8 @@ function buildSystemet() {
       {label:'Brister dokumenterade',v:80,c:'#E8112D'},{label:'Inga brister',v:20,c:'#30363d'}], 100, 'av 30 granskade (Skolinspektionen 2022)'),
     buildBar('Friskolor som begär otillåten info om elev', [
       {label:'Begär info om stödbehov/modersmål',v:50,c:'#BA7517'},{label:'Gör det inte',v:50,c:'#30363d'}], 100),
-    buildBar('Friskolor som inte tar emot elever med funktionsnedsättning', [
-      {label:'Avvisar',v:10,c:'#E8112D'},{label:'Tar emot',v:90,c:'#30363d'}], 100, 'UR/Skolfront-undersökning'),
+    buildBar('Friskolor som i granskning nekade elever med funktionsnedsättning', [
+      {label:'Dokumenterade fall',v:10,c:'#E8112D'},{label:'Ej dokumenterat',v:90,c:'#30363d'}], 100, 'Indikativt — begränsad källbas, ej generaliserbart'),
   ].join('');
 
   // ── SPIRALEN ──
@@ -1334,8 +1515,8 @@ function buildSystemet() {
         const annotations = [
           {year:1992, label:'Friskolereformen (1992)', color:'#BA7517', side:'right'},
           {year:2000, label:'PISA-mätningar börjar', color:'#534AB7', side:'right'},
-          {year:2009, label:'Invandringen ökar markant', color:'#8b949e', side:'left'},
-          {year:2015, label:'Infödda återhämtar sig', color:'#53a145', side:'right'},
+          {year:2015, label:'Invandringen ökar (topp 2015-16)', color:'#8b949e', side:'left'},
+          {year:2018, label:'Infödda återhämtar sig', color:'#53a145', side:'right'},
         ];
 
         annotations.forEach(a => {
@@ -1464,6 +1645,193 @@ function buildSystemet() {
       </div>
     </div>
   `).join('');
+}
+
+// ══════════════════════ COMPOUND CHART ══════════════════════
+let compoundBuilt = false;
+
+function toggleCompound() {
+  const wrap = document.getElementById('compoundWrap');
+  const btn = document.getElementById('compoundBtn');
+  if (!wrap) return;
+  const visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? 'Visa ackumulerad effekt över tid →' : 'Dölj ackumulerad effekt ↑';
+  if (!compoundBuilt && !visible) {
+    buildCompoundChart();
+    compoundBuilt = true;
+  }
+}
+
+function buildCompoundChart() {
+  const ctx = document.getElementById('compoundChart');
+  if (!ctx) return;
+
+  // Per år: antal kohorter i arbetslivet × 26 700 elever × 200 000 kr
+  // Antar arbetslivslängd 40 år. Kohorter från vinstdrivande gym.
+  // Faktisk: friskoleandel liten t.o.m. ~2005, sedan snabb tillväxt.
+  // Vi modellerar antalet aktiva kohorter per år:
+  // Kohort 2005 = liten (~5 000/år), ökar linjärt till 26 700 år 2024.
+  // Projektion 2025-2045: konstant 26 700/år.
+
+  const startYear = 2005;
+  const endYear = 2045;
+  const retireAfter = 40; // år i arbetslivet
+  const lossPerPerson = 200000; // kr
+  const cutoff = 2026; // sista faktiska år
+
+  // Historisk avgångskohort per år (modellerad approximation — exakt data saknas per år)
+  function cohortSize(year) {
+    if (year < 2005) return 0;
+    if (year <= 2024) {
+      // Linjär approximation: liten andel 2005 (~5 000), tillväxt till ~26 700 år 2024
+      // Faktisk tillväxt var ojämn men linjär interpolation ger rimlig ordning av magnitud
+      return Math.round(5000 + (26700 - 5000) * (year - 2005) / (2024 - 2005));
+    }
+    return 26700;
+  }
+
+  const labels = [];
+  const actualData = [];
+  const projData = [];
+
+  for (let y = startYear; y <= endYear; y++) {
+    labels.push(y);
+    // Räkna aktiva kohorter detta år
+    let activePersons = 0;
+    for (let cohortYear = 2005; cohortYear <= y; cohortYear++) {
+      if (y - cohortYear < retireAfter) {
+        activePersons += cohortSize(cohortYear);
+      }
+    }
+    const totalLoss = (activePersons * lossPerPerson) / 1e9; // miljarder
+    if (y <= cutoff) {
+      actualData.push(totalLoss);
+      projData.push(null);
+    } else {
+      actualData.push(null);
+      projData.push(totalLoss);
+      // Lägg till sista faktiska punkt som startpunkt för projektionen
+      if (y === cutoff + 1) {
+        const prev = (actualData[actualData.length - 2]);
+        projData[projData.length - 1] = prev || totalLoss;
+      }
+    }
+  }
+
+  // Koppla ihop vid gränsen
+  const cutoffIdx = cutoff - startYear;
+  projData[cutoffIdx] = actualData[cutoffIdx];
+
+  new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Dokumenterat',
+          data: actualData,
+          backgroundColor: 'rgba(232,17,45,.82)',
+          borderColor: '#E8112D',
+          borderWidth: 0,
+          borderRadius: 2,
+          order: 1,
+        },
+        {
+          label: 'Projektion',
+          data: projData,
+          backgroundColor: 'rgba(232,17,45,.28)',
+          borderColor: '#E8112D',
+          borderWidth: 1,
+          borderDash: [4,3],
+          borderRadius: 2,
+          order: 2,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const v = c.parsed.y;
+              if (v === null) return '';
+              const yr = labels[c.dataIndex];
+              const tag = yr <= cutoff ? '(dokumenterat)' : '(projektion)';
+              return `${v.toFixed(0)} mdr kr ${tag}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          grid: { color: '#21262d' },
+          ticks: { callback: v => v + ' mdr', font: { size: 10 } },
+          title: { display: true, text: 'Miljarder kr (simultant i arbetslivet)', color: '#8b949e', font: { size: 10 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 9 },
+            callback: (_, i) => {
+              const y = labels[i];
+              return y % 5 === 0 ? y : '';
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ══════════════════════ LOBBYNS SPELBOK ══════════════════════
+const SPELBOK = [
+  {n:1, name:'Gör det tråkigt',
+   desc:'Översvämma debatten med metodologiska invändningar. "Studien är ett working paper." "Man kan inte kontrollera för alla faktorer." Folk tappar intresset och slutar lyssna. Ingen behöver bemöta fakta om fakta aldrig landar.'},
+  {n:2, name:'Flytta målet', tag:'Se kort 8',
+   desc:'Svara aldrig på frågan som ställdes. Betygsinflation möts med valfrihetsprat. Livsinkomst möts med mångfald. Segregation möts med Sovjet. Samtalet hamnar alltid på ett annat ställe.'},
+  {n:3, name:'Hitta ett undantag och gör det till regeln',
+   desc:'"Kunskapsskolan i Malmö har fantastiska resultat." En enskild bra skola presenteras som bevis mot systemkritiken. Det spelar ingen roll att det är systemet, inte enskilda skolor, som studeras.'},
+  {n:4, name:'Angrip forskarnas motiv',
+   desc:'"Vlachos är kopplad till vänsternära tankesmedjor." "IFAU finansieras av staten som har egenintresse." Behöver inte vara sant. Det räcker med ett frö av tvivel för att göra folk osäkra på vem de ska lita på.'},
+  {n:5, name:'Klassretorik omvänd',
+   desc:'"Vem är det som vill ta bort valfriheten? Det är folk som har råd att flytta till bra upptagningsområden. Valfriheten är det enda verktyget för den som inte kan flytta." Starkt, populistiskt och svårt att bemöta utan att låta elitistisk.'},
+  {n:6, name:'Framtidsrädsla',
+   desc:'"Om vi förbjuder vinstdrivande skolor stänger tusentals skolor över en natt. Vad händer med ditt barn då?" Ingen vill ta ansvar för kaos. Fungerar extra bra på landsbygden där friskolan är den enda skolan i kommunen.'},
+  {n:7, name:'Det positiva alternativet saknas',
+   desc:'Skapa en falsk dikotomi: antingen vinstdrivande friskolor, eller det gamla statliga monopolet som "vi vet inte fungerade". Det tredje alternativet — idéburna, kooperativ och reglerade friskolor utan vinstuttag — nämns aldrig.'},
+  {n:8, name:'Internationell cherry-picking',
+   desc:'"Finland har privatskolor." (Sant men missvisande — de tar inte skattepengar på samma sätt.) "I Kanada fungerar det." (Utan att nämna att systemet är fundamentalt annorlunda.) Ytliga jämförelser som låter övertygande men inte håller för granskning.'},
+  {n:9, name:'Gör segregationsfrågan personlig',
+   desc:'"Vill du tvinga ditt barn att gå i en skola du inte valt? Det låter mer som Sovjet än Sverige." Ingen vill förknippas med tvång. Frihet vinner alltid mot reglering i en ytlig debatt — och det vet lobbyn.'},
+  {n:10, name:'Trötthetstrategin', tag:'Se Svängdörrar',
+   desc:'Man behöver inte vinna varje debatt. Varje utredning som tar ett år extra, varje remissrunda som läggs till, varje rapport som beställs innan man "kan ta ställning" är en vinst för status quo. Klockan är lobbysystemets bästa vän.'},
+];
+
+let spelbokOpen = false;
+let spelbokBuilt = false;
+
+function toggleSpelbok() {
+  spelbokOpen = !spelbokOpen;
+  const content = document.getElementById('spelbok-content');
+  const btn = document.getElementById('spelbok-btn');
+  content.style.display = spelbokOpen ? 'block' : 'none';
+  btn.classList.toggle('open', spelbokOpen);
+  btn.textContent = spelbokOpen ? 'Dölj spelboken ↑' : 'Vilka är strategierna 1–9?';
+  if (spelbokOpen && !spelbokBuilt) {
+    document.getElementById('spelbok-list').innerHTML = SPELBOK.map(s => `
+      <div class="sb-item">
+        <div class="sb-num">${s.n}.</div>
+        <div>
+          <div class="sb-name">${s.name}${s.tag ? `<span class="sb-tag">${s.tag}</span>` : ''}</div>
+          <div class="sb-desc">${s.desc}</div>
+        </div>
+      </div>`).join('');
+    spelbokBuilt = true;
+  }
 }
 
 // ══════════════════════ INIT ══════════════════════
