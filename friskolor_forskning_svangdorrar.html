@@ -1134,6 +1134,13 @@ const ARGS=[
     counter:'Lägg märke till vad som händer i den här debatten. När någon tar upp <strong>betygsinflation</strong> svarar lobbyn med valfrihet. När någon tar upp <strong>livsinkomst</strong> svarar de med mångfald. När någon tar upp <strong>segregation</strong> svarar de med att motparten vill ha "ett Sovjet-system". Inget faktapåstående besvarades. Ingen siffra ifrågasattes. Samtalet hamnade på ett helt annat ställe. Det är ingen slump. <strong><em>Man behöver inte vinna en debatt om siffror om man kan flytta samtalet till värderingar där alla har rätt.</em></strong> Nästa gång du läser en debattartikel eller ser ett TV-inslag om friskolor, kolla vad frågan var och vad svaret handlade om. Ofta är det två helt olika saker.',
     chips:['Tankesmedjan Balans (2022–2024)','Lobbykollen.se','George Lakoff — Framing the debate'],
   },
+  {
+    claim:'Skattepengar subventionerar vinster i skolan. Det gör att billiga elever koncentreras hos friskolorna och dyra elever hos kommunerna. Kommunernas skolor får det tyngre och tyngre. Det leder till mer utslagning, och utslagning ger rekryteringsunderlag för kriminalitet.',
+    claimSub:'Inte ett lobbypåstående. En konsekvenskedja som följer direkt av hur systemet är konstruerat.',
+    type:'system',
+    counter:'Det stämmer i stora drag, och forskningen bekräftar de flesta länkarna i kedjan. Skolinspektionen har dokumenterat att friskolor i högre utsträckning undviker elever som kräver mer stöd. Kommunala skolor bär en oproportionerligt stor andel av de elever som kostar mest att utbilda. När resurserna per elev sjunker och problemen ökar blir det svårare att hålla kvar erfarna lärare. Utslagning från skolan är en av de starkaste riskfaktorerna för kriminalitet som forskningen känner till. <strong><em>Systemet är alltså inte bara orättvist mot svaga elever, det är dyrt för alla skattebetalare, och det skapar de sociala förutsättningar som gängrekrytering lever på.</em></strong> Kopplingen till kriminalitet är välbelagd som samband, men svårare att bevisa kausalt direkt från friskolereformen. Det är viktigt att säga. Men att blunda för att en segregerande skola och ökad utslagning hänger ihop med ökad kriminalitet kräver ganska aktiv ansträngning.',
+    chips:['Böhlmark, Holmlund & Lindahl (IFAU 2015)','Skolinspektionen (2022)','BRÅ om utbildning och kriminalitet'],
+  },
 ];
 
 function buildArgCards(){
@@ -1141,24 +1148,27 @@ function buildArgCards(){
   el.innerHTML=ARGS.map((a,i)=>{
     const isParent = a.type === 'parent';
     const isRhet   = a.type === 'rhetorical';
-    const claimBg   = isParent ? 'rgba(83,74,183,.09)' : isRhet ? 'rgba(139,148,158,.08)' : 'rgba(186,117,23,.07)';
-    const claimBdr  = isParent ? '#534AB7' : isRhet ? '#8b949e' : '#BA7517';
-    const claimLbl  = isParent ? 'Oroliga föräldrar hävdar:' : isRhet ? 'Den retoriska tekniken:' : 'Lobbyn hävdar:';
-    const claimLblC = isParent ? '#a29bfe' : isRhet ? '#8b949e' : '#BA7517';
-    const claimSubC = isParent ? 'rgba(162,155,254,.75)' : isRhet ? 'rgba(139,148,158,.75)' : 'rgba(230,180,80,.8)';
-    const sepLbl    = isParent ? 'Forskningen nyanserar' : isRhet ? 'Vad som faktiskt händer' : 'Forskningen svarar';
+    const isSystem = a.type === 'system';
+    const claimBg   = isParent ? 'rgba(83,74,183,.09)' : isRhet ? 'rgba(139,148,158,.08)' : isSystem ? 'rgba(83,161,69,.08)' : 'rgba(186,117,23,.07)';
+    const claimBdr  = isParent ? '#534AB7' : isRhet ? '#8b949e' : isSystem ? '#53a145' : '#BA7517';
+    const claimLbl  = isParent ? 'Oroliga föräldrar hävdar:' : isRhet ? 'Den retoriska tekniken:' : isSystem ? 'Systemets konsekvenser:' : 'Lobbyn hävdar:';
+    const claimLblC = isParent ? '#a29bfe' : isRhet ? '#8b949e' : isSystem ? '#53a145' : '#BA7517';
+    const claimSubC = isParent ? 'rgba(162,155,254,.75)' : isRhet ? 'rgba(139,148,158,.75)' : isSystem ? 'rgba(83,161,69,.7)' : 'rgba(230,180,80,.8)';
+    const sepLbl    = isParent ? 'Forskningen nyanserar' : isRhet ? 'Vad som faktiskt händer' : isSystem ? 'Forskningen bekräftar' : 'Forskningen svarar';
     const counterBg = isParent ? 'rgba(83,74,183,.06)' : isRhet ? 'rgba(139,148,158,.06)' : 'rgba(83,161,69,.06)';
     const counterBdr= isParent ? '#534AB7' : isRhet ? '#8b949e' : '#53a145';
     const counterLbl= isParent ? '#a29bfe' : isRhet ? '#8b949e' : '#53a145';
-    const headerBg  = isParent ? 'rgba(83,74,183,.08)' : isRhet ? 'rgba(139,148,158,.06)' : 'var(--surf)';
-    const headerBorder = isParent ? 'border-color:rgba(83,74,183,.35);' : isRhet ? 'border-color:rgba(139,148,158,.3);' : '';
-    const numColor = isParent ? 'color:#a29bfe;' : isRhet ? 'color:#8b949e;' : '';
+    const headerBg  = isParent ? 'rgba(83,74,183,.08)' : isRhet ? 'rgba(139,148,158,.06)' : isSystem ? 'rgba(83,161,69,.06)' : 'var(--surf)';
+    const headerBorder = isParent ? 'border-color:rgba(83,74,183,.35);' : isRhet ? 'border-color:rgba(139,148,158,.3);' : isSystem ? 'border-color:rgba(83,161,69,.35);' : '';
+    const numColor = isParent ? 'color:#a29bfe;' : isRhet ? 'color:#8b949e;' : isSystem ? 'color:#53a145;' : '';
     const headerTag = isParent
       ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(83,74,183,.25);color:#a29bfe;padding:2px 8px;border-radius:100px;font-weight:500;">Inte ett lobbypåstående</span>'
       : isRhet
       ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(139,148,158,.18);color:#8b949e;padding:2px 8px;border-radius:100px;font-weight:500;">Retorisk teknik</span>'
+      : isSystem
+      ? '<span style="margin-left:auto;font-size:.68rem;background:rgba(83,161,69,.2);color:#53a145;padding:2px 8px;border-radius:100px;font-weight:500;">Konsekvenskedja</span>'
       : '';
-    const headerTitle = isParent ? 'Föräldraperspektivet' : isRhet ? 'Mönstret att känna igen' : `Påstående ${i+1} av ${ARGS.length}`;
+    const headerTitle = isParent ? 'Föräldraperspektivet' : isRhet ? 'Mönstret att känna igen' : isSystem ? 'Systemets konsekvenser' : `Påstående ${i+1} av ${ARGS.length}`;
     return `
     <div class="arg-card" style="${headerBorder}">
       <div class="arg-header" style="background:${headerBg};">
