@@ -1351,8 +1351,10 @@ function buildSystemet() {
       {label:'Behöriga',v:85,c:'#53a145'},{label:'Obehöriga',v:15,c:'#30363d'}], 100, 'approx. Skolverket 2023'),
     buildBar('Andel behöriga lärare — utsatt socioekonomisk profil (ungefärligt)', [
       {label:'Behöriga',v:68,c:'#E8112D'},{label:'Obehöriga',v:32,c:'#30363d'}], 100, 'ca 17 pp lägre, approx. Skolverket 2023'),
-    buildBar('Lärartäthet — vinstdrivande friskola (åk 6 & 9)', [
-      {label:'Elever/lärare rel. kommunal',v:100,c:'#BA7517'}], 100, '+1,5 elever/lärare mer än kommunal'),
+    buildBar('Lärare per 100 elever — kommunal skola (åk 6 & 9, approx.)', [
+      {label:'Lärare per 100 elever',v:8.3,c:'#53a145'},{label:'',v:1.7,c:'transparent'}], 10, '~8,3 lärare per 100 elever'),
+    buildBar('Lärare per 100 elever — vinstdrivande friskola (åk 6 & 9)', [
+      {label:'Lärare per 100 elever',v:7.4,c:'#E8112D'},{label:'saknas',v:0.9,c:'rgba(232,17,45,.2)'}], 10, '~7,4 lärare per 100 elever'),
   ].join('');
 
   // ── ELEVSORTERING ──
