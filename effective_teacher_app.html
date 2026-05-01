@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Effective Teacher">
+<meta name="theme-color" content="#FAFAF9">
+<title>Effective Teacher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<style>
+/* ── Reset + Root ──────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#FAFAF9;
+  --surface:#FFFFFF;
+  --border:#EBEBEA;
+  --text:#1A1A1A;
+  --muted:#888884;
+  --accent:#2563EB;
+  --accent-bg:#EFF6FF;
+  --nav-h:68px;
+  --radius:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.04);
+  --font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+/* ── Layout ────────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+#views{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 8px);scroll-behavior:smooth}
+.view{display:none;padding:20px 16px 8px}
+.view.active{display:block}
+/* ── Bottom Nav ────────────────────────────────────────── */
+#nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;height:var(--nav-h);
+  background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);display:flex;z-index:100;
+  padding-bottom:env(safe-area-inset-bottom,0px)
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);border:none;background:none;font-size:10px;font-weight:600;font-family:var(--font);letter-spacing:.03em;transition:color .15s;padding-top:8px}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.nav-btn.active svg{transform:scale(1.08)}
+/* ── Cards ─────────────────────────────────────────────── */
+.card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.card-tap{cursor:pointer;transition:transform .1s,box-shadow .1s}
+.card-tap:active{transform:scale(.985);box-shadow:none}
+/* ── Typography ─────────────────────────────────────────── */
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:20px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+/* ── Buttons ────────────────────────────────────────────── */
+.btn{width:100%;padding:14px;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .1s,transform .1s;font-family:var(--font);letter-spacing:-.01em}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:var(--border);color:var(--text)}
+.btn-danger{background:#DC2626;color:#fff}
+.btn-link{background:none;border:none;color:var(--accent);font-weight:700;font-family:var(--font);font-size:14px;cursor:pointer;padding:0}
+/* ── Form ───────────────────────────────────────────────── */
+.field{margin-bottom:18px}
+.field-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:7px;letter-spacing:.05em;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:var(--font);background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{min-height:72px;resize:vertical;line-height:1.5}
+/* ── Radio options ──────────────────────────────────────── */
+.radio-group{display:flex;flex-direction:column;gap:7px}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s}
+.radio-opt.selected{border-color:var(--accent);background:var(--accent-bg)}
+.rdot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.radio-opt.selected .rdot{border-color:var(--accent);background:var(--accent)}
+.radio-opt.selected .rdot::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;display:block}
+.radio-opt span{font-size:14px;line-height:1.4}
+/* ── Range ──────────────────────────────────────────────── */
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--border);outline:none;padding:0;border:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+.range-hints{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px}
+.range-val{text-align:center;font-size:28px;font-weight:800;color:var(--accent);margin-top:4px;letter-spacing:-.03em}
+/* ── Progress bar ───────────────────────────────────────── */
+.pbar-wrap{background:#F0F0EE;border-radius:99px;height:5px;overflow:hidden;margin-top:8px}
+.pbar{height:100%;border-radius:99px;transition:width .4s cubic-bezier(.16,1,.3,1)}
+/* ── Tabs ───────────────────────────────────────────────── */
+.tabs{display:flex;background:var(--bg);border-radius:11px;padding:3px;margin-bottom:18px;border:1px solid var(--border)}
+.tab{flex:1;padding:8px 6px;text-align:center;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;color:var(--muted);transition:all .15s;border:none;background:none;font-family:var(--font);letter-spacing:-.01em}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+/* ── Log entries ────────────────────────────────────────── */
+.log-entry{padding:13px;border-radius:11px;margin-bottom:8px;border:1px solid var(--border);background:var(--surface)}
+.log-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.log-date{font-size:12px;color:var(--muted);font-weight:500}
+/* ── Empty states ───────────────────────────────────────── */
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:44px;margin-bottom:12px;line-height:1}
+.empty p{font-size:15px;line-height:1.6}
+/* ── Block badge / number ───────────────────────────────── */
+.block-num{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff;flex-shrink:0}
+.block-num-lg{width:48px;height:48px;border-radius:13px;font-size:20px}
+/* ── Week 0 area row ────────────────────────────────────── */
+.area-row{background:var(--surface);border-radius:var(--radius);padding:15px;margin-bottom:10px;box-shadow:var(--shadow)}
+.area-name{font-size:14px;font-weight:600;margin-bottom:12px}
+/* ── Info boxes ─────────────────────────────────────────── */
+.info-card{background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:12px}
+.info-card h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.info-card p{font-size:14px;line-height:1.65;color:#333}
+.accent-strip{border-left:3px solid var(--accent);padding-left:12px;margin-bottom:12px}
+.accent-strip p{font-size:14px;line-height:1.65;color:#333}
+/* ── Profile ────────────────────────────────────────────── */
+.profile-item{display:flex;align-items:center;justify-content:space-between;padding:14px 15px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);transition:border-color .15s}
+.profile-item.active-p{border-color:var(--accent);background:var(--accent-bg)}
+/* ── Chart ──────────────────────────────────────────────── */
+.chart-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.chart-label{font-size:12px;flex:1;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-right{display:flex;align-items:center;gap:7px;width:120px;flex-shrink:0}
+.chart-bar-bg{flex:1;background:#F0F0EE;border-radius:99px;height:8px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.16,1,.3,1)}
+.chart-val{font-size:12px;font-weight:700;width:24px;text-align:right}
+/* ── Back btn ───────────────────────────────────────────── */
+.back-btn{display:flex;align-items:center;gap:5px;color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;border:none;background:none;font-family:var(--font);padding:0;margin-bottom:18px}
+/* ── Score chip ─────────────────────────────────────────── */
+.score-chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
+/* ── Toast ──────────────────────────────────────────────── */
+#toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(12px);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;font-family:var(--font);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:200}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="views">
+    <div class="view active" id="view-home"><div id="home-content"></div></div>
+    <div class="view" id="view-blocks"><div id="blocks-content"></div></div>
+    <div class="view" id="view-block-detail"><div id="block-detail-content"></div></div>
+    <div class="view" id="view-progress"><div id="progress-content"></div></div>
+    <div class="view" id="view-profiles"><div id="profiles-content"></div></div>
+    <div class="view" id="view-week0"><div id="week0-content"></div></div>
+  </div>
+
+  <nav id="nav">
+    <button class="nav-btn active" data-view="home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+    </button>
+    <button class="nav-btn" data-view="blocks">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Blocks
+    </button>
+    <button class="nav-btn" data-view="progress">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Progress
+    </button>
+    <button class="nav-btn" data-view="profiles">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Profiles
+    </button>
+  </nav>
+</div>
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA LAYER
+// ═══════════════════════════════════════════════
+const DB = {
+  getProfiles(){ return JSON.parse(localStorage.getItem('et_profiles') || '[]') },
+  saveProfiles(p){ localStorage.setItem('et_profiles', JSON.stringify(p)) },
+  getActive(){ return localStorage.getItem('et_active') || null },
+  setActive(id){ localStorage.setItem('et_active', id) },
+  getWeek0(pid){ return JSON.parse(localStorage.getItem('et_'+pid+'_w0') || 'null') },
+  saveWeek0(pid,d){ localStorage.setItem('et_'+pid+'_w0', JSON.stringify(d)) },
+  getLogs(pid,b){ return JSON.parse(localStorage.getItem('et_'+pid+'_b'+b) || '[]') },
+  addLog(pid,b,entry){
+    const logs = this.getLogs(pid,b);
+    logs.push({...entry, id: Date.now(), date: new Date().toISOString()});
+    localStorage.setItem('et_'+pid+'_b'+b, JSON.stringify(logs));
+  },
+  deleteLog(pid,b,id){
+    const logs = this.getLogs(pid,b).filter(l => l.id !== id);
+    localStorage.setItem('et_'+pid+'_b'+b, JSON.stringify(logs));
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const W0_AREAS = [
+  "Natural pause points every 5-10 min",
+  "Uses analogies or concrete examples",
+  "Calls on non-volunteers",
+  "Avoids reading text off slides",
+  "Moves away from the front of the room"
+];
+
+const BLOCKS = [
+  {
+    id: 1, title: "Pacing", technique: "The Five-Minute Rule", weeks: "Weeks 1-2",
+    color: "#3B82F6", light: "#EFF6FF",
+    summary: "Limit teacher talk to 5-10 minutes at a stretch. When the timer goes off, stop and use a short active task such as \"Write down two things you just learned.\"",
+    why: "Pacing is structural. Getting regular pause points into your lessons creates the space needed for every other technique. It has zero dependency on content knowledge. You just need a timer. Working memory saturates quickly; the pause lets the brain consolidate before you add more.",
+    target: "Score 5 or above out of 6 by end of Week 2.",
+    scoreMax: 6,
+    fields: [
+      { key:"q1", label:"Did the timer go off at least once?",
+        opts:["Never set it","Set it, forgot to stop","Stopped when it went off"] },
+      { key:"q2", label:"Did students do the active task?",
+        opts:["Skipped it","Told them but moved on fast","Waited for actual responses"] },
+      { key:"q3", label:"Did I restart teaching after the break?",
+        opts:["No, ran out of time","Yes, but felt rushed","Yes, felt natural"] }
+    ]
+  },
+  {
+    id: 2, title: "Explanation", technique: "Definitions and Analogies", weeks: "Weeks 3-4",
+    color: "#16A34A", light: "#F0FDF4",
+    summary: "Start each new concept with a single-sentence Bullet-Proof Definition recited aloud, or a Generative Analogy that borrows something students already know to explain the new idea.",
+    why: "Without a precise definition up front, students build their own informal version of a concept, often wrong, and everything taught afterwards attaches to that instead. Analogies give a new concept an immediate home in long-term memory by borrowing structure the student already has. The Curse of Knowledge makes it easy to forget what it is like to encounter a concept for the first time.",
+    target: "Score 2 or 3 on all three criteria by end of Week 4.",
+    scoreMax: 9,
+    fields: [
+      { key:"technique", label:"Which technique did you use?", type:"select",
+        opts:["Bullet-Proof Definition","Generative Analogy"] },
+      { key:"c1", label:"Was it prepared in advance?",
+        opts:["Made it up on the spot (0)","Rough idea beforehand (1)","Written into lesson plan (2)"] },
+      { key:"c2", label:"Was it single and clear?",
+        opts:["Several mixed explanations (0)","One explanation but wordy (1)","One sentence, no waffle (2)"] },
+      { key:"c3", label:"Student response",
+        opts:["Blank looks or confusion (0)","Some nodding (1)","Visible 'aha' or correct use shortly after (2)"] }
+    ]
+  },
+  {
+    id: 3, title: "Questioning", technique: "Cold Calling with Wait Time", weeks: "Weeks 5-6",
+    color: "#D97706", light: "#FFFBEB",
+    summary: "Pose a question to the whole class, pause 3 seconds in silence, then name a specific student. Write 2-3 cold-call questions with student names into your lesson notes before the lesson.",
+    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. Cold Calling dissolves that contract. When any student may be called at any moment, the whole class cannot afford to switch off. The 3-second wait ensures everyone attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.",
+    target: "At least 3 cold calls per lesson. Wait time every time by Week 6.",
+    scoreMax: null,
+    fields: [
+      { key:"count", label:"Cold calls made (number)", type:"number", placeholder:"e.g. 4" },
+      { key:"wait", label:"Did you wait 3 seconds before naming?",
+        opts:["Always","Sometimes","Rarely"] },
+      { key:"planned", label:"Did you use pre-planned questions?",
+        opts:["Yes","Partly","No"] }
+    ]
+  },
+  {
+    id: 4, title: "Slides and Visuals", technique: "Modality Principle", weeks: "Weeks 7-8",
+    color: "#7C3AED", light: "#F5F3FF",
+    summary: "Audit one presentation: remove text paragraphs from diagram slides, place labels directly on images, and cut bullets you would read aloud. Then teach from the improved version and use this log to track further fixes.",
+    why: "Students cannot read text and listen to speech at the same time. They use the same cognitive channel. Putting your explanation in text while also saying it aloud forces attention to split and nothing is processed well. Diagrams with separate legends do the same. This block is a one-time audit of a presentation you already own, not a daily habit.",
+    target: "Reduce problem slides by at least 50%. No slides where you read text aloud during lessons.",
+    scoreMax: null,
+    isAudit: true,
+    fields: [
+      { key:"readSlide", label:"Did you read text off a slide?",
+        opts:["No","Once","More than once"] },
+      { key:"visualsClear", label:"Did visuals seem clearer to students?",
+        opts:["Yes","Unsure","No"] },
+      { key:"slideToFix", label:"One slide to fix before next lesson", type:"text",
+        placeholder:"Describe the slide..." }
+    ]
+  },
+  {
+    id: 5, title: "Voice and Presence", technique: "Intentional Mobility", weeks: "Weeks 9-10",
+    color: "#DC2626", light: "#FEF2F2",
+    summary: "Move among students using a slide remote. Mark one moment in your lesson plan where you will deliberately change position or vary your voice. Record a lesson in Week 10 and compare to your Week 0 recording.",
+    why: "Voice and physical presence are the hardest to self-monitor in real time. By this point earlier techniques are becoming automatic, freeing up mental capacity to notice what your body is doing. A remote clicker is the single most useful physical tool: it breaks the dependency on the front of the room. Small changes in pace, volume and pitch at key moments are clearly perceptible to students even when they feel subtle to you.",
+    target: "Score 3 or above on all three dimensions by end of Week 10.",
+    scoreMax: 15,
+    fields: [
+      { key:"mobility", label:"Mobility (1-5)", type:"range", min:1, max:5,
+        hints:["Never left front","Intentional zones"] },
+      { key:"vocal", label:"Vocal variety (1-5)", type:"range", min:1, max:5,
+        hints:["Flat monotone","Dynamic and controlled"] },
+      { key:"eye", label:"Eye contact (1-5)", type:"range", min:1, max:5,
+        hints:["Screen only","Connects with individuals"] }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+const S = {
+  view: 'home',
+  block: null,
+  blockTab: 'info',
+  form: {}
+};
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function uid(){ return Math.random().toString(36).slice(2,9) }
+function fmtDate(iso){
+  return new Date(iso).toLocaleDateString('sv-SE',{month:'short',day:'numeric'});
+}
+function calcScore(b, vals){
+  if(b.id===1) return (vals.q1||0)+(vals.q2||0)+(vals.q3||0);
+  if(b.id===2){
+    const extract = v => {
+      if(v===undefined||v===null) return 0;
+      const n = v.toString().match(/\((\d+)\)/);
+      return n ? parseInt(n[1]) : 0;
+    };
+    return extract(vals.c1)+extract(vals.c2)+extract(vals.c3);
+  }
+  if(b.id===5) return (parseInt(vals.mobility)||0)+(parseInt(vals.vocal)||0)+(parseInt(vals.eye)||0);
+  return null;
+}
+function scorePct(b, score){ return b.scoreMax ? Math.round((score/b.scoreMax)*100) : null }
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2000);
+}
+function scrollTop(){ document.getElementById('views').scrollTo({top:0,behavior:'smooth'}) }
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+function go(view, opts={}){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.view===view);
+  });
+  S.view = view;
+  if(opts.block !== undefined){ S.block = opts.block; S.blockTab = 'info'; }
+  scrollTop();
+  render(view);
+}
+
+function render(view){
+  if(view==='home') renderHome();
+  else if(view==='blocks') renderBlocks();
+  else if(view==='block-detail') renderBlockDetail();
+  else if(view==='progress') renderProgress();
+  else if(view==='profiles') renderProfiles();
+  else if(view==='week0') renderWeek0();
+}
+
+// ═══════════════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════════════
+function renderHome(){
+  const pid = DB.getActive();
+  const el  = document.getElementById('home-content');
+  if(!pid || !DB.getProfiles().find(p=>p.id===pid)){
+    el.innerHTML = `
+      <div style="padding-top:32px">
+        <div class="empty-icon">👋</div>
+        <p class="page-title" style="margin-bottom:8px">Welcome</p>
+        <p style="color:var(--muted);font-size:15px;margin-bottom:24px">Create a profile to start tracking your teaching practice.</p>
+        <button class="btn btn-primary" onclick="go('profiles')">Create a profile</button>
+      </div>`;
+    return;
+  }
+  const profile = DB.getProfiles().find(p=>p.id===pid);
+  const w0 = DB.getWeek0(pid);
+  const totalLogs = BLOCKS.reduce((s,b)=>s+DB.getLogs(pid,b.id).length,0);
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Welcome back</div>
+        <div class="page-title" style="margin-bottom:0">${profile.name}</div>
+      </div>
+      <div style="text-align:right;padding-top:4px">
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-.03em">${totalLogs}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600">lessons logged</div>
+      </div>
+    </div>
+
+    ${!w0 ? `
+    <div class="card" style="border:2px solid #3B82F6;background:#EFF6FF;margin-bottom:16px">
+      <div style="font-weight:800;font-size:15px;margin-bottom:5px">Start here: Week 0 Audit</div>
+      <p style="font-size:14px;color:#333;line-height:1.55;margin-bottom:14px">Record yourself teaching one lesson, then score yourself on 5 areas. This is your baseline.</p>
+      <button class="btn btn-primary" onclick="go('week0')">Begin the audit</button>
+    </div>` : `
+    <div class="card card-tap" onclick="go('week0')" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-weight:700;font-size:14px">Week 0 Audit</span>
+        <span style="font-size:12px;color:var(--muted)">Tap to review</span>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${W0_AREAS.map((_,i)=>{
+          const s = w0.scores[i]||0;
+          const c = s<=3?'#DC2626':s<=5?'#D97706':'#16A34A';
+          return `<span style="font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:${c}20;color:${c}">${s}/8</span>`;
+        }).join('')}
+      </div>
+    </div>`}
+
+    <div class="section-label">Your blocks</div>
+    ${BLOCKS.map(b=>{
+      const logs = DB.getLogs(pid,b.id);
+      const pct  = Math.min(100,Math.round((logs.length/6)*100));
+      const last  = logs[logs.length-1];
+      const score = last ? calcScore(b,last) : null;
+      return `
+      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})" style="display:flex;align-items:center;gap:12px;padding:14px">
+        <div class="block-num" style="background:${b.color}">${b.id}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px;margin-bottom:1px">${b.title}</div>
+          <div style="font-size:12px;color:var(--muted)">${b.weeks} &middot; ${logs.length} lesson${logs.length!==1?'s':''} logged</div>
+          <div class="pbar-wrap"><div class="pbar" style="width:${pct}%;background:${b.color}"></div></div>
+        </div>
+        ${score!==null ? `<span style="font-weight:800;font-size:14px;color:${b.color};flex-shrink:0">${score}${b.scoreMax?'/'+b.scoreMax:''}</span>` :
+          b.id===3 && last ? `<span style="font-size:12px;color:var(--muted);flex-shrink:0">${last.count||0} calls</span>` : ''}
+      </div>`;
+    }).join('')}`;
+}
+
+// ═══════════════════════════════════════════════
+//  BLOCKS LIST
+// ═══════════════════════════════════════════════
+function renderBlocks(){
+  const pid = DB.getActive();
+  const el  = document.getElementById('blocks-content');
+  el.innerHTML = `<div class="page-title">Practice Blocks</div>`
+    + BLOCKS.map(b=>{
+      const logs = pid ? DB.getLogs(pid,b.id) : [];
+      const pct  = Math.min(100,Math.round((logs.length/6)*100));
+      return `
+      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})" style="border-left:4px solid ${b.color};padding:15px 15px 15px 14px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="block-num block-num-lg" style="background:${b.color}">${b.id}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:16px;letter-spacing:-.01em">${b.title}</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:2px">${b.technique}</div>
+            <div style="font-size:12px;color:var(--muted)">${b.weeks}</div>
+            <div class="pbar-wrap" style="margin-top:10px"><div class="pbar" style="width:${pct}%;background:${b.color}"></div></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:500">${logs.length} of 6 lessons logged</div>
+          </div>
+          <svg style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  BLOCK DETAIL
+// ═══════════════════════════════════════════════
+function renderBlockDetail(){
+  const b  = BLOCKS.find(x=>x.id===S.block);
+  if(!b) return;
+  const el = document.getElementById('block-detail-content');
+  el.innerHTML = `
+    <button class="back-btn" onclick="go('blocks')">
+      <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>All blocks
+    </button>
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:18px">
+      <div class="block-num block-num-lg" style="background:${b.color}">${b.id}</div>
+      <div>
+        <div style="font-weight:800;font-size:19px;letter-spacing:-.02em">${b.title}</div>
+        <div style="font-size:13px;color:var(--muted)">${b.technique} &middot; ${b.weeks}</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${S.blockTab==='info'?'active':''}" onclick="setTab('info')">About</button>
+      <button class="tab ${S.blockTab==='log'?'active':''}" onclick="setTab('log')">Log lesson</button>
+      <button class="tab ${S.blockTab==='history'?'active':''}" onclick="setTab('history')">History</button>
+    </div>
+    <div id="btab"></div>`;
+  renderTab();
+}
+
+function setTab(t){
+  S.blockTab = t;
+  document.querySelectorAll('.tabs .tab').forEach((btn,i)=>{
+    btn.classList.toggle('active',['info','log','history'][i]===t);
+  });
+  renderTab();
+  scrollTop();
+}
+window.setTab = setTab;
+
+function renderTab(){
+  const b   = BLOCKS.find(x=>x.id===S.block);
+  const pid = DB.getActive();
+  const el  = document.getElementById('btab');
+  if(!el) return;
+
+  // ABOUT
+  if(S.blockTab==='info'){
+    el.innerHTML = `
+      <div class="accent-strip"><p>${b.summary}</p></div>
+      <div class="info-card"><h3>Why this works</h3><p>${b.why}</p></div>
+      <div class="info-card"><h3>Target</h3><p>${b.target}</p></div>
+      ${pid ? `<button class="btn btn-primary" style="margin-top:4px" onclick="setTab('log')">Log a lesson</button>` :
+              `<button class="btn btn-ghost" onclick="go('profiles')">Create a profile to start</button>`}`;
+    return;
+  }
+
+  // LOG FORM
+  if(S.blockTab==='log'){
+    if(!pid){el.innerHTML=`<div class="empty"><p>Create a profile first.</p><br><button class="btn btn-primary btn-sm" onclick="go('profiles')">Go to profiles</button></div>`;return;}
+    S.form = {};
+    b.fields.filter(f=>f.type==='range').forEach(f=>{
+      S.form[f.key] = Math.round((f.min+f.max)/2);
+    });
+    el.innerHTML = `
+      <div id="log-form">
+        ${b.fields.map(f=>buildField(f,b)).join('')}
+        <div class="field">
+          <label class="field-label">Notes or one adjustment for next time</label>
+          <textarea placeholder="What would you do differently?" id="f-notes" oninput="S.form.notes=this.value"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveLog(${b.id})">Save lesson log</button>
+      </div>`;
+    // wire up range inputs
+    b.fields.filter(f=>f.type==='range').forEach(f=>{
+      const inp = document.getElementById('f-'+f.key);
+      const val = document.getElementById('rv-'+f.key);
+      if(inp) inp.addEventListener('input',function(){
+        S.form[f.key]=parseInt(this.value);
+        if(val) val.textContent=this.value;
+      });
+    });
+    return;
+  }
+
+  // HISTORY
+  if(S.blockTab==='history'){
+    if(!pid){el.innerHTML=`<div class="empty"><p>No profile selected.</p></div>`;return;}
+    const logs = DB.getLogs(pid,b.id);
+    if(!logs.length){
+      el.innerHTML=`<div class="empty"><div class="empty-icon">📝</div><p>No lessons logged yet.<br>Tap "Log lesson" to add your first entry.</p></div>`;
+      return;
+    }
+    el.innerHTML = [...logs].reverse().map(l=>{
+      const score = calcScore(b,l);
+      return `<div class="log-entry">
+        <div class="log-meta">
+          <span class="log-date">${fmtDate(l.date)}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            ${score!==null ? `<span class="score-chip" style="background:${b.color}20;color:${b.color}">${score}${b.scoreMax?'/'+b.scoreMax:''}</span>` : ''}
+            <button onclick="delLog(${b.id},${l.id})" style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 5px;font-family:var(--font)">&#10005;</button>
+          </div>
+        </div>
+        ${logSummary(b,l)}
+        ${l.notes?`<div style="font-size:13px;color:var(--muted);margin-top:7px;font-style:italic;line-height:1.5">"${l.notes}"</div>`:''}
+      </div>`;
+    }).join('');
+  }
+}
+
+function buildField(f,b){
+  if(f.type==='range'){
+    const def = Math.round((f.min+f.max)/2);
+    return `<div class="field">
+      <label class="field-label">${f.label}</label>
+      <input type="range" id="f-${f.key}" min="${f.min}" max="${f.max}" value="${def}">
+      <div class="range-hints"><span>${f.hints[0]}</span><span>${f.hints[1]}</span></div>
+      <div class="range-val" id="rv-${f.key}">${def}</div>
+    </div>`;
+  }
+  if(f.type==='select'){
+    return `<div class="field">
+      <label class="field-label">${f.label}</label>
+      <select id="f-${f.key}" onchange="S.form['${f.key}']=this.value">
+        ${f.opts.map(o=>`<option value="${o}">${o}</option>`).join('')}
+      </select>
+    </div>`;
+  }
+  if(f.type==='number'){
+    return `<div class="field">
+      <label class="field-label">${f.label}</label>
+      <input type="number" id="f-${f.key}" min="0" max="30" placeholder="${f.placeholder||''}" oninput="S.form['${f.key}']=parseInt(this.value)||0">
+    </div>`;
+  }
+  if(f.type==='text'){
+    return `<div class="field">
+      <label class="field-label">${f.label}</label>
+      <input type="text" id="f-${f.key}" placeholder="${f.placeholder||''}" oninput="S.form['${f.key}']=this.value">
+    </div>`;
+  }
+  // radio (default)
+  return `<div class="field">
+    <label class="field-label">${f.label}</label>
+    <div class="radio-group" id="rg-${f.key}">
+      ${f.opts.map((o,i)=>`
+        <div class="radio-opt" onclick="pickRadio('${f.key}',${i},this.closest('.radio-group'))">
+          <div class="rdot"></div><span>${o}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+window.pickRadio = function(key,val,group){
+  S.form[key]=val;
+  group.querySelectorAll('.radio-opt').forEach((o,i)=>o.classList.toggle('selected',i===val));
+};
+
+function logSummary(b,l){
+  let lines = [];
+  if(b.id===3){
+    lines.push(`${l.count||0} cold calls &middot; Wait time: ${l.wait||'?'} &middot; Pre-planned: ${l.planned||'?'}`);
+  } else if(b.id===4){
+    lines.push(`Read from slide: ${l.readSlide||'?'} &middot; Visuals clearer: ${l.visualsClear||'?'}`);
+    if(l.slideToFix) lines.push(`Fix: ${l.slideToFix}`);
+  } else if(b.id===5){
+    lines.push(`Mobility: ${l.mobility||0}/5 &middot; Vocal: ${l.vocal||0}/5 &middot; Eye contact: ${l.eye||0}/5`);
+  } else if(b.id===2 && l.technique){
+    lines.push(`Technique: ${l.technique}`);
+  }
+  return lines.map(ln=>`<div style="font-size:13px;color:#444;line-height:1.5">${ln}</div>`).join('');
+}
+
+window.saveLog = function(blockId){
+  const pid = DB.getActive(); if(!pid) return;
+  const b = BLOCKS.find(x=>x.id===blockId);
+  // collect select/number/text values from DOM
+  b.fields.forEach(f=>{
+    if(['select','number','text'].includes(f.type)){
+      const inp = document.getElementById('f-'+f.key);
+      if(inp && S.form[f.key]===undefined){
+        S.form[f.key] = f.type==='number' ? (parseInt(inp.value)||0) : inp.value;
+      }
+    }
+  });
+  DB.addLog(pid,blockId,{...S.form});
+  toast('Lesson logged');
+  S.blockTab='history';
+  renderBlockDetail();
+};
+
+window.delLog = function(blockId,logId){
+  const pid = DB.getActive(); if(!pid) return;
+  if(!confirm('Delete this entry?')) return;
+  DB.deleteLog(pid,blockId,logId);
+  renderTab();
+};
+
+// ═══════════════════════════════════════════════
+//  PROGRESS
+// ═══════════════════════════════════════════════
+function renderProgress(){
+  const pid = DB.getActive();
+  const el  = document.getElementById('progress-content');
+  if(!pid){
+    el.innerHTML=`<div class="page-title">Progress</div><div class="empty"><div class="empty-icon">📊</div><p>Create a profile to track your progress.</p></div>`;
+    return;
+  }
+  const w0 = DB.getWeek0(pid);
+
+  el.innerHTML = `
+    <div class="page-title">Progress</div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px">Week 0 Baseline</div>
+      ${w0 ? W0_AREAS.map((a,i)=>{
+        const s = w0.scores[i]||0;
+        const pct = Math.round((s/8)*100);
+        const c = s<=3?'#DC2626':s<=5?'#D97706':'#16A34A';
+        return `<div class="chart-row">
+          <div class="chart-label">${a}</div>
+          <div class="chart-right">
+            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:${c}"></div></div>
+            <div class="chart-val" style="color:${c}">${s}</div>
+          </div>
+        </div>`;
+      }).join('') : `
+        <div style="font-size:14px;color:var(--muted);margin-bottom:4px">Not completed yet.</div>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="go('week0')">Start the audit</button>`}
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px">Lessons logged per block</div>
+      ${BLOCKS.map(b=>{
+        const logs = DB.getLogs(pid,b.id);
+        const pct  = Math.min(100,Math.round((logs.length/6)*100));
+        return `<div class="chart-row">
+          <div class="chart-label" style="display:flex;align-items:center;gap:7px">
+            <div style="width:8px;height:8px;border-radius:2px;background:${b.color};flex-shrink:0"></div>${b.title}
+          </div>
+          <div class="chart-right">
+            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:${b.color}"></div></div>
+            <div class="chart-val">${logs.length}/6</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${BLOCKS.filter(b=>b.scoreMax).map(b=>{
+      const logs   = DB.getLogs(pid,b.id);
+      const scores = logs.map(l=>calcScore(b,l)).filter(s=>s!==null);
+      if(!scores.length) return '';
+      return `<div class="card" style="margin-bottom:10px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${b.title}: score trend</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${scores.length} lesson${scores.length!==1?'s':''} &middot; max ${b.scoreMax}</div>
+        ${lineChart(scores,b)}
+      </div>`;
+    }).join('')}
+
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px">Questioning: cold calls per lesson</div>
+      ${(()=>{
+        const logs = DB.getLogs(pid,3);
+        if(!logs.length) return `<div style="font-size:14px;color:var(--muted)">No Block 3 entries yet.</div>`;
+        const maxC = Math.max(...logs.map(l=>l.count||0),1);
+        return logs.slice(-8).map((l,i)=>{
+          const pct = Math.round(((l.count||0)/maxC)*100);
+          return `<div class="chart-row">
+            <div class="chart-label">Lesson ${i+1} <span style="font-weight:600">${fmtDate(l.date)}</span></div>
+            <div class="chart-right">
+              <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:#D97706"></div></div>
+              <div class="chart-val" style="color:#D97706">${l.count||0}</div>
+            </div>
+          </div>`;
+        }).join('');
+      })()}
+    </div>`;
+}
+
+function lineChart(scores,b){
+  if(scores.length < 2) return `<div style="font-size:14px;color:var(--muted)">Log at least 2 lessons to see the trend.</div>`;
+  const W=300,H=80,PAD=20;
+  const pts = scores.map((s,i)=>[
+    PAD+(i/(scores.length-1))*(W-PAD*2),
+    H-PAD-(s/b.scoreMax)*(H-PAD*2)
+  ]);
+  const poly = pts.map(p=>p.join(',')).join(' ');
+  const dots = pts.map(([x,y],i)=>
+    `<circle cx="${x}" cy="${y}" r="4.5" fill="${b.color}" stroke="#fff" stroke-width="1.5"><title>Lesson ${i+1}: ${scores[i]}/${b.scoreMax}</title></circle>`
+  ).join('');
+  const target = b.scoreMax ? H-PAD-(5/b.scoreMax)*(H-PAD*2) : null; // rough target line
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible">
+    <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>
+    <polyline points="${poly}" fill="none" stroke="${b.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    <text x="${PAD}" y="${H}" font-size="10" fill="var(--muted)" font-family="var(--font)">${scores[0]}/${b.scoreMax}</text>
+    <text x="${W-PAD}" y="${H}" font-size="10" fill="var(--muted)" font-family="var(--font)" text-anchor="end">${scores[scores.length-1]}/${b.scoreMax}</text>
+  </svg>`;
+}
+
+// ═══════════════════════════════════════════════
+//  PROFILES
+// ═══════════════════════════════════════════════
+function renderProfiles(){
+  const profiles = DB.getProfiles();
+  const active   = DB.getActive();
+  const el       = document.getElementById('profiles-content');
+  el.innerHTML   = `
+    <div class="page-title">Profiles</div>
+    ${profiles.length ? profiles.map(p=>`
+      <div class="profile-item ${p.id===active?'active-p':''}" onclick="switchProfile('${p.id}')">
+        <div>
+          <div style="font-weight:700;font-size:16px">${p.name}</div>
+          <div style="font-size:13px;color:var(--muted)">${p.id===active ? 'Active profile' : 'Tap to switch'}</div>
+        </div>
+        ${p.id===active ? `<svg style="width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+      </div>`).join('') : '<div class="empty"><div class="empty-icon">👤</div><p>No profiles yet.</p></div>'}
+
+    <div style="height:1px;background:var(--border);margin:20px 0"></div>
+    <div class="section-label">Add a profile</div>
+    <div class="field"><input type="text" id="new-name" placeholder="Teacher name" style="margin-bottom:10px"></div>
+    <button class="btn btn-primary" onclick="addProfile()">Add profile</button>
+    ${active ? `<button class="btn btn-danger" style="margin-top:10px" onclick="delProfile()">Delete active profile</button>` : ''}`;
+}
+
+window.switchProfile = function(id){
+  DB.setActive(id); renderProfiles(); renderHome();
+};
+window.addProfile = function(){
+  const name = document.getElementById('new-name').value.trim();
+  if(!name){ toast('Enter a name'); return; }
+  const profiles = DB.getProfiles();
+  const id = uid();
+  profiles.push({id,name,createdAt:new Date().toISOString()});
+  DB.saveProfiles(profiles); DB.setActive(id);
+  toast('Profile created');
+  go('home');
+};
+window.delProfile = function(){
+  if(!confirm('Delete this profile and all its data? This cannot be undone.')) return;
+  const pid = DB.getActive();
+  DB.saveProfiles(DB.getProfiles().filter(p=>p.id!==pid));
+  ['w0','b1','b2','b3','b4','b5'].forEach(k=>localStorage.removeItem('et_'+pid+'_'+k));
+  DB.setActive(DB.getProfiles()[0]?.id || null);
+  go('profiles');
+};
+
+// ═══════════════════════════════════════════════
+//  WEEK 0
+// ═══════════════════════════════════════════════
+function renderWeek0(){
+  const pid = DB.getActive();
+  const el  = document.getElementById('week0-content');
+  if(!pid){
+    el.innerHTML=`<button class="back-btn" onclick="go('home')"><svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Home</button><div class="empty"><p>Create a profile first.</p></div>`;
+    return;
+  }
+  const existing = DB.getWeek0(pid);
+  const scores   = existing ? existing.scores : {};
+  el.innerHTML   = `
+    <button class="back-btn" onclick="go('home')">
+      <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Home
+    </button>
+    <div class="page-title">Week 0 Audit</div>
+    <div class="info-card" style="margin-bottom:20px">
+      <p>Record yourself teaching one full lesson. Watch it back and score each area honestly, based on what you actually see, not what you intend to do.</p>
+      <p style="margin-top:8px;color:var(--muted);font-size:13px">1 = completely absent &nbsp;&middot;&nbsp; 4 = sometimes present &nbsp;&middot;&nbsp; 8 = consistent and confident</p>
+    </div>
+    ${W0_AREAS.map((a,i)=>`
+      <div class="area-row">
+        <div class="area-name">${a}</div>
+        <input type="range" id="w0-${i}" min="1" max="8" value="${scores[i]||4}">
+        <div class="range-hints"><span>1 &mdash; Absent</span><span>8 &mdash; Confident</span></div>
+        <div class="range-val" id="w0v-${i}">${scores[i]||4}</div>
+      </div>`).join('')}
+    <div style="height:8px"></div>
+    <button class="btn btn-primary" onclick="saveWeek0()">Save audit</button>`;
+
+  W0_AREAS.forEach((_,i)=>{
+    const inp = document.getElementById('w0-'+i);
+    const val = document.getElementById('w0v-'+i);
+    inp.addEventListener('input',function(){ val.textContent=this.value; });
+  });
+}
+
+window.saveWeek0 = function(){
+  const pid = DB.getActive(); if(!pid) return;
+  const scores = {};
+  W0_AREAS.forEach((_,i)=>{ scores[i]=parseInt(document.getElementById('w0-'+i).value); });
+  DB.saveWeek0(pid,{scores,savedAt:new Date().toISOString()});
+  toast('Audit saved');
+  go('home');
+};
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.nav-btn[data-view]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const v = btn.dataset.view;
+    if(v===S.view && v!=='block-detail') return;
+    go(v);
+  });
+});
+
+// Register PWA manifest dynamically
+const manifest = {name:"Effective Teacher",short_name:"ETeacher",start_url:"./",display:"standalone",background_color:"#FAFAF9",theme_color:"#FAFAF9",icons:[{src:"https://placehold.co/192x192/2563EB/ffffff?text=ET",sizes:"192x192",type:"image/png"}]};
+const mlink = document.createElement('link');
+mlink.rel='manifest';
+mlink.href='data:application/json,'+encodeURIComponent(JSON.stringify(manifest));
+document.head.appendChild(mlink);
+
+renderHome();
+</script>
+</body>
+</html>
