@@ -200,8 +200,8 @@ const BLOCKS = [
   {
     id: 1, title: "Pacing", technique: "The Five-Minute Rule", weeks: "Weeks 1-2",
     color: "#3B82F6", light: "#EFF6FF",
-    summary: "Limit teacher talk to 5-10 minutes at a stretch. When the timer goes off, stop and use a short active task such as \"Write down two things you just learned.\"",
-    why: "Pacing is structural. Getting regular pause points into your lessons creates the space needed for every other technique. It has zero dependency on content knowledge. You just need a timer. Working memory saturates quickly; the pause lets the brain consolidate before you add more.",
+    summary: "Set a timer for 5-10 minutes before you start teaching. When it goes off, you stop — no matter where you are — and activate students with a short task (see activities below). Then reset and go again.",
+    why: "Pacing is structural. Getting regular pause points into your lessons creates the space every other technique needs. The problem is not that teachers don't know they should pause — it's that the flow of the lesson and anxiety about coverage make stopping feel like a cost. The timer removes that decision from the moment. When it goes off, stopping is no longer a choice you have to make mid-explanation; it was already made before you walked in. Without the external cue, 'pause every five minutes' stays an intention, and intentions disappear under pressure.\n\nThe pause itself needs to do something — not just break the flow but give the brain a task that consolidates what just came in. Vary the activity across lessons so the pause doesn't become invisible through repetition:\n\n• Retrieval — 'Write down two things from the last five minutes.' Simple, always works.\n• Connection — 'How does this connect to what we covered last week?' Builds schema rather than just consolidating new information.\n• Question generation — 'Write one question you still have.' Surfaces misconceptions before they bed in. Powerful before a discussion.\n• Prediction — 'What do you think comes next?' Works well mid-topic. Activates prior knowledge and creates a hook for the next segment.\n• Pair share — 'Turn to the person next to you and explain the main idea in one sentence.' Retrieval plus articulation. Circulate and listen.\n• Sketch or diagram — 'Draw a quick sketch of the process we just described.' Works well for anything spatial or sequential. Different cognitive channel from writing.",
     target: "Score 5 or above out of 6 by end of Week 2.",
     scoreMax: 6,
     fields: [
@@ -216,8 +216,8 @@ const BLOCKS = [
   {
     id: 2, title: "Explanation", technique: "Definitions and Analogies", weeks: "Weeks 3-4",
     color: "#16A34A", light: "#F0FDF4",
-    summary: "Start each new concept with a single-sentence Bullet-Proof Definition recited aloud, or a Generative Analogy that borrows something students already know to explain the new idea.",
-    why: "Without a precise definition up front, students build their own informal version of a concept, often wrong, and everything taught afterwards attaches to that instead. Analogies give a new concept an immediate home in long-term memory by borrowing structure the student already has. The Curse of Knowledge makes it easy to forget what it is like to encounter a concept for the first time.",
+    summary: "Start each new concept with either a Bullet-Proof Definition — one precise sentence, read and recited aloud — or a Generative Analogy — a comparison to something students already know that carries the same structure as the new idea.",
+    why: "Without a precise anchor up front, students construct their own informal version of a concept — often wrong — and <em>everything taught afterwards attaches to that instead</em>. The <strong>Curse of Knowledge</strong> makes it easy to forget what it feels like to encounter an idea for the first time. These two techniques solve the problem in different ways.\n\n<strong>Bullet-Proof Definition</strong><br>One sentence. No qualifications, no <em>\"sort of\"</em> or <em>\"basically\"</em>. Display it, students read it silently, then say it to a neighbour. Saying it aloud is an act of retrieval — not passive reading.\n\n> <strong>Example — teaching propaganda</strong>\n> ✓ <em>\"Propaganda is information deliberately constructed to shape public opinion in favour of a particular ideology or cause, often by distorting or omitting facts.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"Propaganda is basically when governments use information to make people think a certain way.\"</em>\n> The second version has four escape hatches: <em>basically</em>, <em>governments</em> (only them?), <em>information</em> (what kind?), <em>a certain way</em> (which way?). The first has none.\n\n<strong>Generative Analogy</strong><br>An analogy does not define — it <em>connects</em>. It borrows a structure the student already understands and maps the new concept onto it, giving memory somewhere to anchor the idea immediately.\n\n> <strong>Example — teaching variables in programming</strong>\n> ✓ <em>\"Think of a variable as a named box. You can put one thing in it, look at what\'s inside, swap it for something else, or read the label to find it. The box doesn\'t care what you put in — but it can only hold one thing at a time.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"A variable is a named storage location in memory.\"</em>\n> Technically correct — but a student who has never coded has nothing to hang it on.",
     target: "Score 2 or 3 on all three criteria by end of Week 4.",
     scoreMax: 9,
     fields: [
@@ -235,7 +235,7 @@ const BLOCKS = [
     id: 3, title: "Questioning", technique: "Cold Calling with Wait Time", weeks: "Weeks 5-6",
     color: "#D97706", light: "#FFFBEB",
     summary: "Pose a question to the whole class, pause 3 seconds in silence, then name a specific student. Write 2-3 cold-call questions with student names into your lesson notes before the lesson.",
-    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. Cold Calling dissolves that contract. When any student may be called at any moment, the whole class cannot afford to switch off. The 3-second wait ensures everyone attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.",
+    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. <strong>Cold Calling dissolves that contract.</strong> When any student may be called at any moment, the whole class cannot afford to switch off — not because they fear embarrassment, but because the question is live for everyone until a name is called. The 3-second wait matters: it ensures the whole class attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.\n\n<strong>The sequence</strong><br>Pose the question to the whole class first — name nobody. Wait 3 full seconds in silence. Make eye contact around the room. Then, and only then, name a student calmly and matter-of-factly. The tone should feel as routine as asking what page you're on. Once it becomes normal, students stop bracing for it and start just thinking.\n\n<strong>When a student says \"I don't know\"</strong><br>This is the most common failure point. Left unaddressed, <em>I don\'t know</em> becomes the exit strategy that reinstates the old contract. It is usually a reflex, not a genuine statement of ignorance. Never accept it as the end of the interaction.\n\n> <strong>What to say instead:</strong>\n> • <em>\"Take a guess.\"</em> — removes the social cost of being wrong. Most students will answer.\n> • <em>\"What would you say if you did know?\"</em> — sounds strange, but works more often than it should.\n> • <em>\"Tell me one thing you do know about this.\"</em> — partial retrieval is still retrieval.\n> • <em>\"I\'ll come back to you.\"</em> — ask someone else, then return. Signals that I don\'t know does not close the loop.\n> • Reduce the question — \"OK, simpler: what does [key term] mean?\" Keep them in the game.\n\n<strong>The culture shift</strong><br>The first week feels uncomfortable — for you and for students. Some will look down, some will repeat <em>I don\'t know</em>, some will be visibly surprised you came back to them. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes.",
     target: "At least 3 cold calls per lesson. Wait time every time by Week 6.",
     scoreMax: null,
     fields: [
@@ -266,15 +266,19 @@ const BLOCKS = [
   {
     id: 5, title: "Voice and Presence", technique: "Intentional Mobility", weeks: "Weeks 9-10",
     color: "#DC2626", light: "#FEF2F2",
-    summary: "Move among students using a slide remote. Mark one moment in your lesson plan where you will deliberately change position or vary your voice. Record a lesson in Week 10 and compare to your Week 0 recording.",
-    why: "Voice and physical presence are the hardest to self-monitor in real time. By this point earlier techniques are becoming automatic, freeing up mental capacity to notice what your body is doing. A remote clicker is the single most useful physical tool: it breaks the dependency on the front of the room. Small changes in pace, volume and pitch at key moments are clearly perceptible to students even when they feel subtle to you.",
-    target: "Score 3 or above on all three dimensions by end of Week 10.",
-    scoreMax: 15,
+    summary: "Move among students using a slide remote so you are not fixed to the front. For vocal variety, mark one moment in each lesson — the key idea, the central claim — and label it 'drop and slow': drop your volume slightly, halve your pace, and pause briefly before you say it. Record a lesson in Week 10 and compare it honestly to your Week 0 recording.",
+    why: "Voice and physical presence are the hardest to self-monitor in real time — which is why this block comes last, when earlier habits are becoming automatic and you have spare capacity to notice what your body is doing.\n\n<strong>Why vocal variety matters</strong><br>The brain stops processing constant stimuli. A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise — not through laziness but through neurology. Students working hard to extract meaning from a signal their brain is trying to filter out will find the lesson exhausting without knowing why. Vocal variation is the mechanism that keeps the signal alive.\n\n<strong>The three levers</strong><br>\n• <strong>Pace</strong> — slowing down signals that something matters. Speeding up signals transition or background detail. Most teachers speak at roughly the same pace throughout regardless of content weight.\n• <strong>Volume</strong> — the counterintuitive one: <em>dropping</em> volume creates more attention than raising it. When you get quieter, students lean in. Raising volume works but is overused and loses its effect.\n• <strong>Pitch</strong> — a falling pitch at the end of a statement sounds authoritative. A rising pitch sounds uncertain even when you are not. Monotone means pitch barely moves, stripping out all of these signals.\n\n<strong>The pause</strong><br>A 2-3 second silence before a key idea creates genuine anticipation and is probably the single most powerful vocal tool available. It is also the most underused, because silence feels unbearable to most teachers. It is not unbearable to students — it signals that something important is coming.\n\n<strong>The self-monitoring problem</strong><br>What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Teachers consistently underestimate how much variation is needed because the self-consciousness of doing it distorts perception. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. This is why the Week 10 recording matters — not as a performance review, but as calibration.",
+    target: "Mobility and eye contact: 3 or above out of 5 each. Vocal variety: deliberately use at least two of the three levers (pace, volume, pause) in every lesson by Week 10.",
+    scoreMax: 16,
     fields: [
       { key:"mobility", label:"Mobility (1-5)", type:"range", min:1, max:5,
         hints:["Never left front","Intentional zones"] },
-      { key:"vocal", label:"Vocal variety (1-5)", type:"range", min:1, max:5,
-        hints:["Flat monotone","Dynamic and controlled"] },
+      { key:"pace", label:"Pace — did you slow down at key moments?",
+        opts:["Same pace throughout","Changed once or twice","Deliberately slowed at key moments"] },
+      { key:"volume", label:"Volume — did you drop it for emphasis?",
+        opts:["Same volume throughout","Raised volume only","Dropped volume for emphasis at least once"] },
+      { key:"pause", label:"The pause — did you pause before a key idea?",
+        opts:["No intentional pauses","Paused once","Used the pause more than once"] },
       { key:"eye", label:"Eye contact (1-5)", type:"range", min:1, max:5,
         hints:["Screen only","Connects with individuals"] }
     ]
@@ -336,13 +340,13 @@ const PROMPTS = {
   5: {
     low: [
       "You stayed near the front — was it habit, or was something pulling you back there?",
-      "The voice stayed flat in places — where in the lesson would a pause or pitch drop have helped?",
-      "Low mobility this session — pick one specific moment next lesson where you will deliberately move."
+      "The voice stayed flat — pick one moment in the next lesson where you will deliberately drop your volume and slow down before saying it.",
+      "Low mobility this session — which part of the room did you never reach? Plan one reason to go there next lesson."
     ],
     high: [
-      "Good presence — did moving change the dynamic with any specific students?",
-      "Strong vocal variety — was it intentional or did it happen naturally? Note what triggered it.",
-      "You moved well — did students track you, or did some disengage when you left the front?"
+      "Good presence — did moving to a different part of the room change how specific students responded?",
+      "You used the pause — what happened in the room during the silence? Did students lean in or look away?",
+      "Strong session — which of the three levers (pace, volume, pause) felt most natural? Which still feels forced?"
     ]
   }
 };
@@ -359,6 +363,44 @@ const S = {
 function uid(){ return Math.random().toString(36).slice(2,9) }
 function fmtDate(iso){
   return new Date(iso).toLocaleDateString('sv-SE',{month:'short',day:'numeric'});
+}
+
+// Renders why text — handles paragraphs, • bullets, and > callout/example blocks
+function formatWhy(text){
+  return text.split('\n\n').map(para => {
+    const lines = para.split('\n');
+
+    // All lines are > example lines — render as a callout box
+    if(lines.length && lines.every(l => l.startsWith('>'))){
+      return `<div style="background:var(--bg);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 13px;margin:10px 0;font-size:13px;line-height:1.7;color:#333">`
+        + lines.map(l=>`<div style="margin-bottom:2px">${l.slice(1).trim()}</div>`).join('')
+        + '</div>';
+    }
+
+    // Has • bullet lines
+    if(lines.some(l => l.startsWith('•'))){
+      return '<div style="margin-top:4px">'
+        + lines.map(l => {
+            if(l.startsWith('•')){
+              const body = l.slice(1).trim();
+              const dash = body.indexOf(' — ');
+              if(dash > -1){
+                return `<div style="display:flex;gap:8px;margin-bottom:7px;font-size:14px;line-height:1.55">
+                  <span style="color:var(--accent);flex-shrink:0;margin-top:1px">•</span>
+                  <span><strong>${body.slice(0,dash)}</strong> — ${body.slice(dash+3)}</span></div>`;
+              }
+              return `<div style="display:flex;gap:8px;margin-bottom:7px;font-size:14px;line-height:1.55">
+                <span style="color:var(--accent);flex-shrink:0;margin-top:1px">•</span>
+                <span>${body}</span></div>`;
+            }
+            return l ? `<p style="font-size:14px;line-height:1.65;margin-bottom:4px;color:#333">${l}</p>` : '';
+          }).join('')
+        + '</div>';
+    }
+
+    // Regular paragraph — inline HTML (strong, em, br) passes through
+    return `<p style="font-size:14px;line-height:1.7;color:#333;margin-bottom:6px">${para}</p>`;
+  }).join('');
 }
 
 function getPrompt(blockId, logCount, formVals){
@@ -403,7 +445,7 @@ function calcScore(b, vals){
     };
     return extract(vals.c1)+extract(vals.c2)+extract(vals.c3);
   }
-  if(b.id===5) return (parseInt(vals.mobility)||0)+(parseInt(vals.vocal)||0)+(parseInt(vals.eye)||0);
+  if(b.id===5) return (parseInt(vals.mobility)||0)+(vals.pace||0)+(vals.volume||0)+(vals.pause||0)+(parseInt(vals.eye)||0);
   return null;
 }
 function scorePct(b, score){ return b.scoreMax ? Math.round((score/b.scoreMax)*100) : null }
@@ -723,7 +765,7 @@ function renderTab(){
         </div>
       </div>` : ''}
       <div class="accent-strip"><p>${b.summary}</p></div>
-      <div class="info-card"><h3>Why this works</h3><p>${b.why}</p></div>
+      <div class="info-card"><h3>Why this works</h3>${formatWhy(b.why)}</div>
       <div class="info-card"><h3>Target</h3><p>${b.target}</p></div>
       ${pid ? `<button class="btn btn-primary" style="margin-top:4px" onclick="setTab('log')">Log a lesson</button>` :
               `<button class="btn btn-ghost" onclick="go('profiles')">Create a profile to start</button>`}`;
@@ -840,7 +882,11 @@ function logSummary(b,l){
     lines.push(`Read from slide: ${l.readSlide||'?'} &middot; Visuals clearer: ${l.visualsClear||'?'}`);
     if(l.slideToFix) lines.push(`Fix: ${l.slideToFix}`);
   } else if(b.id===5){
-    lines.push(`Mobility: ${l.mobility||0}/5 &middot; Vocal: ${l.vocal||0}/5 &middot; Eye contact: ${l.eye||0}/5`);
+    lines.push(`Mobility: ${l.mobility||0}/5 · Eye contact: ${l.eye||0}/5`);
+    const paceLabels=['','Changed once or twice','Slowed at key moments'];
+    const volLabels=['','Raised only','Dropped for emphasis'];
+    const pauseLabels=['','Paused once','Used more than once'];
+    if(l.pace||l.volume||l.pause) lines.push(`Pace: ${paceLabels[l.pace]||'—'} · Volume: ${volLabels[l.volume]||'—'} · Pause: ${pauseLabels[l.pause]||'—'}`);
   } else if(b.id===2 && l.technique){
     lines.push(`Technique: ${l.technique}`);
   }
