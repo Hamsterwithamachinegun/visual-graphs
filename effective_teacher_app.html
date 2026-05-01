@@ -79,6 +79,11 @@ input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3p
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(37,99,235,.3)}
 .range-hints{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px}
 .range-val{text-align:center;font-size:28px;font-weight:800;color:var(--accent);margin-top:4px;letter-spacing:-.03em}
+/* ── Stepper ─────────────────────────────────────────────── */
+.stepper{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1.5px solid var(--border);border-radius:13px;padding:5px;margin-top:4px}
+.step-btn{width:48px;height:48px;border:none;border-radius:10px;background:var(--surface);font-size:26px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-family:var(--font);box-shadow:0 1px 3px rgba(0,0,0,.08);transition:background .1s;line-height:1;padding-bottom:2px}
+.step-btn:active{background:var(--border)}
+.step-display{font-size:32px;font-weight:800;color:var(--accent);letter-spacing:-.03em;min-width:48px;text-align:center}
 /* ── Progress bar ───────────────────────────────────────── */
 .pbar-wrap{background:#F0F0EE;border-radius:99px;height:5px;overflow:hidden;margin-top:8px}
 .pbar{height:100%;border-radius:99px;transition:width .4s cubic-bezier(.16,1,.3,1)}
@@ -120,14 +125,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .back-btn{display:flex;align-items:center;gap:5px;color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;border:none;background:none;font-family:var(--font);padding:0;margin-bottom:18px}
 /* ── Score chip ─────────────────────────────────────────── */
 .score-chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
-/* ── Toast ──────────────────────────────────────────────── */
+/* ── Offline banner ─────────────────────────────────────── */
+#offline-banner{display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#1A1A1A;color:#fff;text-align:center;font-size:13px;font-weight:600;font-family:var(--font);padding:8px 16px;z-index:300;letter-spacing:.01em}
+#offline-banner.show{display:block}
+body.offline #views{padding-top:36px}
 #toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(12px);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;font-family:var(--font);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:200}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+<div id="offline-banner">No internet connection — running from cache</div>
 <div id="app">
-  <div id="views">
+    <div id="views">
     <div class="view active" id="view-home"><div id="home-content"></div></div>
     <div class="view" id="view-blocks"><div id="blocks-content"></div></div>
     <div class="view" id="view-block-detail"><div id="block-detail-content"></div></div>
@@ -273,8 +282,70 @@ const BLOCKS = [
 ];
 
 // ═══════════════════════════════════════════════
-//  STATE
+//  REFLECTION PROMPTS
 // ═══════════════════════════════════════════════
+const PROMPTS = {
+  1: {
+    low: [
+      "The timer went off but felt disruptive — what would make the pause feel more natural next time?",
+      "Students didn't engage with the active task — was it the task itself, or the transition into it?",
+      "You ran out of time to restart — what would you cut next lesson to protect the pause?"
+    ],
+    high: [
+      "The pause worked well — what did students do during it that told you that?",
+      "You stopped when the timer went off — how did the room feel different in the second half?",
+      "Good rhythm this lesson — could you try a different active task next time to vary it?"
+    ]
+  },
+  2: {
+    low: [
+      "The analogy or definition didn't quite land — what do your students already know that might work better?",
+      "It felt wordy in the moment — can you cut it to one sentence before next lesson?",
+      "Students looked blank — was the concept itself unclear, or the way you explained it?"
+    ],
+    high: [
+      "It clicked for most students — what specifically did you say that seemed to do the work?",
+      "The definition stuck — did students use the language back at you later in the lesson?",
+      "Strong explanation — could the same analogy carry a different concept in a future lesson?"
+    ]
+  },
+  3: {
+    low: [
+      "Fewer cold calls than planned — what made you hold back? Pace, confidence, or something else?",
+      "The wait time felt long — did students visibly think during it, or did eyes drift?",
+      "You reverted to volunteers — was there a moment you could have cold called instead?"
+    ],
+    high: [
+      "Good number of calls — did any student surprise you with their answer?",
+      "The wait time held — what did you notice in the room during the silence?",
+      "Cold calling felt routine — are students anticipating it now, or still caught off guard?"
+    ]
+  },
+  4: {
+    low: [
+      "You read from a slide — which one, and what would you put there instead?",
+      "The text pulled you in — was it a safety net or a habit? Name the slide to fix.",
+      "It happened again — is there one slide that keeps trapping you? Note it here."
+    ],
+    high: [
+      "Clean session — did the visuals do the work, or did your explanation carry it?",
+      "No reading from slides — which visual landed best and why?",
+      "Good discipline — is there a slide that still tempts you? Note it before next lesson."
+    ]
+  },
+  5: {
+    low: [
+      "You stayed near the front — was it habit, or was something pulling you back there?",
+      "The voice stayed flat in places — where in the lesson would a pause or pitch drop have helped?",
+      "Low mobility this session — pick one specific moment next lesson where you will deliberately move."
+    ],
+    high: [
+      "Good presence — did moving change the dynamic with any specific students?",
+      "Strong vocal variety — was it intentional or did it happen naturally? Note what triggered it.",
+      "You moved well — did students track you, or did some disengage when you left the front?"
+    ]
+  }
+};
 const S = {
   view: 'home',
   block: null,
@@ -288,6 +359,39 @@ const S = {
 function uid(){ return Math.random().toString(36).slice(2,9) }
 function fmtDate(iso){
   return new Date(iso).toLocaleDateString('sv-SE',{month:'short',day:'numeric'});
+}
+
+function getPrompt(blockId, logCount, formVals){
+  const bank  = PROMPTS[blockId];
+  const index = logCount % 3;
+  // Determine low/high based on block
+  let isHigh = false;
+  if(blockId === 1){
+    const total = (formVals.q1||0)+(formVals.q2||0)+(formVals.q3||0);
+    const filled = formVals.q1!==undefined && formVals.q2!==undefined && formVals.q3!==undefined;
+    isHigh = filled && total >= 4;
+  } else if(blockId === 2){
+    const extract = v => { if(!v) return 0; const n=v.toString().match(/\((\d+)\)/); return n?parseInt(n[1]):0; };
+    const total = extract(formVals.c1)+extract(formVals.c2)+extract(formVals.c3);
+    const filled = formVals.c1!==undefined && formVals.c2!==undefined && formVals.c3!==undefined;
+    isHigh = filled && total >= 6;
+  } else if(blockId === 3){
+    isHigh = (formVals.count||0) >= 3;
+  } else if(blockId === 4){
+    isHigh = formVals.readSlide === 'No';
+  } else if(blockId === 5){
+    const total = (parseInt(formVals.mobility)||0)+(parseInt(formVals.vocal)||0)+(parseInt(formVals.eye)||0);
+    isHigh = total >= 9;
+  }
+  return (isHigh ? bank.high : bank.low)[index];
+}
+
+function refreshPrompt(){
+  const el = document.getElementById('notes-prompt');
+  if(!el) return;
+  const pid  = DB.getActive(); if(!pid) return;
+  const logs = DB.getLogs(pid, S.block);
+  el.textContent = '💭 ' + getPrompt(S.block, logs.length, S.form);
 }
 function calcScore(b, vals){
   if(b.id===1) return (vals.q1||0)+(vals.q2||0)+(vals.q3||0);
@@ -303,6 +407,56 @@ function calcScore(b, vals){
   return null;
 }
 function scorePct(b, score){ return b.scoreMax ? Math.round((score/b.scoreMax)*100) : null }
+
+window.stepVal = function(key, min, max, delta){
+  const el  = document.getElementById('sv-'+key);
+  const cur = parseInt(el.textContent) || min;
+  const next = Math.min(max, Math.max(min, cur + delta));
+  el.textContent = next;
+  S.form[key] = next;
+  refreshPrompt();
+};
+
+window.stepW0 = function(i, min, max, delta){
+  const el  = document.getElementById('w0v-'+i);
+  const cur = parseInt(el.textContent) || min;
+  const next = Math.min(max, Math.max(min, cur + delta));
+  el.textContent = next;
+};
+
+function getTrend(scores){
+  if(scores.length < 2) return null;
+  const last = scores[scores.length-1];
+  const prev = scores[scores.length-2];
+  if(last > prev) return 'up';
+  if(last < prev) return 'down';
+  return 'flat';
+}
+
+// W0 area index maps directly to block id (area 0 = block 1, etc.)
+function getRecommended(pid){
+  const w0 = DB.getWeek0(pid);
+  if(!w0) return [];
+  return [0,1,2,3,4]
+    .map(i => ({ blockId: i+1, score: w0.scores[i]||0 }))
+    .filter(x => x.score < 6)          // only recommend areas not already strong
+    .sort((a,b) => a.score - b.score)
+    .slice(0,2)
+    .map(x => x.blockId);
+}
+
+// A block unlocks if:
+//   - it is Block 1 (always open), or
+//   - the previous block has 3+ lessons logged, or
+//   - the Week 0 score for the previous block's area was already 6+
+//     (teacher already demonstrates that skill — no need to practise it first)
+function isUnlocked(blockId, pid){
+  if(!pid || blockId === 1) return true;
+  if(DB.getLogs(pid, blockId - 1).length >= 3) return true;
+  const w0 = DB.getWeek0(pid);
+  if(w0 && (w0.scores[blockId - 2] || 0) >= 6) return true;
+  return false;
+}
 function toast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
@@ -351,8 +505,11 @@ function renderHome(){
     return;
   }
   const profile = DB.getProfiles().find(p=>p.id===pid);
-  const w0 = DB.getWeek0(pid);
+  const w0  = DB.getWeek0(pid);
   const totalLogs = BLOCKS.reduce((s,b)=>s+DB.getLogs(pid,b.id).length,0);
+  const rec = w0 ? getRecommended(pid) : [];
+  const recBlocks = rec.map(id => BLOCKS.find(b=>b.id===id));
+  const anyLogged = totalLogs > 0;
 
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
@@ -369,10 +526,10 @@ function renderHome(){
     ${!w0 ? `
     <div class="card" style="border:2px solid #3B82F6;background:#EFF6FF;margin-bottom:16px">
       <div style="font-weight:800;font-size:15px;margin-bottom:5px">Start here: Week 0 Audit</div>
-      <p style="font-size:14px;color:#333;line-height:1.55;margin-bottom:14px">Record yourself teaching one lesson, then score yourself on 5 areas. This is your baseline.</p>
+      <p style="font-size:14px;color:#333;line-height:1.55;margin-bottom:14px">Record yourself teaching one lesson, then score yourself on 5 areas. Your two lowest scores will tell you which blocks to prioritise.</p>
       <button class="btn btn-primary" onclick="go('week0')">Begin the audit</button>
     </div>` : `
-    <div class="card card-tap" onclick="go('week0')" style="margin-bottom:16px">
+    <div class="card card-tap" onclick="go('week0')" style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-weight:700;font-size:14px">Week 0 Audit</span>
         <span style="font-size:12px;color:var(--muted)">Tap to review</span>
@@ -386,22 +543,67 @@ function renderHome(){
       </div>
     </div>`}
 
+    ${w0 && !anyLogged ? `
+    <div class="card" style="border:1.5px solid #2563EB;background:#EFF6FF;margin-bottom:16px">
+      ${recBlocks.length ? `
+      <div style="font-weight:800;font-size:14px;margin-bottom:8px">Your recommended starting blocks</div>
+      <p style="font-size:13px;color:#333;line-height:1.55;margin-bottom:12px">Based on your two lowest Week 0 scores. Work through them in order even if only one is highlighted — the sequence matters.</p>
+      <div style="display:flex;gap:8px">
+        ${recBlocks.map((b,i) => `
+        <div onclick="go('block-detail',{block:${b.id}})" style="flex:1;background:${b.color};border-radius:11px;padding:12px;cursor:pointer">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:3px">${i===0?'PRIORITY 1':'PRIORITY 2'}</div>
+          <div style="font-size:15px;font-weight:800;color:#fff">${b.title}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">${b.weeks}</div>
+        </div>`).join('')}
+      </div>` : `
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:28px">🌟</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;margin-bottom:3px">Strong baseline across all areas</div>
+          <div style="font-size:13px;color:#333;line-height:1.5">Your Week 0 scores were 6 or above everywhere. All blocks are unlocked — start with whichever feels most useful right now.</div>
+        </div>
+      </div>`}
+    </div>` : ''}
+
     <div class="section-label">Your blocks</div>
     ${BLOCKS.map(b=>{
-      const logs = DB.getLogs(pid,b.id);
-      const pct  = Math.min(100,Math.round((logs.length/6)*100));
-      const last  = logs[logs.length-1];
-      const score = last ? calcScore(b,last) : null;
+      const logs    = DB.getLogs(pid,b.id);
+      const pct     = Math.min(100,Math.round((logs.length/6)*100));
+      const last    = logs[logs.length-1];
+      const score   = last ? calcScore(b,last) : null;
+      const isRec   = rec.includes(b.id);
+      const recRank = rec.indexOf(b.id);
+      const locked  = !isUnlocked(b.id, pid);
+      const prevLogs = b.id > 1 ? DB.getLogs(pid, b.id-1).length : 3;
+      const trendScores = b.scoreMax
+        ? logs.map(l=>calcScore(b,l)).filter(s=>s!==null)
+        : b.id===3 ? logs.map(l=>l.count||0) : [];
+      const trend = getTrend(trendScores);
+      const trendHtml = trend ? ({
+        up:   `<span style="font-size:15px;color:#16A34A;font-weight:800;flex-shrink:0">&#8679;</span>`,
+        down: `<span style="font-size:15px;color:#DC2626;font-weight:800;flex-shrink:0">&#8681;</span>`,
+        flat: `<span style="font-size:15px;color:var(--muted);font-weight:800;flex-shrink:0">&#8680;</span>`
+      })[trend] : '';
       return `
-      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})" style="display:flex;align-items:center;gap:12px;padding:14px">
-        <div class="block-num" style="background:${b.color}">${b.id}</div>
+      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})"
+        style="display:flex;align-items:center;gap:12px;padding:14px;${locked?'opacity:.45;':''}${isRec && !anyLogged && !locked ? 'border:1.5px solid '+b.color+';' : ''}">
+        <div class="block-num" style="background:${locked?'#aaa':b.color}">${b.id}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:14px;margin-bottom:1px">${b.title}</div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:1px;flex-wrap:wrap">
+            <div style="font-weight:700;font-size:14px">${b.title}</div>
+            ${locked
+              ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:#D97706;color:#fff;letter-spacing:.02em">Block ${b.id-1} first</span>`
+              : isRec && !anyLogged ? `<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;background:${b.color};color:#fff;letter-spacing:.03em">P${recRank+1}</span>` : ''}
+          </div>
           <div style="font-size:12px;color:var(--muted)">${b.weeks} &middot; ${logs.length} lesson${logs.length!==1?'s':''} logged</div>
-          <div class="pbar-wrap"><div class="pbar" style="width:${pct}%;background:${b.color}"></div></div>
+          <div class="pbar-wrap"><div class="pbar" style="width:${pct}%;background:${locked?'#aaa':b.color}"></div></div>
         </div>
-        ${score!==null ? `<span style="font-weight:800;font-size:14px;color:${b.color};flex-shrink:0">${score}${b.scoreMax?'/'+b.scoreMax:''}</span>` :
-          b.id===3 && last ? `<span style="font-size:12px;color:var(--muted);flex-shrink:0">${last.count||0} calls</span>` : ''}
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          ${!locked && score!==null ? `<span style="font-weight:800;font-size:14px;color:${b.color}">${score}${b.scoreMax?'/'+b.scoreMax:''}</span>` :
+            !locked && b.id===3 && last ? `<span style="font-size:12px;color:var(--muted)">${last.count||0} calls</span>` :
+            locked ? `<span style="font-size:18px">🔒</span>` : ''}
+          ${!locked ? trendHtml : ''}
+        </div>
       </div>`;
     }).join('')}`;
 }
@@ -412,22 +614,36 @@ function renderHome(){
 function renderBlocks(){
   const pid = DB.getActive();
   const el  = document.getElementById('blocks-content');
+  const rec = pid ? getRecommended(pid) : [];
+  const anyLogged = pid ? BLOCKS.reduce((s,b)=>s+DB.getLogs(pid,b.id).length,0) > 0 : false;
   el.innerHTML = `<div class="page-title">Practice Blocks</div>`
     + BLOCKS.map(b=>{
-      const logs = pid ? DB.getLogs(pid,b.id) : [];
-      const pct  = Math.min(100,Math.round((logs.length/6)*100));
+      const logs   = pid ? DB.getLogs(pid,b.id) : [];
+      const pct    = Math.min(100,Math.round((logs.length/6)*100));
+      const isRec  = rec.includes(b.id);
+      const rank   = rec.indexOf(b.id);
+      const locked = pid ? !isUnlocked(b.id, pid) : false;
+      const prevCount = pid && b.id > 1 ? DB.getLogs(pid, b.id-1).length : 3;
       return `
-      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})" style="border-left:4px solid ${b.color};padding:15px 15px 15px 14px">
+      <div class="card card-tap" onclick="go('block-detail',{block:${b.id}})"
+        style="border-left:4px solid ${locked?'#ccc':b.color};padding:15px 15px 15px 14px;${locked?'opacity:.45;':''}${isRec && !anyLogged && !locked?'border-top:1.5px solid '+b.color+';border-right:1.5px solid '+b.color+';border-bottom:1.5px solid '+b.color+';':''}">
         <div style="display:flex;gap:12px;align-items:flex-start">
-          <div class="block-num block-num-lg" style="background:${b.color}">${b.id}</div>
+          <div class="block-num block-num-lg" style="background:${locked?'#aaa':b.color}">${b.id}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-size:16px;letter-spacing:-.01em">${b.title}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;flex-wrap:wrap">
+              <div style="font-weight:800;font-size:16px;letter-spacing:-.01em">${b.title}</div>
+              ${locked
+                ? `<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;background:#D97706;color:#fff;letter-spacing:.02em">Block ${b.id-1} first (${prevCount}/3)</span>`
+                : isRec && !anyLogged ? `<span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;background:${b.color};color:#fff;letter-spacing:.04em">PRIORITY ${rank+1}</span>` : ''}
+            </div>
             <div style="font-size:13px;color:var(--muted);margin-bottom:2px">${b.technique}</div>
             <div style="font-size:12px;color:var(--muted)">${b.weeks}</div>
-            <div class="pbar-wrap" style="margin-top:10px"><div class="pbar" style="width:${pct}%;background:${b.color}"></div></div>
+            <div class="pbar-wrap" style="margin-top:10px"><div class="pbar" style="width:${pct}%;background:${locked?'#aaa':b.color}"></div></div>
             <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:500">${logs.length} of 6 lessons logged</div>
           </div>
-          <svg style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          ${locked
+            ? `<span style="font-size:18px;margin-top:2px">🔒</span>`
+            : `<svg style="width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;margin-top:3px" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`}
         </div>
       </div>`;
     }).join('');
@@ -478,7 +694,34 @@ function renderTab(){
 
   // ABOUT
   if(S.blockTab==='info'){
+    const pid = DB.getActive();
+    const rec = pid ? getRecommended(pid) : [];
+    const anyLogged = pid ? BLOCKS.reduce((s,x)=>s+DB.getLogs(pid,x.id).length,0) > 0 : false;
+    const rank = rec.indexOf(b.id);
+    const locked = pid ? !isUnlocked(b.id, pid) : false;
+    const prevBlock = locked ? BLOCKS.find(x=>x.id===b.id-1) : null;
+    const prevCount = locked && pid ? DB.getLogs(pid, b.id-1).length : 0;
+    const prevW0Score = locked && pid ? (DB.getWeek0(pid)?.scores[b.id-2] || 0) : 0;
     el.innerHTML = `
+      ${locked ? `
+      <div style="background:#FEF3C7;border:1.5px solid #D97706;border-radius:11px;padding:13px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+        <div style="font-size:20px;flex-shrink:0">🔒</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#92400E;margin-bottom:4px">Finish Block ${b.id-1} first</div>
+          <div style="font-size:13px;color:#78350F;line-height:1.55">Each block builds on habits from the previous one. To unlock this block, either:<br>
+          <span style="display:inline-block;margin-top:5px">&#8226; Log 3 lessons in <strong>${prevBlock.title}</strong> (${prevCount}/3 so far), or</span><br>
+          <span style="display:inline-block;margin-top:2px">&#8226; Score 6 or above for that area in the Week 0 audit (your score: <strong>${prevW0Score}/8</strong>)</span><br>
+          <span style="display:inline-block;margin-top:6px;color:#92400E">You can still read and explore below.</span></div>
+        </div>
+      </div>` : ''}
+      ${rank >= 0 && !anyLogged && !locked ? `
+      <div style="background:${b.color};border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:22px">⭐</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#fff">Your Priority ${rank+1} block</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.4">Your Week 0 audit identified this as one of your lowest-scoring areas. Start here.</div>
+        </div>
+      </div>` : ''}
       <div class="accent-strip"><p>${b.summary}</p></div>
       <div class="info-card"><h3>Why this works</h3><p>${b.why}</p></div>
       <div class="info-card"><h3>Target</h3><p>${b.target}</p></div>
@@ -494,23 +737,22 @@ function renderTab(){
     b.fields.filter(f=>f.type==='range').forEach(f=>{
       S.form[f.key] = Math.round((f.min+f.max)/2);
     });
+    const pid2   = DB.getActive();
+    const logCount = pid2 ? DB.getLogs(pid2, b.id).length : 0;
+    const initPrompt = getPrompt(b.id, logCount, S.form);
     el.innerHTML = `
       <div id="log-form">
         ${b.fields.map(f=>buildField(f,b)).join('')}
         <div class="field">
-          <label class="field-label">Notes or one adjustment for next time</label>
-          <textarea placeholder="What would you do differently?" id="f-notes" oninput="S.form.notes=this.value"></textarea>
+          <label class="field-label">Reflection</label>
+          <div id="notes-prompt" style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:var(--muted);line-height:1.55;font-style:italic">💭 ${initPrompt}</div>
+          <textarea placeholder="Your thoughts..." id="f-notes" oninput="S.form.notes=this.value"></textarea>
         </div>
         <button class="btn btn-primary" onclick="saveLog(${b.id})">Save lesson log</button>
       </div>`;
-    // wire up range inputs
+    // initialise stepper values in S.form
     b.fields.filter(f=>f.type==='range').forEach(f=>{
-      const inp = document.getElementById('f-'+f.key);
-      const val = document.getElementById('rv-'+f.key);
-      if(inp) inp.addEventListener('input',function(){
-        S.form[f.key]=parseInt(this.value);
-        if(val) val.textContent=this.value;
-      });
+      S.form[f.key] = Math.round((f.min+f.max)/2);
     });
     return;
   }
@@ -545,15 +787,18 @@ function buildField(f,b){
     const def = Math.round((f.min+f.max)/2);
     return `<div class="field">
       <label class="field-label">${f.label}</label>
-      <input type="range" id="f-${f.key}" min="${f.min}" max="${f.max}" value="${def}">
-      <div class="range-hints"><span>${f.hints[0]}</span><span>${f.hints[1]}</span></div>
-      <div class="range-val" id="rv-${f.key}">${def}</div>
+      <div class="stepper">
+        <button class="step-btn" onclick="stepVal('${f.key}',${f.min},${f.max},-1)">&#8722;</button>
+        <div class="step-display" id="sv-${f.key}">${def}</div>
+        <button class="step-btn" onclick="stepVal('${f.key}',${f.min},${f.max},1)">&#43;</button>
+      </div>
+      <div class="range-hints" style="margin-top:8px"><span>${f.hints[0]}</span><span>${f.hints[1]}</span></div>
     </div>`;
   }
   if(f.type==='select'){
     return `<div class="field">
       <label class="field-label">${f.label}</label>
-      <select id="f-${f.key}" onchange="S.form['${f.key}']=this.value">
+      <select id="f-${f.key}" onchange="S.form['${f.key}']=this.value;refreshPrompt()">
         ${f.opts.map(o=>`<option value="${o}">${o}</option>`).join('')}
       </select>
     </div>`;
@@ -561,7 +806,7 @@ function buildField(f,b){
   if(f.type==='number'){
     return `<div class="field">
       <label class="field-label">${f.label}</label>
-      <input type="number" id="f-${f.key}" min="0" max="30" placeholder="${f.placeholder||''}" oninput="S.form['${f.key}']=parseInt(this.value)||0">
+      <input type="number" id="f-${f.key}" min="0" max="30" placeholder="${f.placeholder||''}" oninput="S.form['${f.key}']=parseInt(this.value)||0;refreshPrompt()">
     </div>`;
   }
   if(f.type==='text'){
@@ -584,6 +829,7 @@ function buildField(f,b){
 window.pickRadio = function(key,val,group){
   S.form[key]=val;
   group.querySelectorAll('.radio-opt').forEach((o,i)=>o.classList.toggle('selected',i===val));
+  refreshPrompt();
 };
 
 function logSummary(b,l){
@@ -640,6 +886,10 @@ function renderProgress(){
 
   el.innerHTML = `
     <div class="page-title">Progress</div>
+
+    <button class="btn btn-ghost" onclick="generateSummary()" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-size:14px">
+      <span style="font-size:18px">✨</span> Generate progress summary
+    </button>
 
     <div class="card" style="margin-bottom:10px">
       <div style="font-weight:700;font-size:14px;margin-bottom:14px">Week 0 Baseline</div>
@@ -750,7 +1000,22 @@ function renderProfiles(){
     <div class="section-label">Add a profile</div>
     <div class="field"><input type="text" id="new-name" placeholder="Teacher name" style="margin-bottom:10px"></div>
     <button class="btn btn-primary" onclick="addProfile()">Add profile</button>
-    ${active ? `<button class="btn btn-danger" style="margin-top:10px" onclick="delProfile()">Delete active profile</button>` : ''}`;
+    ${active ? `<button class="btn btn-danger" style="margin-top:10px" onclick="delProfile()">Delete active profile</button>` : ''}
+
+    <div style="height:1px;background:var(--border);margin:24px 0"></div>
+    <div class="section-label">Data backup</div>
+    <div class="info-card" style="margin-bottom:14px">
+      <p>Export saves all profiles and lesson logs as a JSON file on your device. Import restores from a previous export — you can choose to add the backup profiles alongside your existing ones, or replace everything.</p>
+    </div>
+    <button class="btn btn-ghost" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="exportData()">
+      <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export all data
+    </button>
+    <button class="btn btn-ghost" style="display:flex;align-items:center;justify-content:center;gap:8px" onclick="triggerImport()">
+      <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import from backup
+    </button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">`;
 }
 
 window.switchProfile = function(id){
@@ -774,6 +1039,108 @@ window.delProfile = function(){
   DB.setActive(DB.getProfiles()[0]?.id || null);
   go('profiles');
 };
+
+// ── Export ───────────────────────────────────────────────
+window.exportData = function(){
+  const data = {};
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('et_')) data[k] = localStorage.getItem(k);
+  }
+  if(!Object.keys(data).length){ toast('Nothing to export yet'); return; }
+  const payload = JSON.stringify({ version:1, exportedAt:new Date().toISOString(), data }, null, 2);
+  const blob    = new Blob([payload], { type:'application/json' });
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement('a');
+  a.href        = url;
+  a.download    = 'effective_teacher_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded');
+};
+
+// ── Import ───────────────────────────────────────────────
+window.triggerImport = function(){
+  document.getElementById('import-file').click();
+};
+
+window.handleImport = function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      const backup = JSON.parse(ev.target.result);
+      if(!backup.version || !backup.data) throw new Error('Invalid file');
+
+      // Count profiles in backup
+      const backupProfiles = JSON.parse(backup.data['et_profiles'] || '[]');
+      if(!backupProfiles.length){ toast('No profiles found in backup'); return; }
+
+      const names = backupProfiles.map(p=>p.name).join(', ');
+      const choice = confirm(
+        'Found ' + backupProfiles.length + ' profile(s): ' + names + '\n\n' +
+        'Tap OK to ADD these to your existing data.\n' +
+        'Tap Cancel to REPLACE everything with the backup.'
+      );
+
+      if(choice) mergeImport(backup.data, backupProfiles);
+      else       replaceImport(backup.data);
+
+    } catch(err){
+      alert('Could not read the backup file. Make sure it was exported from this app.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+};
+
+function mergeImport(data, backupProfiles){
+  const existing = DB.getProfiles();
+  const idMap    = {};
+
+  // Assign each backup profile a fresh ID to avoid collisions
+  backupProfiles.forEach(p => {
+    const newId  = uid();
+    idMap[p.id]  = newId;
+    const name   = existing.find(x=>x.name===p.name) ? p.name + ' (backup)' : p.name;
+    existing.push({ ...p, id:newId, name });
+  });
+  DB.saveProfiles(existing);
+
+  // Remap and restore data keys
+  Object.keys(data).forEach(k => {
+    if(k === 'et_profiles' || k === 'et_active') return;
+    Object.keys(idMap).forEach(oldId => {
+      if(k.startsWith('et_' + oldId + '_')){
+        const newKey = 'et_' + idMap[oldId] + '_' + k.slice(('et_' + oldId + '_').length);
+        localStorage.setItem(newKey, data[k]);
+      }
+    });
+  });
+
+  toast('Profiles added from backup');
+  renderProfiles();
+}
+
+function replaceImport(data){
+  // Remove all existing et_ keys
+  const toRemove = [];
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('et_')) toRemove.push(k);
+  }
+  toRemove.forEach(k => localStorage.removeItem(k));
+
+  // Restore from backup
+  Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+
+  toast('Data restored from backup');
+  go('profiles');
+  renderHome();
+}
 
 // ═══════════════════════════════════════════════
 //  WEEK 0
@@ -799,28 +1166,173 @@ function renderWeek0(){
     ${W0_AREAS.map((a,i)=>`
       <div class="area-row">
         <div class="area-name">${a}</div>
-        <input type="range" id="w0-${i}" min="1" max="8" value="${scores[i]||4}">
-        <div class="range-hints"><span>1 &mdash; Absent</span><span>8 &mdash; Confident</span></div>
-        <div class="range-val" id="w0v-${i}">${scores[i]||4}</div>
+        <div class="stepper">
+          <button class="step-btn" onclick="stepW0(${i},1,8,-1)">&#8722;</button>
+          <div class="step-display" id="w0v-${i}">${scores[i]||4}</div>
+          <button class="step-btn" onclick="stepW0(${i},1,8,1)">&#43;</button>
+        </div>
+        <div class="range-hints" style="margin-top:8px"><span>1 – Absent</span><span>8 – Confident</span></div>
       </div>`).join('')}
     <div style="height:8px"></div>
     <button class="btn btn-primary" onclick="saveWeek0()">Save audit</button>`;
-
-  W0_AREAS.forEach((_,i)=>{
-    const inp = document.getElementById('w0-'+i);
-    const val = document.getElementById('w0v-'+i);
-    inp.addEventListener('input',function(){ val.textContent=this.value; });
-  });
 }
 
 window.saveWeek0 = function(){
   const pid = DB.getActive(); if(!pid) return;
   const scores = {};
-  W0_AREAS.forEach((_,i)=>{ scores[i]=parseInt(document.getElementById('w0-'+i).value); });
+  W0_AREAS.forEach((_,i)=>{ scores[i] = parseInt(document.getElementById('w0v-'+i).textContent) || 1; });
   DB.saveWeek0(pid,{scores,savedAt:new Date().toISOString()});
   toast('Audit saved');
   go('home');
 };
+
+// ═══════════════════════════════════════════════
+//  PROGRESS SUMMARY (AI)
+// ═══════════════════════════════════════════════
+window.generateSummary = async function(){
+  const pid = DB.getActive(); if(!pid) return;
+  const profile  = DB.getProfiles().find(p=>p.id===pid);
+  const w0       = DB.getWeek0(pid);
+  const allLogs  = BLOCKS.flatMap(b=>DB.getLogs(pid,b.id));
+
+  if(!w0 && allLogs.length < 2){
+    showSummaryModal('nodata'); return;
+  }
+
+  // Compile block-level data
+  const blockData = BLOCKS.map(b=>{
+    const logs    = DB.getLogs(pid,b.id);
+    const scored  = b.scoreMax ? logs.map(l=>calcScore(b,l)).filter(s=>s!==null) : [];
+    const notes   = logs.map(l=>l.notes).filter(Boolean).slice(-3);
+    const counts  = b.id===3 ? logs.map(l=>l.count||0) : [];
+    return {
+      block: b.id, title: b.title,
+      logsCount: logs.length,
+      latestScore: scored.length ? scored[scored.length-1] : null,
+      scoreMax: b.scoreMax || null,
+      trend: getTrend(scored.length ? scored : counts),
+      recentNotes: notes,
+      coldCallCounts: counts.slice(-4)
+    };
+  });
+
+  const dates     = allLogs.map(l=>l.date).sort();
+  const firstDate = dates[0] ? fmtDate(dates[0]) : null;
+  const lastDate  = dates[dates.length-1] ? fmtDate(dates[dates.length-1]) : null;
+
+  const payload = {
+    teacherName: profile.name,
+    week0Scores: w0 ? W0_AREAS.map((a,i)=>({area:a, score:w0.scores[i]||0})) : null,
+    practiceSpan: firstDate ? firstDate + (lastDate!==firstDate?' to '+lastDate:'') : null,
+    totalLessonsLogged: allLogs.length,
+    blocks: blockData
+  };
+
+  showSummaryModal('loading');
+
+  try {
+    const res  = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are writing a brief personal progress note for a teacher working through a five-block deliberate practice programme covering: Pacing, Explanation, Questioning, Slides and Visuals, and Voice and Presence.
+
+Write in second person. Sound like a warm, observant mentor who has genuinely read the teacher's notes — not a performance management tool. Be specific: use the actual numbers and quote fragments from notes when they add meaning. Acknowledge that this kind of deliberate practice is genuinely demanding alongside a full teaching timetable.
+
+Structure: 2-3 short paragraphs. First: what they have done and what is working — be specific and honest. Second: the current picture, including any blocks not yet started or gaps, without judgement. Third: one concrete forward-looking observation — something specific to notice or try next, not a generic encouragement.
+
+Under 200 words total. No bullet points. Do not open with a sycophantic line. Do not use the phrase "it is clear that". Do not mention any app or programme by name.`,
+        messages: [{
+          role: 'user',
+          content: 'Here is the teacher\'s progress data:\n\n'
+            + JSON.stringify(payload, null, 2)
+            + '\n\nWrite the progress note.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(c=>c.type==='text')?.text || 'Could not generate summary.';
+    showSummaryModal('done', profile.name, text);
+  } catch(err){
+    showSummaryModal('error');
+  }
+};
+
+function showSummaryModal(state, name='', text=''){
+  const old = document.getElementById('summary-modal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'summary-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end;';
+
+  const inner = state === 'loading' ? `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
+      <div style="font-size:28px;margin-bottom:14px">✨</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:6px">Reading your logs...</div>
+      <div style="font-size:14px;color:var(--muted)">This takes a few seconds</div>
+    </div>`
+
+  : state === 'done' ? `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;margin:0 auto;max-height:82vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Progress summary</div>
+          <div style="font-weight:800;font-size:19px;letter-spacing:-.02em">${name}</div>
+        </div>
+        <button onclick="closeSummaryModal()" style="border:none;background:var(--bg);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;color:var(--muted);font-family:var(--font);flex-shrink:0;margin-left:12px">&#10005;</button>
+      </div>
+      <div id="summary-text" style="font-size:15px;line-height:1.75;color:var(--text);white-space:pre-wrap;margin-bottom:22px">${text}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1" onclick="copySummary()">Copy text</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="closeSummaryModal()">Close</button>
+      </div>
+    </div>`
+
+  : state === 'nodata' ? `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
+      <div style="font-size:28px;margin-bottom:14px">📋</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Not enough data yet</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px">Complete the Week 0 audit and log at least a couple of lessons first — otherwise there is nothing meaningful to summarise.</div>
+      <button class="btn btn-ghost" onclick="closeSummaryModal()">Close</button>
+    </div>`
+
+  : `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
+      <div style="font-size:28px;margin-bottom:14px">⚠️</div>
+      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Could not generate summary</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px">Check your internet connection and try again.</div>
+      <button class="btn btn-ghost" onclick="closeSummaryModal()">Close</button>
+    </div>`;
+
+  modal.innerHTML = inner;
+  modal.addEventListener('click', e=>{ if(e.target===modal) closeSummaryModal(); });
+  document.body.appendChild(modal);
+}
+
+window.closeSummaryModal = function(){
+  const m = document.getElementById('summary-modal');
+  if(m) m.remove();
+};
+
+window.copySummary = function(){
+  const text = document.getElementById('summary-text')?.textContent || '';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')).catch(fallbackCopy.bind(null,text));
+  } else { fallbackCopy(text); }
+};
+
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  toast('Copied to clipboard');
+}
 
 // ═══════════════════════════════════════════════
 //  INIT
@@ -839,6 +1351,34 @@ const mlink = document.createElement('link');
 mlink.rel='manifest';
 mlink.href='data:application/json,'+encodeURIComponent(JSON.stringify(manifest));
 document.head.appendChild(mlink);
+
+// ═══════════════════════════════════════════════
+//  OFFLINE DETECTION + SERVICE WORKER
+// ═══════════════════════════════════════════════
+function setOfflineBanner(offline){
+  document.getElementById('offline-banner').classList.toggle('show', offline);
+  document.body.classList.toggle('offline', offline);
+}
+window.addEventListener('online',  () => setOfflineBanner(false));
+window.addEventListener('offline', () => setOfflineBanner(true));
+if(!navigator.onLine) setOfflineBanner(true);
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const sw = reg.installing;
+          sw.addEventListener('statechange', () => {
+            if(sw.state === 'installed' && navigator.serviceWorker.controller){
+              toast('App updated. Reload to get the latest version.');
+            }
+          });
+        });
+      })
+      .catch(() => {}); // Fail silently — app still works online without SW
+  });
+}
 
 renderHome();
 </script>
