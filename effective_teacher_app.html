@@ -125,7 +125,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 .back-btn{display:flex;align-items:center;gap:5px;color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;border:none;background:none;font-family:var(--font);padding:0;margin-bottom:18px}
 /* ── Score chip ─────────────────────────────────────────── */
 .score-chip{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
-/* ── Offline banner ─────────────────────────────────────── */
+/* ── Info card swiper ────────────────────────────────────── */
+.swiper-wrap{position:relative;overflow:hidden;border-radius:var(--radius);margin-bottom:14px;touch-action:pan-y}
+.swiper-track{display:flex;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.swiper-card{min-width:100%;padding:20px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);box-sizing:border-box}
+.swiper-headline{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px;line-height:1.25}
+.swiper-body{font-size:14px;line-height:1.7;color:#444}
+.swiper-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px}
+.swiper-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s;cursor:pointer}
+.swiper-dot.active{width:18px;border-radius:3px}
+.swiper-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.swiper-nav button{border:none;background:none;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;color:var(--accent);padding:0}
+.swiper-nav button:disabled{color:var(--muted);cursor:default}
+.swiper-count{font-size:12px;color:var(--muted);font-weight:600}
 #offline-banner{display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#1A1A1A;color:#fff;text-align:center;font-size:13px;font-weight:600;font-family:var(--font);padding:8px 16px;z-index:300;letter-spacing:.01em}
 #offline-banner.show{display:block}
 body.offline #views{padding-top:36px}
@@ -134,7 +146,7 @@ body.offline #views{padding-top:36px}
 </style>
 </head>
 <body>
-<div id="offline-banner">No internet connection — running from cache</div>
+<div id="offline-banner">No internet connection: running from cache</div>
 <div id="app">
     <div id="views">
     <div class="view active" id="view-home"><div id="home-content"></div></div>
@@ -200,8 +212,16 @@ const BLOCKS = [
   {
     id: 1, title: "Pacing", technique: "The Five-Minute Rule", weeks: "Weeks 1-2",
     color: "#3B82F6", light: "#EFF6FF",
-    summary: "Set a timer for 5-10 minutes before you start teaching. When it goes off, you stop — no matter where you are — and activate students with a short task (see activities below). Then reset and go again.",
-    why: "Pacing is structural. Getting regular pause points into your lessons creates the space every other technique needs. The problem is not that teachers don't know they should pause — it's that the flow of the lesson and anxiety about coverage make stopping feel like a cost. The timer removes that decision from the moment. When it goes off, stopping is no longer a choice you have to make mid-explanation; it was already made before you walked in. Without the external cue, 'pause every five minutes' stays an intention, and intentions disappear under pressure.\n\nThe pause itself needs to do something — not just break the flow but give the brain a task that consolidates what just came in. Vary the activity across lessons so the pause doesn't become invisible through repetition:\n\n• Retrieval — 'Write down two things from the last five minutes.' Simple, always works.\n• Connection — 'How does this connect to what we covered last week?' Builds schema rather than just consolidating new information.\n• Question generation — 'Write one question you still have.' Surfaces misconceptions before they bed in. Powerful before a discussion.\n• Prediction — 'What do you think comes next?' Works well mid-topic. Activates prior knowledge and creates a hook for the next segment.\n• Pair share — 'Turn to the person next to you and explain the main idea in one sentence.' Retrieval plus articulation. Circulate and listen.\n• Sketch or diagram — 'Draw a quick sketch of the process we just described.' Works well for anything spatial or sequential. Different cognitive channel from writing.",
+    cards: [
+      { headline: "The problem", body: "Teachers know they should pause. They don't, because the flow of the lesson and anxiety about coverage make stopping feel like a cost. Good intentions disappear under pressure." },
+      { headline: "The fix: make it external", body: "Set a timer before you walk in. When it goes off, you stop, no matter where you are. The decision is already made. You don't have to choose in the moment." },
+      { headline: "Why pausing works", body: "Working memory saturates quickly. A pause gives the brain time to consolidate what just came in before you add more. Without it, new information overwrites the old." },
+      { headline: "The pause needs a task", body: "Don't just stop: activate. Give students something short to do: write, connect, predict, or explain to a neighbour. The task does the consolidation work." },
+      { headline: "Vary the activity", body: "Retrieval, connection, prediction, pair share, sketch: rotate through these across lessons. The same task every time becomes invisible and stops working." },
+      { headline: "The target", body: "Stop at least once per lesson when the timer goes off. Wait for actual responses before continuing. It will feel slow at first. That feeling is normal and temporary." }
+    ],
+    summary: "Set a timer for 5-10 minutes before you start teaching. When it goes off, you stop, no matter where you are, and activate students with a short task (see activities below). Then reset and go again.",
+    why: "Pacing is structural. Getting regular pause points into your lessons creates the space every other technique needs. The problem is not that teachers don't know they should pause; it's that the flow of the lesson and anxiety about coverage make stopping feel like a cost. The timer removes that decision from the moment. When it goes off, stopping is no longer a choice you have to make mid-explanation; it was already made before you walked in. Without the external cue, 'pause every five minutes' stays an intention, and intentions disappear under pressure.\n\nThe pause itself needs to do something: not just break the flow but give the brain a task that consolidates what just came in. Vary the activity across lessons so the pause doesn't become invisible through repetition:\n\n• Retrieval — 'Write down two things from the last five minutes.' Simple, always works.\n• Connection — 'How does this connect to what we covered last week?' Builds schema rather than just consolidating new information.\n• Question generation — 'Write one question you still have.' Surfaces misconceptions before they bed in. Powerful before a discussion.\n• Prediction — 'What do you think comes next?' Works well mid-topic. Activates prior knowledge and creates a hook for the next segment.\n• Pair share — 'Turn to the person next to you and explain the main idea in one sentence.' Retrieval plus articulation. Circulate and listen.\n• Sketch or diagram — 'Draw a quick sketch of the process we just described.' Works well for anything spatial or sequential. Different cognitive channel from writing.",
     target: "Score 5 or above out of 6 by end of Week 2.",
     scoreMax: 6,
     fields: [
@@ -216,10 +236,18 @@ const BLOCKS = [
   {
     id: 2, title: "Explanation", technique: "Definitions and Analogies", weeks: "Weeks 3-4",
     color: "#16A34A", light: "#F0FDF4",
-    summary: "Start each new concept with either a Bullet-Proof Definition — one precise sentence, read and recited aloud — or a Generative Analogy — a comparison to something students already know that carries the same structure as the new idea.",
-    why: "Without a precise anchor up front, students construct their own informal version of a concept — often wrong — and <em>everything taught afterwards attaches to that instead</em>. The <strong>Curse of Knowledge</strong> makes it easy to forget what it feels like to encounter an idea for the first time. These two techniques solve the problem in different ways.\n\n<strong>Bullet-Proof Definition</strong><br>One sentence. No qualifications, no <em>\"sort of\"</em> or <em>\"basically\"</em>. Display it, students read it silently, then say it to a neighbour. Saying it aloud is an act of retrieval — not passive reading.\n\n> <strong>Example — teaching propaganda</strong>\n> ✓ <em>\"Propaganda is information deliberately constructed to shape public opinion in favour of a particular ideology or cause, often by distorting or omitting facts.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"Propaganda is basically when governments use information to make people think a certain way.\"</em>\n> The second version has four escape hatches: <em>basically</em>, <em>governments</em> (only them?), <em>information</em> (what kind?), <em>a certain way</em> (which way?). The first has none.\n\n<strong>Generative Analogy</strong><br>An analogy does not define — it <em>connects</em>. It borrows a structure the student already understands and maps the new concept onto it, giving memory somewhere to anchor the idea immediately.\n\n> <strong>Example — teaching variables in programming</strong>\n> ✓ <em>\"Think of a variable as a named box. You can put one thing in it, look at what\'s inside, swap it for something else, or read the label to find it. The box doesn\'t care what you put in — but it can only hold one thing at a time.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"A variable is a named storage location in memory.\"</em>\n> Technically correct — but a student who has never coded has nothing to hang it on.",
-    target: "Score 2 or 3 on all three criteria by end of Week 4.",
-    scoreMax: 9,
+    cards: [
+      { headline: "The core problem", body: "Without a precise anchor up front, students build their own version of a concept, often wrong. Everything taught afterwards attaches to that instead. You can't see it happening." },
+      { headline: "The Curse of Knowledge", body: "Once you know something well, it is very hard to remember what it felt like not to know it. This makes it easy to skip the explanation that students actually need." },
+      { headline: "Bullet-Proof Definition", body: "One sentence. No qualifications, no ‘basically’ or ‘sort of’. Display it, students read it silently, then say it to a neighbour. Saying it aloud is retrieval, not passive reading." },
+      { headline: "What a good definition looks like", body: "✓ 'Propaganda is information deliberately constructed to shape public opinion in favour of a particular ideology, often by distorting or omitting facts.' ✗ 'Propaganda is basically when governments use information to make people think a certain way.' Four escape hatches. The first has none." },
+      { headline: "Generative Analogy", body: "An analogy doesn't define; it connects. It borrows a structure the student already understands and maps the new concept onto it, so memory has somewhere to attach the idea immediately." },
+      { headline: "What a good analogy looks like", body: "Teaching variables in programming: 'Think of a variable as a named box. You put one thing in it, look at what's inside, or swap it for something else. It can only hold one thing at a time.' A student who has never coded can hold that immediately." }
+    ],
+    summary: "Start each new concept with either a Bullet-Proof Definition (one precise sentence, read and recited aloud) or a Generative Analogy: a comparison to something students already know that carries the same structure as the new idea.",
+    why: "Without a precise anchor up front, students construct their own informal version of a concept, often wrong, and <em>everything taught afterwards attaches to that instead</em>. The <strong>Curse of Knowledge</strong> makes it easy to forget what it feels like to encounter an idea for the first time. These two techniques solve the problem in different ways.\n\n<strong>Bullet-Proof Definition</strong><br>One sentence. No qualifications, no <em>\"sort of\"</em> or <em>\"basically\"</em>. Display it, students read it silently, then say it to a neighbour. Saying it aloud is an act of retrieval, not passive reading.\n\n> <strong>Example: teaching propaganda</strong>\n> ✓ <em>\"Propaganda is information deliberately constructed to shape public opinion in favour of a particular ideology or cause, often by distorting or omitting facts.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"Propaganda is basically when governments use information to make people think a certain way.\"</em>\n> The second version has four escape hatches: <em>basically</em>, <em>governments</em> (only them?), <em>information</em> (what kind?), <em>a certain way</em> (which way?). The first has none.\n\n<strong>Generative Analogy</strong><br>An analogy does not define; it <em>connects</em>. It borrows a structure the student already understands and maps the new concept onto it, giving memory somewhere to anchor the idea immediately.\n\n> <strong>Example: teaching variables in programming</strong>\n> ✓ <em>\"Think of a variable as a named box. You can put one thing in it, look at what\'s inside, swap it for something else, or read the label to find it. The box doesn\'t care what you put in, but it can only hold one thing at a time.\"</em>\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> <em>\"A variable is a named storage location in memory.\"</em>\n> Technically correct, but a student who has never coded has nothing to hang it on.",
+    target: "Aim for a total score of 4 or above out of 6 by end of Week 4. A score of 2 on each criterion is solid; 3 on all three is excellent.",
+    scoreMax: 6,
     fields: [
       { key:"technique", label:"Which technique did you use?", type:"select",
         opts:["Bullet-Proof Definition","Generative Analogy"] },
@@ -234,8 +262,16 @@ const BLOCKS = [
   {
     id: 3, title: "Questioning", technique: "Cold Calling with Wait Time", weeks: "Weeks 5-6",
     color: "#D97706", light: "#FFFBEB",
+    cards: [
+      { headline: "The hidden contract", body: "In most classrooms the same 4–5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. It is invisible but it is real." },
+      { headline: "What Cold Calling does", body: "When any student may be called at any moment, the question is live for everyone until a name is called. The whole class can't afford to switch off, not from fear, but because the question is genuinely theirs." },
+      { headline: "The sequence", body: "Pose the question to the whole class first, name nobody. Wait 3 full seconds in silence and make eye contact around the room. Then, calmly, name a student. The tone should feel as routine as asking what page you're on." },
+      { headline: "Why 3 seconds matters", body: "Cutting the silence short means only fast processors respond. Waiting means more students complete a genuine retrieval attempt before the answer arrives, which is the whole point." },
+      { headline: "When they say 'I don't know'", body: "This is usually a reflex, not genuine ignorance. Never accept it as the end of the interaction. Say: ‘Take a guess.’ Or: ‘Tell me one thing you do know about this.’ Or: ‘I’ll come back to you’ and do." },
+      { headline: "The culture shift", body: "The first week feels uncomfortable for everyone. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes." }
+    ],
     summary: "Pose a question to the whole class, pause 3 seconds in silence, then name a specific student. Write 2-3 cold-call questions with student names into your lesson notes before the lesson.",
-    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. <strong>Cold Calling dissolves that contract.</strong> When any student may be called at any moment, the whole class cannot afford to switch off — not because they fear embarrassment, but because the question is live for everyone until a name is called. The 3-second wait matters: it ensures the whole class attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.\n\n<strong>The sequence</strong><br>Pose the question to the whole class first — name nobody. Wait 3 full seconds in silence. Make eye contact around the room. Then, and only then, name a student calmly and matter-of-factly. The tone should feel as routine as asking what page you're on. Once it becomes normal, students stop bracing for it and start just thinking.\n\n<strong>When a student says \"I don't know\"</strong><br>This is the most common failure point. Left unaddressed, <em>I don\'t know</em> becomes the exit strategy that reinstates the old contract. It is usually a reflex, not a genuine statement of ignorance. Never accept it as the end of the interaction.\n\n> <strong>What to say instead:</strong>\n> • <em>\"Take a guess.\"</em> — removes the social cost of being wrong. Most students will answer.\n> • <em>\"What would you say if you did know?\"</em> — sounds strange, but works more often than it should.\n> • <em>\"Tell me one thing you do know about this.\"</em> — partial retrieval is still retrieval.\n> • <em>\"I\'ll come back to you.\"</em> — ask someone else, then return. Signals that I don\'t know does not close the loop.\n> • Reduce the question — \"OK, simpler: what does [key term] mean?\" Keep them in the game.\n\n<strong>The culture shift</strong><br>The first week feels uncomfortable — for you and for students. Some will look down, some will repeat <em>I don\'t know</em>, some will be visibly surprised you came back to them. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes.",
+    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. <strong>Cold Calling dissolves that contract.</strong> When any student may be called at any moment, the whole class cannot afford to switch off, not because they fear embarrassment, but because the question is live for everyone until a name is called. The 3-second wait matters: it ensures the whole class attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.\n\n<strong>The sequence</strong><br>Pose the question to the whole class first, name nobody. Wait 3 full seconds in silence. Make eye contact around the room. Then, and only then, name a student calmly and matter-of-factly. The tone should feel as routine as asking what page you're on. Once it becomes normal, students stop bracing for it and start just thinking.\n\n<strong>When a student says \"I don't know\"</strong><br>This is the most common failure point. Left unaddressed, <em>I don\'t know</em> becomes the exit strategy that reinstates the old contract. It is usually a reflex, not a genuine statement of ignorance. Never accept it as the end of the interaction.\n\n> <strong>What to say instead:</strong>\n> • <em>\"Take a guess.\"</em> — removes the social cost of being wrong. Most students will answer.\n> • <em>\"What would you say if you did know?\"</em> — sounds strange, but works more often than it should.\n> • <em>\"Tell me one thing you do know about this.\"</em> — partial retrieval is still retrieval.\n> • <em>\"I\'ll come back to you.\"</em> — ask someone else, then return. Signals that I don\'t know does not close the loop.\n> • Reduce the question — \"OK, simpler: what does [key term] mean?\" Keep them in the game.\n\n<strong>The culture shift</strong><br>The first week feels uncomfortable, for you and for students. Some will look down, some will repeat <em>I don\'t know</em>, some will be visibly surprised you came back to them. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes.",
     target: "At least 3 cold calls per lesson. Wait time every time by Week 6.",
     scoreMax: null,
     fields: [
@@ -249,16 +285,25 @@ const BLOCKS = [
   {
     id: 4, title: "Slides and Visuals", technique: "Modality Principle", weeks: "Weeks 7-8",
     color: "#7C3AED", light: "#F5F3FF",
+    cards: [
+      { headline: "The core problem", body: "Students cannot read text and listen to speech at the same time. They use the same cognitive channel. Putting your explanation in text while also saying it forces attention to split, and nothing is processed well." },
+      { headline: "The Modality Principle", body: "If a slide has a diagram or image, explain it orally. Do not also put the explanation in text on the slide. Let the image do the visual work. Let your voice do the explanation." },
+      { headline: "The Split-Attention Effect", body: "When a diagram and its explanation are physically separated, the eye travels back and forth between them. That travel itself uses up working memory, leaving less capacity for understanding the content." },
+      { headline: "The Redundancy Effect", body: "Reading a paragraph aloud that is also on the screen is worse than either alone. Students cannot decide whether to read or listen, so they do both badly. Cut the text, or stay silent while they read it." },
+      { headline: "Integrated labelling", body: "Place labels directly on the item they describe, not in a separate legend. A legend forces the eye to shuttle between image and key. Writing the label on the item removes that cost entirely." },
+      { headline: "When text is fine", body: "Titles, single keyword labels, short captions under ten words, and spoken cues like look at the top right are all fine. The rule is not no text. It is no redundant text that competes with what you are saying." },
+      { headline: "The goal", body: "Reduce slides where you read text aloud to zero. Reduce diagrams with separate legends by at least half. Perfect is not the target. Meaningfully better is." }
+    ],
     summary: "Audit one presentation: remove text paragraphs from diagram slides, place labels directly on images, and cut bullets you would read aloud. Then teach from the improved version and use this log to track further fixes.",
-    why: "Students cannot read text and listen to speech at the same time. They use the same cognitive channel. Putting your explanation in text while also saying it aloud forces attention to split and nothing is processed well. Diagrams with separate legends do the same. This block is a one-time audit of a presentation you already own, not a daily habit.",
-    target: "Reduce problem slides by at least 50%. No slides where you read text aloud during lessons.",
+    why: "<strong>The core problem</strong><br>Students cannot read and listen at the same time. Both use the same cognitive channel: verbal working memory. When a slide shows a text explanation while you speak one, students must choose which to follow. Neither gets full attention. The result feels like understanding but is often surface processing.\n\n<strong>The Split-Attention Effect</strong><br>When a diagram and its label or explanation are physically separated on screen, the eye has to travel between them repeatedly. That travel is not free: it uses up working memory just to track position, leaving less capacity for understanding the content. This is why a legend at the bottom of a diagram is worse than a label placed directly on the item, even when the information is identical.\n\n> <strong>Example: a WWI alliance map</strong>\n> ✓ The map shows countries coloured by alliance, with the alliance name written directly on each shaded region. You point and explain verbally.\n> <span style=\"color:#DC2626;font-weight:600\">✗ Not this:</span> The same map with a colour key at the bottom. Students look at the map, look at the key, look at the map again. The cognitive cost of navigation competes with the content.\n\n<strong>The Redundancy Effect</strong><br>Reading a paragraph aloud that is also visible on the slide is worse than either alone. The spoken and read versions arrive at different speeds and interfere with each other. The fix is simple: either remove the text and speak, or display the text and stay silent while students read.\n\n<strong>The Temporal Contiguity Principle</strong><br>If you must explain something complex using both words and an image, the explanation should happen at the same time as the image is visible. Revealing a diagram fully and then talking through it is less effective than building it step by step while explaining each part. Timing and space both matter.\n\n<strong>When text is appropriate</strong><br>Titles, single keyword labels, short captions under ten words, and cues like note the arrow at the top right are all fine. The principle is not no text on slides. It is no redundant text that competes with what you are saying at the same moment.\n\n<strong>The practical audit</strong><br>For each slide in the presentation you are rebuilding, ask three questions: Will I be speaking while this is on screen? Does it have a diagram with a separate legend? Is there a text block I would read aloud? If yes to any of these, flag it. Reduce every flagged slide, not necessarily eliminate them all.",
+    target: "Reduce flagged slides by at least 50%. No slides where you read a text block aloud by end of Week 8.",
     scoreMax: null,
     isAudit: true,
     fields: [
       { key:"readSlide", label:"Did you read text off a slide?",
         opts:["No","Once","More than once"] },
-      { key:"visualsClear", label:"Did visuals seem clearer to students?",
-        opts:["Yes","Unsure","No"] },
+      { key:"visualsClear", label:"When you explained, did students look at the slide or at you?",
+        opts:["At me — good sign","At the slide mostly","Hard to tell"] },
       { key:"slideToFix", label:"One slide to fix before next lesson", type:"text",
         placeholder:"Describe the slide..." }
     ]
@@ -266,18 +311,26 @@ const BLOCKS = [
   {
     id: 5, title: "Voice and Presence", technique: "Intentional Mobility", weeks: "Weeks 9-10",
     color: "#DC2626", light: "#FEF2F2",
-    summary: "Move among students using a slide remote so you are not fixed to the front. For vocal variety, mark one moment in each lesson — the key idea, the central claim — and label it 'drop and slow': drop your volume slightly, halve your pace, and pause briefly before you say it. Record a lesson in Week 10 and compare it honestly to your Week 0 recording.",
-    why: "Voice and physical presence are the hardest to self-monitor in real time — which is why this block comes last, when earlier habits are becoming automatic and you have spare capacity to notice what your body is doing.\n\n<strong>Why vocal variety matters</strong><br>The brain stops processing constant stimuli. A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise — not through laziness but through neurology. Students working hard to extract meaning from a signal their brain is trying to filter out will find the lesson exhausting without knowing why. Vocal variation is the mechanism that keeps the signal alive.\n\n<strong>The three levers</strong><br>\n• <strong>Pace</strong> — slowing down signals that something matters. Speeding up signals transition or background detail. Most teachers speak at roughly the same pace throughout regardless of content weight.\n• <strong>Volume</strong> — the counterintuitive one: <em>dropping</em> volume creates more attention than raising it. When you get quieter, students lean in. Raising volume works but is overused and loses its effect.\n• <strong>Pitch</strong> — a falling pitch at the end of a statement sounds authoritative. A rising pitch sounds uncertain even when you are not. Monotone means pitch barely moves, stripping out all of these signals.\n\n<strong>The pause</strong><br>A 2-3 second silence before a key idea creates genuine anticipation and is probably the single most powerful vocal tool available. It is also the most underused, because silence feels unbearable to most teachers. It is not unbearable to students — it signals that something important is coming.\n\n<strong>The self-monitoring problem</strong><br>What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Teachers consistently underestimate how much variation is needed because the self-consciousness of doing it distorts perception. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. This is why the Week 10 recording matters — not as a performance review, but as calibration.",
+    cards: [
+      { headline: "Why this comes last", body: "Voice and physical presence are the hardest to self-monitor in real time. By now, earlier techniques are becoming automatic, freeing up the mental capacity to notice what your body is actually doing." },
+      { headline: "The habituation problem", body: "A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise, not through laziness but through neurology. The brain filters constant stimuli. Variation keeps the signal alive." },
+      { headline: "The three levers", body: "Pace: slowing down signals that something matters. Volume: dropping it creates more attention than raising it, and students lean in. Pitch: a falling pitch sounds authoritative; a rising pitch sounds uncertain, even when you're not." },
+      { headline: "The pause", body: "A 2–3 second silence before a key idea creates genuine anticipation. It is the most powerful vocal tool and the most underused. Silence is not awkward for students; it signals that something important is coming." },
+      { headline: "Drop and slow", body: "Mark one moment in your lesson plan (the central claim, the key idea) and label it ‘drop and slow’. Drop your volume slightly, halve your pace, and pause briefly before you say it. That is the whole technique." },
+      { headline: "The self-monitoring gap", body: "What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. The Week 10 recording is calibration, not performance review." }
+    ],
+    summary: "Move among students using a slide remote so you are not fixed to the front. For vocal variety, mark one moment in each lesson (the key idea, the central claim) and label it ‘drop and slow’: drop your volume slightly, halve your pace, and pause briefly before you say it. Record a lesson in Week 10 and compare it honestly to your Week 0 recording.",
+    why: "Voice and physical presence are the hardest to self-monitor in real time, which is why this block comes last, when earlier habits are becoming automatic and you have spare capacity to notice what your body is doing.\n\n<strong>Why vocal variety matters</strong><br>The brain stops processing constant stimuli. A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise, not through laziness but through neurology. Students working hard to extract meaning from a signal their brain is trying to filter out will find the lesson exhausting without knowing why. Vocal variation is the mechanism that keeps the signal alive.\n\n<strong>The three levers</strong><br>\n• <strong>Pace</strong> — slowing down signals that something matters. Speeding up signals transition or background detail. Most teachers speak at roughly the same pace throughout regardless of content weight.\n• <strong>Volume</strong> — the counterintuitive one: <em>dropping</em> volume creates more attention than raising it. When you get quieter, students lean in. Raising volume works but is overused and loses its effect.\n• <strong>Pitch</strong> — a falling pitch at the end of a statement sounds authoritative. A rising pitch sounds uncertain even when you are not. Monotone means pitch barely moves, stripping out all of these signals.\n\n<strong>The pause</strong><br>A 2-3 second silence before a key idea creates genuine anticipation and is probably the single most powerful vocal tool available. It is also the most underused, because silence feels unbearable to most teachers. It is . It signals that something important is coming.\n\n<strong>The self-monitoring problem</strong><br>What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Teachers consistently underestimate how much variation is needed because the self-consciousness of doing it distorts perception. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. This is why the Week 10 , not as a performance review, but as calibration.",
     target: "Mobility and eye contact: 3 or above out of 5 each. Vocal variety: deliberately use at least two of the three levers (pace, volume, pause) in every lesson by Week 10.",
     scoreMax: 16,
     fields: [
       { key:"mobility", label:"Mobility (1-5)", type:"range", min:1, max:5,
         hints:["Never left front","Intentional zones"] },
-      { key:"pace", label:"Pace — did you slow down at key moments?",
+      { key:"pace", label:"Pace: did you slow down at key moments?",
         opts:["Same pace throughout","Changed once or twice","Deliberately slowed at key moments"] },
-      { key:"volume", label:"Volume — did you drop it for emphasis?",
+      { key:"volume", label:"Volume: did you drop it for emphasis?",
         opts:["Same volume throughout","Raised volume only","Dropped volume for emphasis at least once"] },
-      { key:"pause", label:"The pause — did you pause before a key idea?",
+      { key:"pause", label:"The pause: did you pause before a key idea?",
         opts:["No intentional pauses","Paused once","Used the pause more than once"] },
       { key:"eye", label:"Eye contact (1-5)", type:"range", min:1, max:5,
         hints:["Screen only","Connects with individuals"] }
@@ -291,65 +344,73 @@ const BLOCKS = [
 const PROMPTS = {
   1: {
     low: [
-      "The timer went off but felt disruptive — what would make the pause feel more natural next time?",
-      "Students didn't engage with the active task — was it the task itself, or the transition into it?",
-      "You ran out of time to restart — what would you cut next lesson to protect the pause?"
+      "The timer went off but felt disruptive: what would make the pause feel more natural next time?",
+      "Students didn't engage with the active task: was it the task itself, or the transition into it?",
+      "You ran out of time to restart: what would you cut next lesson to protect the pause?"
     ],
     high: [
-      "The pause worked well — what did students do during it that told you that?",
-      "You stopped when the timer went off — how did the room feel different in the second half?",
-      "Good rhythm this lesson — could you try a different active task next time to vary it?"
+      "The pause worked well: what did students do during it that told you that?",
+      "You stopped when the timer went off: how did the room feel different in the second half?",
+      ". Could you try a different active task next time to vary it?"
     ]
   },
   2: {
     low: [
-      "The analogy or definition didn't quite land — what do your students already know that might work better?",
-      "It felt wordy in the moment — can you cut it to one sentence before next lesson?",
-      "Students looked blank — was the concept itself unclear, or the way you explained it?"
+      "The analogy or definition didn't quite land: what do your students already know that might work better?",
+      "It felt wordy in the moment: can you cut it to one sentence before next lesson?",
+      "Students looked blank: was the concept itself unclear, or the way you explained it?"
     ],
     high: [
-      "It clicked for most students — what specifically did you say that seemed to do the work?",
-      "The definition stuck — did students use the language back at you later in the lesson?",
-      "Strong explanation — could the same analogy carry a different concept in a future lesson?"
+      "It clicked for most students: what specifically did you say that seemed to do the work?",
+      "The definition stuck: did students use the language back at you later in the lesson?",
+      ". Could the same analogy carry a different concept in a future lesson?"
     ]
   },
   3: {
     low: [
-      "Fewer cold calls than planned — what made you hold back? Pace, confidence, or something else?",
-      "The wait time felt long — did students visibly think during it, or did eyes drift?",
-      "You reverted to volunteers — was there a moment you could have cold called instead?"
+      "Fewer cold calls than planned: what made you hold back? Pace, confidence, or something else?",
+      "The wait time felt long: did students visibly think during it, or did eyes drift?",
+      "You reverted to volunteers: was there a moment you could have cold called instead?"
     ],
     high: [
-      "Good number of calls — did any student surprise you with their answer?",
-      "The wait time held — what did you notice in the room during the silence?",
-      "Cold calling felt routine — are students anticipating it now, or still caught off guard?"
+      "Good number of calls: did any student surprise you with their answer?",
+      "The wait time held: what did you notice in the room during the silence?",
+      "Cold calling felt routine: are students anticipating it now, or still caught off guard?"
     ]
   },
   4: {
     low: [
-      "You read from a slide — which one, and what would you put there instead?",
-      "The text pulled you in — was it a safety net or a habit? Name the slide to fix.",
-      "It happened again — is there one slide that keeps trapping you? Note it here."
+      "You read from a slide: which one would you rewrite before next lesson, and what would replace the text?",
+      "The text pulled you in: was it a safety net or a habit? Name the slide so you can fix it.",
+      "Which slide keeps drawing you back to the text? Note it here and plan one change."
     ],
     high: [
-      "Clean session — did the visuals do the work, or did your explanation carry it?",
-      "No reading from slides — which visual landed best and why?",
-      "Good discipline — is there a slide that still tempts you? Note it before next lesson."
+      "Clean session: did the visuals do the work, or did your explanation carry it?",
+      "No reading from slides this lesson. Which visual landed best and why?",
+      "Good discipline. Is there a slide that still tempts you? Note it before next lesson."
     ]
   },
   5: {
     low: [
-      "You stayed near the front — was it habit, or was something pulling you back there?",
-      "The voice stayed flat — pick one moment in the next lesson where you will deliberately drop your volume and slow down before saying it.",
-      "Low mobility this session — which part of the room did you never reach? Plan one reason to go there next lesson."
+      "You stayed near the front: was it habit, or was something pulling you back there?",
+      "The voice ; pick one moment in the next lesson where you will deliberately drop your volume and slow down before saying it.",
+      "Low mobility . Which part of the room did you never reach? Plan one reason to go there next lesson."
     ],
     high: [
-      "Good presence — did moving to a different part of the room change how specific students responded?",
-      "You used the pause — what happened in the room during the silence? Did students lean in or look away?",
-      "Strong session — which of the three levers (pace, volume, pause) felt most natural? Which still feels forced?"
+      ". Did moving to a different part of the room change how specific students responded?",
+      "You used the pause: what happened in the room during the silence? Did students lean in or look away?",
+      ". Which of the three levers (pace, volume, pause) felt most natural? Which still feels forced?"
     ]
   }
 };
+const W0_HINTS = [
+  "Do you naturally stop every 5-10 minutes and give students something active to do, or does the lesson run continuously?",
+  "Do you regularly use comparisons, stories or examples that students already know to explain new ideas?",
+  "Do you direct questions to specific students who have not raised their hand, or do you rely mainly on volunteers?",
+  "Do you read text off your slides while it is also visible on screen, or do you let the image do the visual work?",
+  "Do you move around the room during the lesson, or do you spend most of the time at the front?"
+];
+
 const S = {
   view: 'home',
   block: null,
@@ -435,6 +496,70 @@ function refreshPrompt(){
   const logs = DB.getLogs(pid, S.block);
   el.textContent = '💭 ' + getPrompt(S.block, logs.length, S.form);
 }
+function buildSwiper(cards, color){
+  const id = 'sw' + Date.now();
+  const html = `
+    <div class="swiper-wrap" id="${id}-wrap">
+      <div class="swiper-track" id="${id}-track">
+        ${cards.map((c,i)=>`
+          <div class="swiper-card">
+            <div class="swiper-headline" style="color:${color}">${c.headline}</div>
+            <div class="swiper-body">${c.body}</div>
+          </div>`).join('')}
+      </div>
+      <div class="swiper-nav">
+        <button id="${id}-prev" onclick="swiperMove('${id}',-1)" disabled>&#8592; Prev</button>
+        <div class="swiper-dots" id="${id}-dots">
+          ${cards.map((_,i)=>`<div class="swiper-dot${i===0?' active':''}" style="${i===0?'background:'+color:''}" onclick="swiperGo('${id}',${i},${cards.length},'${color}')"></div>`).join('')}
+        </div>
+        <button id="${id}-next" onclick="swiperMove('${id}',1)">Next &#8594;</button>
+      </div>
+    </div>`;
+
+  // Wire up touch after render
+  setTimeout(()=>{
+    const wrap = document.getElementById(id+'-wrap');
+    if(!wrap) return;
+    let startX=0, startY=0, dragging=false;
+    wrap.addEventListener('touchstart', e=>{ startX=e.touches[0].clientX; startY=e.touches[0].clientY; dragging=true; },{passive:true});
+    wrap.addEventListener('touchend', e=>{
+      if(!dragging) return; dragging=false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){
+        swiperMove(id, dx < 0 ? 1 : -1);
+      }
+    },{passive:true});
+  },0);
+
+  return html;
+}
+
+window.swiperMove = function(id, dir){
+  const track = document.getElementById(id+'-track');
+  if(!track) return;
+  const total = track.children.length;
+  const cur   = parseInt(track.dataset.cur||'0');
+  swiperGo(id, Math.max(0,Math.min(total-1, cur+dir)), total, track.dataset.color);
+};
+
+window.swiperGo = function(id, idx, total, color){
+  const track = document.getElementById(id+'-track');
+  const dots  = document.getElementById(id+'-dots');
+  const prev  = document.getElementById(id+'-prev');
+  const next  = document.getElementById(id+'-next');
+  if(!track) return;
+  track.dataset.cur   = idx;
+  track.dataset.color = color;
+  track.style.transform = `translateX(-${idx*100}%)`;
+  dots && dots.querySelectorAll('.swiper-dot').forEach((d,i)=>{
+    d.classList.toggle('active', i===idx);
+    d.style.background = i===idx ? color : '';
+  });
+  if(prev) prev.disabled = idx===0;
+  if(next) next.disabled = idx===total-1;
+};
+
 function calcScore(b, vals){
   if(b.id===1) return (vals.q1||0)+(vals.q2||0)+(vals.q3||0);
   if(b.id===2){
@@ -457,6 +582,8 @@ window.stepVal = function(key, min, max, delta){
   el.textContent = next;
   S.form[key] = next;
   refreshPrompt();
+  const msg = document.getElementById('log-validation-msg');
+  if(msg) msg.style.display='none';
 };
 
 window.stepW0 = function(i, min, max, delta){
@@ -498,6 +625,18 @@ function isUnlocked(blockId, pid){
   const w0 = DB.getWeek0(pid);
   if(w0 && (w0.scores[blockId - 2] || 0) >= 6) return true;
   return false;
+}
+
+function getCircuitStatus(pid){
+  if(!pid) return { complete: false, b5logs: 0, allBlocksDone: false };
+  const w0       = DB.getWeek0(pid);
+  const b5logs   = DB.getLogs(pid, 5).length;
+  const blocksDone = BLOCKS.every(b => {
+    const needed = b.id === 5 ? 5 : 3;
+    return DB.getLogs(pid, b.id).length >= needed;
+  });
+  const complete = !!(w0 && blocksDone);
+  return { complete, b5logs, allBlocksDone: blocksDone, hasW0: !!w0 };
 }
 function toast(msg){
   const el = document.getElementById('toast');
@@ -548,10 +687,11 @@ function renderHome(){
   }
   const profile = DB.getProfiles().find(p=>p.id===pid);
   const w0  = DB.getWeek0(pid);
-  const totalLogs = BLOCKS.reduce((s,b)=>s+DB.getLogs(pid,b.id).length,0);
+  const totalLogs = BLOCKS.filter(b=>b.id!==4).reduce((s,b)=>s+DB.getLogs(pid,b.id).length,0);
   const rec = w0 ? getRecommended(pid) : [];
   const recBlocks = rec.map(id => BLOCKS.find(b=>b.id===id));
   const anyLogged = totalLogs > 0;
+  const circuit   = getCircuitStatus(pid);
 
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
@@ -589,7 +729,7 @@ function renderHome(){
     <div class="card" style="border:1.5px solid #2563EB;background:#EFF6FF;margin-bottom:16px">
       ${recBlocks.length ? `
       <div style="font-weight:800;font-size:14px;margin-bottom:8px">Your recommended starting blocks</div>
-      <p style="font-size:13px;color:#333;line-height:1.55;margin-bottom:12px">Based on your two lowest Week 0 scores. Work through them in order even if only one is highlighted — the sequence matters.</p>
+      <p style="font-size:13px;color:#333;line-height:1.55;margin-bottom:12px">Based on your two lowest Week 0 scores. Work through them in order even if only one is highlighted. The sequence matters.</p>
       <div style="display:flex;gap:8px">
         ${recBlocks.map((b,i) => `
         <div onclick="go('block-detail',{block:${b.id}})" style="flex:1;background:${b.color};border-radius:11px;padding:12px;cursor:pointer">
@@ -602,12 +742,31 @@ function renderHome(){
         <div style="font-size:28px">🌟</div>
         <div>
           <div style="font-weight:800;font-size:14px;margin-bottom:3px">Strong baseline across all areas</div>
-          <div style="font-size:13px;color:#333;line-height:1.5">Your Week 0 scores were 6 or above everywhere. All blocks are unlocked — start with whichever feels most useful right now.</div>
+          <div style="font-size:13px;color:#333;line-height:1.5">Your Week 0 scores were 6 or above everywhere. All blocks are unlocked. Start with whichever feels most useful right now.</div>
         </div>
       </div>`}
     </div>` : ''}
 
     <div class="section-label">Your blocks</div>
+
+    ${circuit.complete ? `
+    <div style="background:linear-gradient(135deg,#7C3AED,#2563EB);border-radius:16px;padding:20px;margin-bottom:16px;text-align:center;box-shadow:0 4px 20px rgba(124,58,237,.25)">
+      <div style="font-size:44px;margin-bottom:8px">🌟</div>
+      <div style="font-weight:800;font-size:20px;color:#fff;letter-spacing:-.02em;margin-bottom:6px">Full circuit complete</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:16px">You have worked through all five blocks and reached Week 10. That is a full cycle of deliberate practice. Now record one lesson, watch it back against your Week 0 recording, and see how far you have come.</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button onclick="go(\'week0\')" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);color:#fff;font-weight:700;font-size:13px;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:var(--font)">Review Week 0 scores</button>
+        <button onclick="go(\'block-detail\',{block:5});setTimeout(()=>setTab(\'info\'),50)" style="background:#fff;border:none;color:#7C3AED;font-weight:800;font-size:13px;padding:10px 16px;border-radius:10px;cursor:pointer;font-family:var(--font)">Block 5 recording tips</button>
+      </div>
+    </div>` : circuit.b5logs >= 3 && circuit.b5logs < 5 ? `
+    <div style="background:var(--surface);border:1.5px solid #7C3AED;border-radius:13px;padding:15px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--shadow)">
+      <div style="font-size:26px;flex-shrink:0">🎯</div>
+      <div>
+        <div style="font-weight:800;font-size:14px;color:#7C3AED;margin-bottom:4px">Almost there: ${5 - circuit.b5logs} lesson(s) to go</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.55">Log ${5 - circuit.b5logs} more Block 5 lesson(s), then record yourself teaching and compare it to your Week 0 recording. That comparison is the point of the whole programme.</div>
+      </div>
+    </div>` : ''}
+
     ${BLOCKS.map(b=>{
       const logs    = DB.getLogs(pid,b.id);
       const pct     = Math.min(100,Math.round((logs.length/6)*100));
@@ -756,6 +915,21 @@ function renderTab(){
           <span style="display:inline-block;margin-top:6px;color:#92400E">You can still read and explore below.</span></div>
         </div>
       </div>` : ''}
+      ${b.id === 5 && pid && DB.getLogs(pid, 5).length >= 5 ? `
+      <div style="background:linear-gradient(135deg,#DC2626,#7C3AED);border-radius:13px;padding:14px 16px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:24px;flex-shrink:0">🎬</div>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#fff;margin-bottom:4px">Time for your Week 10 recording</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.88);line-height:1.55">You have logged 5 Block 5 lessons. Record yourself teaching a full lesson this week, then watch it back alongside your Week 0 recording. Notice what has changed: where you move, how your voice varies, whether you cold call without hesitation. The comparison is the point.</div>
+        </div>
+      </div>` : b.id === 5 && pid && DB.getLogs(pid, 5).length >= 3 ? `
+      <div style="background:var(--surface);border:1.5px solid #DC2626;border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+        <div style="font-size:20px;flex-shrink:0">🎬</div>
+        <div>
+          <div style="font-weight:800;font-size:13px;color:#DC2626;margin-bottom:3px">Recording reminder</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.5">Plan to record yourself in one of your next ${5 - DB.getLogs(pid, 5).length} lessons. You will want to compare it to your Week 0 recording when you finish Block 5.</div>
+        </div>
+      </div>` : ''}
       ${rank >= 0 && !anyLogged && !locked ? `
       <div style="background:${b.color};border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
         <div style="font-size:22px">⭐</div>
@@ -764,6 +938,7 @@ function renderTab(){
           <div style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.4">Your Week 0 audit identified this as one of your lowest-scoring areas. Start here.</div>
         </div>
       </div>` : ''}
+      ${b.cards ? buildSwiper(b.cards, b.color) : ''}
       <div class="accent-strip"><p>${b.summary}</p></div>
       <div class="info-card"><h3>Why this works</h3>${formatWhy(b.why)}</div>
       <div class="info-card"><h3>Target</h3><p>${b.target}</p></div>
@@ -779,17 +954,30 @@ function renderTab(){
     b.fields.filter(f=>f.type==='range').forEach(f=>{
       S.form[f.key] = Math.round((f.min+f.max)/2);
     });
-    const pid2   = DB.getActive();
-    const logCount = pid2 ? DB.getLogs(pid2, b.id).length : 0;
+    const pid2     = DB.getActive();
+    const logs     = pid2 ? DB.getLogs(pid2, b.id) : [];
+    const lastLog  = logs[logs.length - 1];
+    const prevNote = lastLog?.notes?.trim() || '';
+    const logCount = logs.length;
     const initPrompt = getPrompt(b.id, logCount, S.form);
+    const prevNoteHtml = prevNote ? `
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:13px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
+        <div style="font-size:18px;flex-shrink:0;margin-top:1px">📌</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Your note from last lesson</div>
+          <div style="font-size:14px;line-height:1.6;color:var(--text);font-style:italic">"${prevNote}"</div>
+        </div>
+      </div>` : '';
     el.innerHTML = `
       <div id="log-form">
+        ${prevNoteHtml}
         ${b.fields.map(f=>buildField(f,b)).join('')}
         <div class="field">
           <label class="field-label">Reflection</label>
           <div id="notes-prompt" style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:var(--muted);line-height:1.55;font-style:italic">💭 ${initPrompt}</div>
           <textarea placeholder="Your thoughts..." id="f-notes" oninput="S.form.notes=this.value"></textarea>
         </div>
+        <div id="log-validation-msg" style="display:none;color:#DC2626;font-size:13px;font-weight:600;padding:10px 13px;background:#FEF2F2;border-radius:9px;margin-bottom:10px;border:1px solid #FECACA"></div>
         <button class="btn btn-primary" onclick="saveLog(${b.id})">Save lesson log</button>
       </div>`;
     // initialise stepper values in S.form
@@ -811,9 +999,11 @@ function renderTab(){
       const score = calcScore(b,l);
       return `<div class="log-entry">
         <div class="log-meta">
-          <span class="log-date">${fmtDate(l.date)}</span>
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <span class="log-date">${fmtDate(l.date)}</span>
+            ${score!==null ? `<span style="font-size:16px;font-weight:800;color:${b.color};letter-spacing:-.02em">${score}<span style="font-size:12px;font-weight:600;color:var(--muted)">/${b.scoreMax}</span></span>` : ''}
+          </div>
           <div style="display:flex;align-items:center;gap:8px">
-            ${score!==null ? `<span class="score-chip" style="background:${b.color}20;color:${b.color}">${score}${b.scoreMax?'/'+b.scoreMax:''}</span>` : ''}
             <button onclick="delLog(${b.id},${l.id})" style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 5px;font-family:var(--font)">&#10005;</button>
           </div>
         </div>
@@ -872,6 +1062,8 @@ window.pickRadio = function(key,val,group){
   S.form[key]=val;
   group.querySelectorAll('.radio-opt').forEach((o,i)=>o.classList.toggle('selected',i===val));
   refreshPrompt();
+  const msg = document.getElementById('log-validation-msg');
+  if(msg) msg.style.display='none';
 };
 
 function logSummary(b,l){
@@ -896,7 +1088,8 @@ function logSummary(b,l){
 window.saveLog = function(blockId){
   const pid = DB.getActive(); if(!pid) return;
   const b = BLOCKS.find(x=>x.id===blockId);
-  // collect select/number/text values from DOM
+
+  // Collect select/number/text values from DOM first
   b.fields.forEach(f=>{
     if(['select','number','text'].includes(f.type)){
       const inp = document.getElementById('f-'+f.key);
@@ -905,11 +1098,55 @@ window.saveLog = function(blockId){
       }
     }
   });
+
+  // Validation: check meaningful engagement per block
+  const err = validateLog(b, S.form);
+  if(err){
+    const msgEl = document.getElementById('log-validation-msg');
+    if(msgEl){ msgEl.textContent = err; msgEl.style.display = 'block'; }
+    return;
+  }
+
+  // Soft nudge: save but remind if no note written
+  const hasNote = (S.form.notes||'').trim().length > 0;
+
   DB.addLog(pid,blockId,{...S.form});
-  toast('Lesson logged');
+  toast(hasNote ? 'Lesson logged' : 'Logged. Add a reflection note next time');
   S.blockTab='history';
   renderBlockDetail();
 };
+
+function validateLog(b, vals){
+  if(b.id === 1){
+    if(vals.q1 === undefined && vals.q2 === undefined && vals.q3 === undefined)
+      return 'Pick at least one answer before saving.';
+  }
+  if(b.id === 2){
+    const extract = v => { if(!v) return 0; const n=v.toString().match(/\((\d+)\)/); return n?parseInt(n[1]):0; };
+    if(vals.c1 === undefined && vals.c2 === undefined && vals.c3 === undefined)
+      return 'Pick at least one answer before saving.';
+  }
+  if(b.id === 3){
+    const count = parseInt(vals.count) || 0;
+    const hasRadio = vals.wait !== undefined || vals.planned !== undefined;
+    if(count === 0 && !hasRadio)
+      return 'Enter your cold call count or answer at least one question.';
+  }
+  if(b.id === 4){
+    if(vals.readSlide === undefined && vals.visualsClear === undefined && !vals.slideToFix)
+      return 'Fill in at least one field before saving.';
+  }
+  if(b.id === 5){
+    // Steppers start at midpoint — check if anything was deliberately changed
+    const midMobility = 3, midEye = 3;
+    const mobilityMoved = (parseInt(vals.mobility)||3) !== midMobility;
+    const eyeMoved      = (parseInt(vals.eye)||3)      !== midEye;
+    const hasRadio = vals.pace !== undefined || vals.volume !== undefined || vals.pause !== undefined;
+    if(!mobilityMoved && !eyeMoved && !hasRadio)
+      return 'Adjust at least one field before saving.';
+  }
+  return null;
+}
 
 window.delLog = function(blockId,logId){
   const pid = DB.getActive(); if(!pid) return;
@@ -930,12 +1167,31 @@ function renderProgress(){
   }
   const w0 = DB.getWeek0(pid);
 
+  // Weeks active calculation
+  const allDates = BLOCKS.flatMap(b=>DB.getLogs(pid,b.id).map(l=>l.date)).sort();
+  const totalLogs = allDates.length;
+  let weeksActive = 0;
+  if(allDates.length >= 2){
+    const ms = new Date(allDates[allDates.length-1]) - new Date(allDates[0]);
+    weeksActive = Math.max(1, Math.round(ms / (7*24*60*60*1000)));
+  } else if(allDates.length === 1){
+    weeksActive = 1;
+  }
+
   el.innerHTML = `
     <div class="page-title">Progress</div>
 
-    <button class="btn btn-ghost" onclick="generateSummary()" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-size:14px">
-      <span style="font-size:18px">✨</span> Generate progress summary
-    </button>
+    ${totalLogs > 0 ? `
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <div style="flex:1;background:var(--surface);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);text-align:center">
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-.03em">${totalLogs}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Lessons logged</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);text-align:center">
+        <div style="font-size:28px;font-weight:800;color:var(--accent);letter-spacing:-.03em">${weeksActive}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Week${weeksActive!==1?'s':''} active</div>
+      </div>
+    </div>` : ''}
 
     <div class="card" style="margin-bottom:10px">
       <div style="font-weight:700;font-size:14px;margin-bottom:14px">Week 0 Baseline</div>
@@ -975,11 +1231,24 @@ function renderProgress(){
     ${BLOCKS.filter(b=>b.scoreMax).map(b=>{
       const logs   = DB.getLogs(pid,b.id);
       const scores = logs.map(l=>calcScore(b,l)).filter(s=>s!==null);
-      if(!scores.length) return '';
       return `<div class="card" style="margin-bottom:10px">
         <div style="font-weight:700;font-size:14px;margin-bottom:4px">${b.title}: score trend</div>
+        ${scores.length < 2 ? `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
+          <div style="width:36px;height:36px;border-radius:10px;background:${b.color}20;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <div style="width:10px;height:10px;border-radius:50%;background:${b.color}"></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">${scores.length === 0 ? 'No data yet' : 'One lesson logged'}</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5">${scores.length === 0
+              ? `Log your first ${b.title} lesson to start tracking your score trend.`
+              : `Log one more ${b.title} lesson to see how your score is moving.`}
+            </div>
+          </div>
+          <button onclick="go('block-detail',{block:${b.id}});setTimeout(()=>setTab('log'),50)" style="border:none;background:${b.color};color:#fff;font-weight:700;font-size:12px;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);flex-shrink:0;white-space:nowrap">Log now</button>
+        </div>` : `
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${scores.length} lesson${scores.length!==1?'s':''} &middot; max ${b.scoreMax}</div>
-        ${lineChart(scores,b)}
+        ${lineChart(scores,b)}`}
       </div>`;
     }).join('')}
 
@@ -987,7 +1256,17 @@ function renderProgress(){
       <div style="font-weight:700;font-size:14px;margin-bottom:14px">Questioning: cold calls per lesson</div>
       ${(()=>{
         const logs = DB.getLogs(pid,3);
-        if(!logs.length) return `<div style="font-size:14px;color:var(--muted)">No Block 3 entries yet.</div>`;
+        if(!logs.length) return `
+          <div style="display:flex;align-items:center;gap:12px;padding:4px 0">
+            <div style="width:36px;height:36px;border-radius:10px;background:#D9770620;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <div style="width:10px;height:10px;border-radius:50%;background:#D97706"></div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">No data yet</div>
+              <div style="font-size:12px;color:var(--muted)">Log a Questioning lesson to track your cold call count.</div>
+            </div>
+            <button onclick="go('block-detail',{block:3});setTimeout(()=>setTab('log'),50)" style="border:none;background:#D97706;color:#fff;font-weight:700;font-size:12px;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:var(--font);flex-shrink:0;white-space:nowrap">Log now</button>
+          </div>`;
         const maxC = Math.max(...logs.map(l=>l.count||0),1);
         return logs.slice(-8).map((l,i)=>{
           const pct = Math.round(((l.count||0)/maxC)*100);
@@ -1051,7 +1330,7 @@ function renderProfiles(){
     <div style="height:1px;background:var(--border);margin:24px 0"></div>
     <div class="section-label">Data backup</div>
     <div class="info-card" style="margin-bottom:14px">
-      <p>Export saves all profiles and lesson logs as a JSON file on your device. Import restores from a previous export — you can choose to add the backup profiles alongside your existing ones, or replace everything.</p>
+      <p>Export saves all profiles and lesson logs as a JSON file on your device. Import restores from a previous export; you can choose to add the backup profiles alongside your existing ones, or replace everything.</p>
     </div>
     <button class="btn btn-ghost" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="exportData()">
       <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1212,12 +1491,17 @@ function renderWeek0(){
     ${W0_AREAS.map((a,i)=>`
       <div class="area-row">
         <div class="area-name">${a}</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:12px">${W0_HINTS[i]}</div>
         <div class="stepper">
           <button class="step-btn" onclick="stepW0(${i},1,8,-1)">&#8722;</button>
           <div class="step-display" id="w0v-${i}">${scores[i]||4}</div>
           <button class="step-btn" onclick="stepW0(${i},1,8,1)">&#43;</button>
         </div>
-        <div class="range-hints" style="margin-top:8px"><span>1 – Absent</span><span>8 – Confident</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4">
+          <span style="max-width:30%;text-align:left">1–3<br>Rarely or never</span>
+          <span style="max-width:30%;text-align:center">4–5<br>Sometimes, inconsistently</span>
+          <span style="max-width:30%;text-align:right">6–8<br>Regularly and deliberately</span>
+        </div>
       </div>`).join('')}
     <div style="height:8px"></div>
     <button class="btn btn-primary" onclick="saveWeek0()">Save audit</button>`;
@@ -1231,154 +1515,6 @@ window.saveWeek0 = function(){
   toast('Audit saved');
   go('home');
 };
-
-// ═══════════════════════════════════════════════
-//  PROGRESS SUMMARY (AI)
-// ═══════════════════════════════════════════════
-window.generateSummary = async function(){
-  const pid = DB.getActive(); if(!pid) return;
-  const profile  = DB.getProfiles().find(p=>p.id===pid);
-  const w0       = DB.getWeek0(pid);
-  const allLogs  = BLOCKS.flatMap(b=>DB.getLogs(pid,b.id));
-
-  if(!w0 && allLogs.length < 2){
-    showSummaryModal('nodata'); return;
-  }
-
-  // Compile block-level data
-  const blockData = BLOCKS.map(b=>{
-    const logs    = DB.getLogs(pid,b.id);
-    const scored  = b.scoreMax ? logs.map(l=>calcScore(b,l)).filter(s=>s!==null) : [];
-    const notes   = logs.map(l=>l.notes).filter(Boolean).slice(-3);
-    const counts  = b.id===3 ? logs.map(l=>l.count||0) : [];
-    return {
-      block: b.id, title: b.title,
-      logsCount: logs.length,
-      latestScore: scored.length ? scored[scored.length-1] : null,
-      scoreMax: b.scoreMax || null,
-      trend: getTrend(scored.length ? scored : counts),
-      recentNotes: notes,
-      coldCallCounts: counts.slice(-4)
-    };
-  });
-
-  const dates     = allLogs.map(l=>l.date).sort();
-  const firstDate = dates[0] ? fmtDate(dates[0]) : null;
-  const lastDate  = dates[dates.length-1] ? fmtDate(dates[dates.length-1]) : null;
-
-  const payload = {
-    teacherName: profile.name,
-    week0Scores: w0 ? W0_AREAS.map((a,i)=>({area:a, score:w0.scores[i]||0})) : null,
-    practiceSpan: firstDate ? firstDate + (lastDate!==firstDate?' to '+lastDate:'') : null,
-    totalLessonsLogged: allLogs.length,
-    blocks: blockData
-  };
-
-  showSummaryModal('loading');
-
-  try {
-    const res  = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are writing a brief personal progress note for a teacher working through a five-block deliberate practice programme covering: Pacing, Explanation, Questioning, Slides and Visuals, and Voice and Presence.
-
-Write in second person. Sound like a warm, observant mentor who has genuinely read the teacher's notes — not a performance management tool. Be specific: use the actual numbers and quote fragments from notes when they add meaning. Acknowledge that this kind of deliberate practice is genuinely demanding alongside a full teaching timetable.
-
-Structure: 2-3 short paragraphs. First: what they have done and what is working — be specific and honest. Second: the current picture, including any blocks not yet started or gaps, without judgement. Third: one concrete forward-looking observation — something specific to notice or try next, not a generic encouragement.
-
-Under 200 words total. No bullet points. Do not open with a sycophantic line. Do not use the phrase "it is clear that". Do not mention any app or programme by name.`,
-        messages: [{
-          role: 'user',
-          content: 'Here is the teacher\'s progress data:\n\n'
-            + JSON.stringify(payload, null, 2)
-            + '\n\nWrite the progress note.'
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.find(c=>c.type==='text')?.text || 'Could not generate summary.';
-    showSummaryModal('done', profile.name, text);
-  } catch(err){
-    showSummaryModal('error');
-  }
-};
-
-function showSummaryModal(state, name='', text=''){
-  const old = document.getElementById('summary-modal');
-  if(old) old.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'summary-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end;';
-
-  const inner = state === 'loading' ? `
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
-      <div style="font-size:28px;margin-bottom:14px">✨</div>
-      <div style="font-weight:700;font-size:16px;margin-bottom:6px">Reading your logs...</div>
-      <div style="font-size:14px;color:var(--muted)">This takes a few seconds</div>
-    </div>`
-
-  : state === 'done' ? `
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;margin:0 auto;max-height:82vh;overflow-y:auto">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
-        <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Progress summary</div>
-          <div style="font-weight:800;font-size:19px;letter-spacing:-.02em">${name}</div>
-        </div>
-        <button onclick="closeSummaryModal()" style="border:none;background:var(--bg);border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer;color:var(--muted);font-family:var(--font);flex-shrink:0;margin-left:12px">&#10005;</button>
-      </div>
-      <div id="summary-text" style="font-size:15px;line-height:1.75;color:var(--text);white-space:pre-wrap;margin-bottom:22px">${text}</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="copySummary()">Copy text</button>
-        <button class="btn btn-ghost" style="flex:1" onclick="closeSummaryModal()">Close</button>
-      </div>
-    </div>`
-
-  : state === 'nodata' ? `
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
-      <div style="font-size:28px;margin-bottom:14px">📋</div>
-      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Not enough data yet</div>
-      <div style="font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px">Complete the Week 0 audit and log at least a couple of lessons first — otherwise there is nothing meaningful to summarise.</div>
-      <button class="btn btn-ghost" onclick="closeSummaryModal()">Close</button>
-    </div>`
-
-  : `
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:36px 20px;width:100%;max-width:480px;margin:0 auto;text-align:center">
-      <div style="font-size:28px;margin-bottom:14px">⚠️</div>
-      <div style="font-weight:700;font-size:16px;margin-bottom:8px">Could not generate summary</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:20px">Check your internet connection and try again.</div>
-      <button class="btn btn-ghost" onclick="closeSummaryModal()">Close</button>
-    </div>`;
-
-  modal.innerHTML = inner;
-  modal.addEventListener('click', e=>{ if(e.target===modal) closeSummaryModal(); });
-  document.body.appendChild(modal);
-}
-
-window.closeSummaryModal = function(){
-  const m = document.getElementById('summary-modal');
-  if(m) m.remove();
-};
-
-window.copySummary = function(){
-  const text = document.getElementById('summary-text')?.textContent || '';
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')).catch(fallbackCopy.bind(null,text));
-  } else { fallbackCopy(text); }
-};
-
-function fallbackCopy(text){
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed'; ta.style.opacity = '0';
-  document.body.appendChild(ta); ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  toast('Copied to clipboard');
-}
 
 // ═══════════════════════════════════════════════
 //  INIT
