@@ -1,0 +1,228 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  #pao-app { font-family: 'Syne', sans-serif; color: var(--color-text-primary); padding: 2rem 1rem 3rem; max-width: 620px; margin: 0 auto; }
+  .app-title { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 0.25rem; }
+  .app-heading { font-size: 28px; font-weight: 800; color: var(--color-text-primary); margin-bottom: 2rem; line-height: 1.1; }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-secondary); display: block; margin-bottom: 10px; }
+  .field-slider { display: block; width: 100%; margin-bottom: 8px; appearance: auto; -webkit-appearance: auto; }
+  .field-numbox { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; width: 100%; padding: 7px 10px; text-align: center; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-primary); outline: none; }
+  .field-numbox:focus { border-color: var(--color-border-primary); }
+  .start-btn { width: 100%; padding: 14px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-text-primary); color: var(--color-background-primary); transition: opacity 0.15s; }
+  .start-btn:hover { opacity: 0.85; }
+  .start-btn:active { transform: scale(0.98); }
+  .phase { display: none; animation: fadeIn 0.3s ease; }
+  .phase.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .phase-label { font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .digits-display { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 2rem 0; }
+  .chunk { font-family: 'Space Mono', monospace; font-weight: 700; letter-spacing: 0.06em; color: var(--color-text-primary); line-height: 1; }
+  .countdown-bar-wrap { background: var(--color-background-secondary); border-radius: 999px; height: 4px; overflow: hidden; margin: 2rem 0 0.75rem; }
+  .countdown-bar { height: 100%; background: var(--color-text-primary); width: 100%; transform-origin: left; }
+  .countdown-label { font-size: 12px; color: var(--color-text-secondary); text-align: right; }
+  .recall-prompt { font-size: 18px; font-weight: 600; margin-bottom: 1.5rem; }
+  .recall-hint { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+  .recall-input { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700; letter-spacing: 0.12em; width: 100%; text-align: center; padding: 16px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-primary); outline: none; margin-bottom: 1rem; }
+  .recall-input:focus { border-color: var(--color-border-primary); }
+  .submit-btn { width: 100%; padding: 13px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); transition: background 0.15s; }
+  .submit-btn:hover { background: var(--color-background-secondary); }
+  .feedback-block { border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; border: 0.5px solid var(--color-border-tertiary); }
+  .feedback-block.correct { background: var(--color-background-success); border-color: var(--color-border-success); }
+  .feedback-block.wrong { background: var(--color-background-danger); border-color: var(--color-border-danger); }
+  .feedback-verdict { font-size: 20px; font-weight: 800; margin-bottom: 0.75rem; }
+  .feedback-block.correct .feedback-verdict { color: var(--color-text-success); }
+  .feedback-block.wrong .feedback-verdict { color: var(--color-text-danger); }
+  .comparison { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+  .comparison-row { display: flex; flex-direction: column; gap: 3px; }
+  .comp-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-secondary); }
+  .comp-digits { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; word-break: break-all; line-height: 1.6; }
+  .digit-correct { color: var(--color-text-success); }
+  .digit-wrong   { color: var(--color-text-danger); }
+  .score-line { font-size: 13px; color: var(--color-text-secondary); margin-top: 0.75rem; }
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.5rem; }
+  .action-btn { padding: 12px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); transition: background 0.15s; text-align: center; }
+  .action-btn:hover { background: var(--color-background-secondary); }
+  .action-btn.primary { background: var(--color-text-primary); color: var(--color-background-primary); }
+  .action-btn.primary:hover { opacity: 0.85; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; text-align: center; }
+  .stat-num { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; display: block; }
+  .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-secondary); }
+</style>
+
+<div id="pao-app" role="main">
+  <h2 class="sr-only">PAO Memory Trainer</h2>
+  <p class="app-title">Memory Training</p>
+  <h1 class="app-heading">PAO Digit<br>Trainer</h1>
+
+  <div id="phase-config" class="phase active">
+    <div class="config-grid">
+      <div>
+        <label class="field-label" for="numDigits">Digits</label>
+        <input type="range" class="field-slider" id="numDigits" min="1" max="100" step="1" value="18"
+          oninput="document.getElementById('digitsBox').value=this.value">
+        <input type="number" class="field-numbox" id="digitsBox" min="1" max="9999" value="18"
+          oninput="document.getElementById('numDigits').value=Math.min(this.value,100)">
+      </div>
+      <div>
+        <label class="field-label" for="studyTime">Study time (s)</label>
+        <input type="range" class="field-slider" id="studyTime" min="1" max="120" step="1" value="30"
+          oninput="document.getElementById('timeBox').value=this.value">
+        <input type="number" class="field-numbox" id="timeBox" min="1" max="3600" value="30"
+          oninput="document.getElementById('studyTime').value=Math.min(this.value,120)">
+      </div>
+      <div>
+        <label class="field-label" for="chunkSize">Chunk size</label>
+        <input type="range" class="field-slider" id="chunkSize" min="1" max="10" step="1" value="6"
+          oninput="document.getElementById('chunkBox').value=this.value">
+        <input type="number" class="field-numbox" id="chunkBox" min="1" max="20" value="6"
+          oninput="document.getElementById('chunkSize').value=Math.min(Math.max(this.value,1),10)">
+      </div>
+    </div>
+    <button class="start-btn" onclick="startSession()">Start session</button>
+  </div>
+
+  <div id="phase-study" class="phase">
+    <p class="phase-label">Memorise these digits</p>
+    <div class="digits-display" id="digitsDisplay"></div>
+    <div class="countdown-bar-wrap">
+      <div class="countdown-bar" id="countdownBar"></div>
+    </div>
+    <p class="countdown-label" id="countdownLabel"></p>
+  </div>
+
+  <div id="phase-recall" class="phase">
+    <p class="phase-label">Recall</p>
+    <p class="recall-prompt">Enter the digits you memorised</p>
+    <p class="recall-hint" id="recallHint"></p>
+    <input type="text" class="recall-input" id="recallInput" inputmode="numeric" autocomplete="off" autocorrect="off" placeholder="···"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      onkeydown="if(event.key==='Enter')checkAnswer()">
+    <button class="submit-btn" onclick="checkAnswer()">Check answer</button>
+  </div>
+
+  <div id="phase-feedback" class="phase">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="feedback-block" id="feedbackBlock">
+      <p class="feedback-verdict" id="feedbackVerdict"></p>
+      <div class="comparison" id="comparison"></div>
+      <p class="score-line" id="scoreLine"></p>
+    </div>
+    <div class="action-row">
+      <button class="action-btn primary" onclick="startSession()">New sequence</button>
+      <button class="action-btn" onclick="resetToConfig()">Change settings</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let sequence = '';
+let countdownTimer = null;
+let sessionStats = { attempts: 0, correct: 0, totalDigits: 0, correctDigits: 0 };
+
+function getDigits()    { return Math.max(1,  parseInt(document.getElementById('digitsBox').value)  || 18); }
+function getTime()      { return Math.max(1,  parseInt(document.getElementById('timeBox').value)    || 30); }
+function getChunkSize() { return Math.max(1,  parseInt(document.getElementById('chunkBox').value)   || 6);  }
+
+function showPhase(id) {
+  document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function generateSequence(n) {
+  let s = '';
+  for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+  return s;
+}
+
+function chunkFontSize(chunkSize) {
+  if (chunkSize <= 3)  return '42px';
+  if (chunkSize <= 6)  return '36px';
+  if (chunkSize <= 9)  return '28px';
+  return '22px';
+}
+
+function renderChunks(seq) {
+  const el = document.getElementById('digitsDisplay');
+  const size = getChunkSize();
+  const fs = chunkFontSize(size);
+  el.innerHTML = '';
+  for (let i = 0; i < seq.length; i += size)
+    el.innerHTML += `<span class="chunk" style="font-size:${fs}">${seq.slice(i, i+size)}</span>`;
+}
+
+function startSession() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  const n = getDigits(), t = getTime();
+  sequence = generateSequence(n);
+  renderChunks(sequence);
+  document.getElementById('recallHint').textContent = `${n} digit${n !== 1 ? 's' : ''} — type without spaces`;
+  document.getElementById('recallInput').value = '';
+  showPhase('phase-study');
+  startCountdown(t);
+}
+
+function startCountdown(seconds) {
+  const bar = document.getElementById('countdownBar');
+  const label = document.getElementById('countdownLabel');
+  let remaining = seconds;
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  void bar.offsetWidth;
+  bar.style.transition = `width ${seconds}s linear`;
+  bar.style.width = '0%';
+  label.textContent = remaining + 's';
+  countdownTimer = setInterval(() => {
+    remaining--;
+    label.textContent = remaining + 's';
+    if (remaining <= 0) {
+      clearInterval(countdownTimer);
+      showPhase('phase-recall');
+      document.getElementById('recallInput').focus();
+    }
+  }, 1000);
+}
+
+function checkAnswer() {
+  const userInput = document.getElementById('recallInput').value.trim();
+  const correct = sequence;
+  const n = correct.length;
+  sessionStats.attempts++;
+  sessionStats.totalDigits += n;
+  let correctCount = 0, ac = '', au = '';
+  for (let i = 0; i < Math.max(correct.length, userInput.length); i++) {
+    const c = correct[i] || '', u = userInput[i] || '_';
+    if (c === u && c !== '') {
+      correctCount++;
+      ac += `<span class="digit-correct">${c}</span>`;
+      au += `<span class="digit-correct">${u}</span>`;
+    } else {
+      ac += `<span class="digit-wrong">${c || '_'}</span>`;
+      au += `<span class="digit-wrong">${u}</span>`;
+    }
+  }
+  sessionStats.correctDigits += correctCount;
+  const isPerfect = userInput === correct;
+  if (isPerfect) sessionStats.correct++;
+  document.getElementById('feedbackBlock').className = 'feedback-block ' + (isPerfect ? 'correct' : 'wrong');
+  document.getElementById('feedbackVerdict').textContent = isPerfect ? '✓ Perfect recall' : '✗ Not quite';
+  document.getElementById('comparison').innerHTML = `
+    <div class="comparison-row"><span class="comp-label">Target</span><span class="comp-digits">${ac}</span></div>
+    <div class="comparison-row"><span class="comp-label">Your answer</span><span class="comp-digits">${au || '<span style="color:var(--color-text-secondary)">—</span>'}</span></div>`;
+  const pct = Math.round((correctCount / n) * 100);
+  document.getElementById('scoreLine').textContent = `${correctCount} of ${n} digits correct (${pct}%)`;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><span class="stat-num">${sessionStats.attempts}</span><span class="stat-label">Attempts</span></div>
+    <div class="stat-card"><span class="stat-num">${sessionStats.correct}</span><span class="stat-label">Perfect</span></div>
+    <div class="stat-card"><span class="stat-num">${Math.round(sessionStats.correctDigits/sessionStats.totalDigits*100)}%</span><span class="stat-label">Accuracy</span></div>`;
+  showPhase('phase-feedback');
+}
+
+function resetToConfig() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  sessionStats = { attempts: 0, correct: 0, totalDigits: 0, correctDigits: 0 };
+  showPhase('phase-config');
+}
+</script>
