@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedagogisk Promptkompilator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --surface3: #e4e7ed;
+    --border: #d0d5e0;
+    --border-light: #b0b8cc;
+    --accent: #3b6fd4;
+    --gold: #b8860b;
+    --teal: #0a8a86;
+    --text: #1a1d26;
+    --text2: #4a5270;
+    --text3: #8890aa;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Import fonts */
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #e8eaf2 0%, #f4f5f7 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Spectral', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  /* MAIN TAB NAV */
+  .main-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 28px;
+  }
+
+  .main-tab {
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .main-tab:hover { color: var(--text2); border-color: var(--border-light); }
+
+  .main-tab.active {
+    background: var(--surface2);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .main-tab.active .tab-dot {
+    background: var(--accent);
+  }
+
+  .tab-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.15s;
+  }
+
+  .tool-pane { display: none; }
+  .tool-pane.active { display: contents; }
+
+  .header-meta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .token-counter {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .token-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    transition: background 0.3s;
+  }
+
+  .token-dot.warn { background: var(--gold); }
+  .token-dot.over { background: var(--danger); }
+
+  /* LAYOUT */
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 57px);
+  }
+
+  .shared-panel {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--border);
+    overflow-y: auto;
+    max-height: 50vh;
+    min-height: 200px;
+    resize: vertical;
+  }
+
+  .shared-panel.collapsed .shared-panel-inner {
+    display: none;
+  }
+
+  .shared-panel.collapsed {
+    max-height: none;
+    min-height: 0;
+    resize: none;
+  }
+
+  .collapse-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text3);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .collapse-btn:hover { border-color: var(--border-light); color: var(--text2); }
+
+  .collapse-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+
+  .shared-panel.collapsed .collapse-arrow {
+    transform: rotate(180deg);
+  }
+
+  .shared-panel-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .shared-col {
+    border-right: 1px solid var(--border);
+    padding: 14px 18px;
+    overflow-y: auto;
+  }
+
+  .shared-col:last-child { border-right: none; }
+
+  .shared-panel-header {
+    padding: 10px 18px 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .shared-panel-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .shared-panel-subtitle {
+    font-size: 12px;
+    color: var(--text2);
+    margin-left: auto;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* PANELS */
+  .panel {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel:last-child { border-right: none; }
+
+  .panel-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+
+  .panel-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .panel-body { padding: 16px 20px; flex: 1; }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 20px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* INPUTS */
+  textarea, input[type="text"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    resize: vertical;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  textarea:focus, input[type="text"]:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  textarea { min-height: 120px; line-height: 1.5; }
+
+  select option { background: var(--surface2); }
+
+  /* RADIO GROUPS */
+  .radio-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .radio-btn {
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .radio-btn:hover { border-color: var(--border-light); color: var(--text); }
+
+  .radio-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .radio-btn.active.gold {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1a1200;
+  }
+
+  .radio-btn.active.teal {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+
+  .radio-btn.active.media {
+    background: #ff6b00;
+    border-color: #ff6b00;
+    color: #fff;
+  }
+
+  .radio-btn.active.neutral {
+    background: #d4d4d8;
+    border-color: #71717a;
+    color: #18181b;
+  }
+
+  .radio-btn.active.custom {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  #customDesignWrap textarea {
+    min-height: 110px;
+    border-color: var(--accent);
+    background: rgba(59,111,212,0.04);
+  }
+
+  /* FILE UPLOAD */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(59,111,212,0.05);
+  }
+
+  .upload-zone input {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-text { color: var(--text2); font-size: 13px; }
+  .upload-hint { color: var(--text3); font-size: 11px; margin-top: 4px; }
+
+  .upload-success {
+    background: rgba(22,163,74,0.08);
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+
+  .tab {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* MODULE CARDS */
+  .module-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .module-card.active { border-color: var(--accent); }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .module-toggle {
+    width: 32px; height: 18px;
+    background: var(--surface3);
+    border-radius: 9px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+
+  .module-toggle::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--text3);
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: all 0.2s;
+  }
+
+  .module-card.active .module-toggle {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .module-card.active .module-toggle::after {
+    left: 16px;
+    background: #fff;
+  }
+
+  .module-icon { font-size: 16px; }
+
+  .module-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .module-badge {
+    font-size: 10px;
+    background: var(--surface3);
+    color: var(--text3);
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+
+  .module-expand-btn {
+    color: var(--text3);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+
+  .module-card.expanded .module-expand-btn { transform: rotate(180deg); }
+
+  .module-options {
+    display: none;
+    padding: 0 14px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .module-card.expanded .module-options { display: block; }
+
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .option-label {
+    font-size: 12px;
+    color: var(--text2);
+    flex: 1;
+  }
+
+  .option-stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stepper-btn {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .stepper-btn:hover { background: var(--border); }
+
+  .stepper-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .order-btns {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .order-btn {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    transition: all 0.15s;
+  }
+
+  .order-btn:hover { background: var(--border); color: var(--text); }
+
+  /* OUTLINE */
+  .outline-list {
+    list-style: none;
+    counter-reset: outline-counter;
+  }
+
+  .outline-item {
+    counter-increment: outline-counter;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+
+  .outline-item.active { opacity: 1; }
+
+  .outline-num {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    background: var(--surface2);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .outline-item.active .outline-num {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .outline-content { flex: 1; }
+
+  .outline-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .outline-desc {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  /* OUTPUT AREA */
+  .output-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .output-prompt {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--text2);
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 300px;
+    max-height: 420px;
+  }
+
+  .prompt-section-tag {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .prompt-content { color: var(--text2); }
+
+  .copy-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .copy-btn:hover { background: #2d5cbf; transform: translateY(-1px); }
+  .copy-btn:active { transform: translateY(0); }
+  .copy-btn.copied { background: var(--success); }
+
+  .copy-btn-secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 12px;
+    padding: 8px;
+    margin-top: 6px;
+  }
+
+  .copy-btn-secondary:hover { background: var(--surface3); color: var(--text); }
+
+  /* SMALL HELPERS */
+  .hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .badge-blue { background: rgba(59,111,212,0.12); color: var(--accent); }
+  .badge-gold { background: rgba(184,134,11,0.12); color: var(--gold); }
+  .badge-teal { background: rgba(10,138,134,0.12); color: var(--teal); }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .spacer { flex: 1; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    outline: none;
+    padding: 0;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  .char-count {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: right;
+    margin-top: 3px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  /* APPROACH SELECTOR */
+  .approach-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .approach-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+
+  .approach-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .approach-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .approach-btn:hover { border-color: var(--border-light); color: var(--text); }
+
+  .approach-btn.active {
+    border-color: var(--accent);
+    background: rgba(59,111,212,0.10);
+    color: var(--accent);
+  }
+
+  .approach-btn .approach-icon { font-size: 14px; display: block; margin-bottom: 3px; }
+  .approach-btn .approach-name { display: block; font-weight: 600; }
+  .approach-btn .approach-desc { display: block; color: var(--text3); font-size: 10px; margin-top: 1px; }
+  .approach-btn.active .approach-desc { color: var(--accent); opacity: 0.8; }
+
+  /* FOUNDATION CARD (hero — always on) */
+  .module-card.foundation {
+    border-color: var(--border-light);
+    background: var(--surface2);
+  }
+
+  .module-card.foundation .module-header {
+    cursor: default;
+  }
+
+  .module-card.foundation .module-name {
+    color: var(--text);
+  }
+
+  .foundation-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(59,111,212,0.12);
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .foundation-desc {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+    padding: 0 0 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  /* MODULE MOVE FLASH */
+  @keyframes moduleFlash {
+    0%   { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,111,212,0.3); }
+    60%  { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(59,111,212,0.10); }
+    100% { box-shadow: none; }
+  }
+
+  .module-card.just-moved {
+    animation: moduleFlash 0.5s ease-out forwards;
+  }
+
+  @keyframes outlineFlash {
+    0%   { background: rgba(59,111,212,0.12); }
+    100% { background: transparent; }
+  }
+
+  .outline-item.just-updated {
+    animation: outlineFlash 0.4s ease-out forwards;
+  }
+
+  /* PPTX SLIDE CONFIG */
+  .slide-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .slide-type-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    cursor: pointer;
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .slide-type-card:hover { border-color: var(--border-light); }
+  .slide-type-card.active { border-color: var(--accent); background: rgba(59,111,212,0.07); }
+
+  .slide-type-icon { font-size: 18px; margin-bottom: 4px; }
+  .slide-type-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .slide-type-desc { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .pptx-outline-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .pptx-outline-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    background: var(--surface2);
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pptx-outline-item.title-slide .pptx-outline-num { background: var(--accent); color: #fff; }
+  .pptx-outline-item.end-slide .pptx-outline-num { background: var(--gold); color: #1a1200; }
+
+  /* PPTX MODE — accent override when on pptx tab */
+  body.pptx-mode {
+    --accent: #7c3aed;
+    --border: #d4c8f0;
+    --border-light: #b8a8e0;
+    --surface2: #f0ecfc;
+    --surface3: #e8e0f8;
+  }
+
+  body.pptx-mode header {
+    background: linear-gradient(135deg, #ede8fc 0%, #f4f5f7 100%);
+  }
+
+  body.pptx-mode .main-tab.active {
+    border-color: #7c3aed;
+    color: var(--text);
+  }
+
+  body.pptx-mode .main-tab.active .tab-dot {
+    background: #7c3aed;
+  }
+
+  body.pptx-mode .logo span {
+    color: #7c3aed;
+  }
+
+  body.pptx-mode .token-counter {
+    border-color: #d4c8f0;
+  }
+
+  body.pptx-mode .shared-panel {
+    border-bottom-color: #d4c8f0;
+  }
+
+  body.pptx-mode .shared-col {
+    border-right-color: #d4c8f0;
+  }
+
+  body.pptx-mode .shared-panel-header {
+    border-bottom-color: #d4c8f0;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Pedagogisk <span>Promptkompilator</span></div>
+  <nav class="main-tabs">
+    <button class="main-tab active" onclick="switchMainTab('html')">
+      <span class="tab-dot"></span> 🌐 Webbsida (HTML)
+    </button>
+    <button class="main-tab" onclick="switchMainTab('pptx')">
+      <span class="tab-dot"></span> 📊 Presentation (PPTX)
+    </button>
+  </nav>
+  <div class="header-meta">
+    <button onclick="resetAll()" style="background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text3); font-family:inherit; font-size:12px; padding:5px 12px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--border-light)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">↺ Återställ</button>
+    <div class="token-counter">
+      <div class="token-dot" id="tokenDot"></div>
+      <span id="tokenCount">0</span> tokens estimerat
+    </div>
+  </div>
+</header>
+
+<div class="workspace">
+
+<!-- SHARED PANEL 1 -->
+<div class="shared-panel">
+  <div class="shared-panel-header">
+    <div class="shared-panel-title">01 — Material &amp; Kontext</div>
+    <div class="shared-panel-subtitle">Gemensamt för HTML och PPTX</div>
+    <button class="collapse-btn" onclick="toggleSharedPanel()" id="collapseBtn">
+      <span class="collapse-arrow">▲</span>
+      <span id="collapseBtnLabel">Fäll ihop</span>
+    </button>
+  </div>
+  <div class="shared-panel-inner">
+
+    <!-- COL 1: Ämne + Källmaterial -->
+    <div class="shared-col">
+      <div class="section">
+        <div class="section-label">Ämne</div>
+        <input type="text" id="subject" placeholder="T.ex. Franska revolutionen, WWI, dystopisk litteratur..." oninput="compile(); pCompile()">
+      </div>
+      <div class="section">
+        <div class="section-label">Källmaterial</div>
+        <div class="tabs">
+          <div class="tab active" data-tab="text" onclick="switchTab('text')">Klistra in text</div>
+          <div class="tab" data-tab="pdf" onclick="switchTab('pdf')">Ladda PDF</div>
+        </div>
+        <div id="textTab">
+          <textarea id="sourceText" placeholder="Klistra in ditt källmaterial här — NotebookLM-output, egna anteckningar, ett textavsnitt..." oninput="updateCharCount(); compile(); pCompile()" style="min-height:80px;"></textarea>
+          <div class="char-count"><span id="charCount">0</span> tecken — <span id="tokenEstimate">~0</span> tokens</div>
+          <div id="pdfActiveBadge" style="display:none; margin-top:6px; padding:5px 10px; background:rgba(34,197,94,0.1); border:1px solid var(--success); border-radius:6px; font-size:11px; color:var(--success);">
+            📄 PDF aktivt som källa — textrutan ignoreras
+          </div>
+        </div>
+        <div id="pdfTab" style="display:none">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="pdfInput" accept=".pdf" onchange="loadPDF(this)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Dra hit en PDF eller klicka</div>
+            <div class="upload-hint">PDF.js extraherar texten lokalt — ingen server används</div>
+          </div>
+          <div id="pdfStatus" style="margin-top:8px; font-size:12px; color:var(--text3);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Designsystem + Källhänvisningar -->
+    <div class="shared-col">
+      <div class="section">
+        <div class="section-label">Källhänvisningar</div>
+        <div class="radio-group">
+          <label class="radio-btn" data-group="citations" data-val="ja" onclick="setRadio(this,'citations'); compile(); pCompile()">Inkludera</label>
+          <label class="radio-btn active" data-group="citations" data-val="nej" onclick="setRadio(this,'citations'); compile(); pCompile()">Exkludera</label>
+        </div>
+        <p class="hint">Akademiska inline-källhänvisningar i löptext och talaranteckningar.</p>
+      </div>
+      <div class="section">
+        <div class="section-label">Designsystem</div>
+        <div class="radio-group">
+          <label class="radio-btn active gold" data-group="design" data-val="historia" onclick="setRadio(this,'design'); compile(); pCompile()">⚔️ Historia</label>
+          <label class="radio-btn" data-group="design" data-val="engelska" onclick="setRadio(this,'design'); compile(); pCompile()">📘 Engelska</label>
+          <label class="radio-btn" data-group="design" data-val="media" onclick="setRadio(this,'design'); compile(); pCompile()">🎬 Media</label>
+          <label class="radio-btn" data-group="design" data-val="neutral" onclick="setRadio(this,'design'); compile(); pCompile()">⚪ Neutral</label>
+          <label class="radio-btn" data-group="design" data-val="custom" onclick="setRadio(this,'design'); compile(); pCompile()">✏️ Eget</label>
+        </div>
+        <p class="hint" id="designHint">Navy/gold, Playfair Display + Lora, akademisk-mörk estetik</p>
+        <div id="customDesignWrap" style="display:none; margin-top:8px;">
+          <textarea id="customDesignText" rows="4"
+            placeholder="Beskriv ditt designsystem fritt — färger, typsnitt, känsla..."
+            oninput="compile(); pCompile()" style="font-size:12px; min-height:80px;"></textarea>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">Detaljnivå i källtext</div>
+        <input type="range" id="sourceDepth" min="1" max="3" value="2" oninput="compile(); pCompile()">
+        <div class="range-labels"><span>Komprimerad</span><span>Balanserad</span><span>Fullständig</span></div>
+        <p class="hint">Fullständig = mer kontext till Claude, längre prompt</p>
+      </div>
+    </div>
+
+    <!-- COL 3: Kursnivå + Syfte + Språk -->
+    <div class="shared-col">
+      <div class="section">
+        <div class="section-label">Kursnivå</div>
+        <div class="radio-group" id="levelGroup">
+          <label class="radio-btn active" data-group="level" data-val="Historia 1a" onclick="setRadio(this,'level'); compile(); pCompile()">Historia 1a</label>
+          <label class="radio-btn" data-group="level" data-val="Historia 1b" onclick="setRadio(this,'level'); compile(); pCompile()">Historia 1b</label>
+          <label class="radio-btn" data-group="level" data-val="Historia 2" onclick="setRadio(this,'level'); compile(); pCompile()">Historia 2</label>
+          <label class="radio-btn" data-group="level" data-val="Historia 3" onclick="setRadio(this,'level'); compile(); pCompile()">Historia 3</label>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">Syfte</div>
+        <div class="radio-group">
+          <label class="radio-btn active" data-group="purpose" data-val="introduktion" onclick="setRadio(this,'purpose'); compile(); pCompile()">Introduktion</label>
+          <label class="radio-btn" data-group="purpose" data-val="fördjupning" onclick="setRadio(this,'purpose'); compile(); pCompile()">Fördjupning</label>
+          <label class="radio-btn" data-group="purpose" data-val="repetition" onclick="setRadio(this,'purpose'); compile(); pCompile()">Repetition</label>
+          <label class="radio-btn" data-group="purpose" data-val="lektion" onclick="setRadio(this,'purpose'); compile(); pCompile()">Lektion</label>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">Språk i output</div>
+        <div class="radio-group">
+          <label class="radio-btn active" data-group="lang" data-val="svenska" onclick="setRadio(this,'lang'); compile(); pCompile()">🇸🇪 Svenska</label>
+          <label class="radio-btn" data-group="lang" data-val="engelska" onclick="setRadio(this,'lang'); compile(); pCompile()">🇬🇧 Engelska</label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /shared-panel -->
+
+<div class="tool-pane active" id="pane-html">
+<div class="app">
+
+  <!-- PANEL 2: MODULES -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">02 — Moduler & Konfiguration</div>
+      <div class="panel-subtitle">Välj och konfigurera sidans byggstenar</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="section">
+        <div class="section-label">Globala inställningar</div>
+        <div class="option-row">
+          <span class="option-label">Responsiv (mobilvänlig)</span>
+          <label class="radio-btn active" data-group="responsive" data-val="ja" onclick="setRadio(this,'responsive'); compile()">Ja</label>
+          <label class="radio-btn" data-group="responsive" data-val="nej" onclick="setRadio(this,'responsive'); compile()">Nej</label>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Smooth scroll-animationer</span>
+          <label class="radio-btn active" data-group="animate" data-val="ja" onclick="setRadio(this,'animate'); compile()">Ja</label>
+          <label class="radio-btn" data-group="animate" data-val="nej" onclick="setRadio(this,'animate'); compile()">Nej</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Moduler — aktivera och konfigurera</div>
+        <div class="module-grid" id="moduleGrid">
+
+          <!-- Hero -->
+          <div class="module-card foundation active expanded" data-module="hero">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <span class="module-icon">🏛️</span>
+              <span class="module-name">Hero-sektion</span>
+              <span class="foundation-badge">Alltid med</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <p class="foundation-desc">Sidans toppbanner — stor rubrik, valfri underrubrik och dekorativ CSS-bakgrund. Sätter tonen för hela sidan.</p>
+              <div class="option-row">
+                <span class="option-label">Underrubrik / ingress</span>
+                <label class="radio-btn active" data-group="hero_sub" data-val="ja" onclick="setRadio(this,'hero_sub'); compile()">Ja</label>
+                <label class="radio-btn" data-group="hero_sub" data-val="nej" onclick="setRadio(this,'hero_sub'); compile()">Nej</label>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Dekorativ bakgrundsgrafik</span>
+                <label class="radio-btn active" data-group="hero_bg" data-val="ja" onclick="setRadio(this,'hero_bg'); compile()">Ja</label>
+                <label class="radio-btn" data-group="hero_bg" data-val="nej" onclick="setRadio(this,'hero_bg'); compile()">Nej</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Intro text -->
+          <div class="module-card active" data-module="intro">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">📝</span>
+              <span class="module-name">Introduktionstext</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)" title="Upp">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)" title="Ned">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Stycken</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,5)">−</button>
+                  <span class="stepper-val" data-key="intro_paras">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,5)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Inkludera källhänvisningar</span>
+                <label class="radio-btn" data-group="intro_sources" data-val="ja" onclick="setRadio(this,'intro_sources'); compile()">Ja</label>
+                <label class="radio-btn active" data-group="intro_sources" data-val="nej" onclick="setRadio(this,'intro_sources'); compile()">Nej</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- MCQ -->
+          <div class="module-card active" data-module="mcq">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🎯</span>
+              <span class="module-name">Craig Barton MCQ</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal frågor</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,2,8)">−</button>
+                  <span class="stepper-val" data-key="mcq_count">4</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,2,8)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Svarsalternativ per fråga</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,3,5)">−</button>
+                  <span class="stepper-val" data-key="mcq_opts">4</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,3,5)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Visa förklaring vid svar</span>
+                <label class="radio-btn active" data-group="mcq_explain" data-val="ja" onclick="setRadio(this,'mcq_explain'); compile()">Ja</label>
+                <label class="radio-btn" data-group="mcq_explain" data-val="nej" onclick="setRadio(this,'mcq_explain'); compile()">Nej</label>
+              </div>
+              <p class="hint" style="margin-top:4px;">Varje distraktor mappar till en namngiven missuppfattning per Craig Barton-metoden. Fisher-Yates shuffling alltid aktivt.</p>
+            </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="module-card" data-module="timeline">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">📅</span>
+              <span class="module-name">Interaktiv tidslinje</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal händelser</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,4,15)">−</button>
+                  <span class="stepper-val" data-key="timeline_events">6</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,4,15)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Stil</span>
+                <label class="radio-btn active" data-group="timeline_style" data-val="vertikal" onclick="setRadio(this,'timeline_style'); compile()">Vertikal</label>
+                <label class="radio-btn" data-group="timeline_style" data-val="horisontell" onclick="setRadio(this,'timeline_style'); compile()">Horisontell</label>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Klickbara detaljer</span>
+                <label class="radio-btn active" data-group="timeline_click" data-val="ja" onclick="setRadio(this,'timeline_click'); compile()">Ja</label>
+                <label class="radio-btn" data-group="timeline_click" data-val="nej" onclick="setRadio(this,'timeline_click'); compile()">Nej</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flip cards -->
+          <div class="module-card" data-module="flipcards">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🃏</span>
+              <span class="module-name">Flip cards</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal kort</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,3,12)">−</button>
+                  <span class="stepper-val" data-key="flip_count">6</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,3,12)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Typ</span>
+                <label class="radio-btn active" data-group="flip_type" data-val="begrepp" onclick="setRadio(this,'flip_type'); compile()">Begrepp/Def</label>
+                <label class="radio-btn" data-group="flip_type" data-val="person" onclick="setRadio(this,'flip_type'); compile()">Person/Roll</label>
+                <label class="radio-btn" data-group="flip_type" data-val="orsak" onclick="setRadio(this,'flip_type'); compile()">Orsak/Följd</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map -->
+          <div class="module-card" data-module="map">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🗺️</span>
+              <span class="module-name">Interaktiv karta</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Bibliotek</span>
+                <label class="radio-btn active" data-group="map_lib" data-val="leaflet" onclick="setRadio(this,'map_lib'); compile()">Leaflet.js</label>
+                <label class="radio-btn" data-group="map_lib" data-val="svg" onclick="setRadio(this,'map_lib'); compile()">SVG-karta</label>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Markörer / platser</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,2,12)">−</button>
+                  <span class="stepper-val" data-key="map_markers">5</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,2,12)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Popup-info vid klick</span>
+                <label class="radio-btn active" data-group="map_popup" data-val="ja" onclick="setRadio(this,'map_popup'); compile()">Ja</label>
+                <label class="radio-btn" data-group="map_popup" data-val="nej" onclick="setRadio(this,'map_popup'); compile()">Nej</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Person gallery -->
+          <div class="module-card" data-module="persons">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">👤</span>
+              <span class="module-name">Persongalleri</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal personer</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,2,8)">−</button>
+                  <span class="stepper-val" data-key="persons_count">4</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,2,8)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Wikimedia-bilder</span>
+                <label class="radio-btn active" data-group="persons_img" data-val="ja" onclick="setRadio(this,'persons_img'); compile()">Ja</label>
+                <label class="radio-btn" data-group="persons_img" data-val="nej" onclick="setRadio(this,'persons_img'); compile()">Nej</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistics tab -->
+          <div class="module-card" data-module="stats">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">📊</span>
+              <span class="module-name">Statistikflik / Chart.js</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal diagram</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,4)">−</button>
+                  <span class="stepper-val" data-key="stats_charts">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,4)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Typ</span>
+                <label class="radio-btn active" data-group="stats_type" data-val="bar" onclick="setRadio(this,'stats_type'); compile()">Stapel</label>
+                <label class="radio-btn" data-group="stats_type" data-val="line" onclick="setRadio(this,'stats_type'); compile()">Linje</label>
+                <label class="radio-btn" data-group="stats_type" data-val="mixed" onclick="setRadio(this,'stats_type'); compile()">Blandat</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnostic exit -->
+          <div class="module-card active" data-module="diagnostic">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🔬</span>
+              <span class="module-name">Diagnostisk avslutning</span>
+              <div class="order-btns">
+                <button class="order-btn" onclick="moveModule(this,event,-1)">↑</button>
+                <button class="order-btn" onclick="moveModule(this,event,1)">↓</button>
+              </div>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Typ</span>
+                <label class="radio-btn active" data-group="diag_type" data-val="exitticket" onclick="setRadio(this,'diag_type'); compile()">Exitbiljett</label>
+                <label class="radio-btn" data-group="diag_type" data-val="reflection" onclick="setRadio(this,'diag_type'); compile()">Reflektion</label>
+                <label class="radio-btn" data-group="diag_type" data-val="summary" onclick="setRadio(this,'diag_type'); compile()">Sammanfattning</label>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Diskussionsfrågor</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,5)">−</button>
+                  <span class="stepper-val" data-key="diag_discuss">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,5)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Avancerade instruktioner — fri text</div>
+        <textarea id="extraInstructions" placeholder="Här kan du go crazy. Specificera format, pedagogisk struktur, specialfunktioner eller hela layoutkoncept.&#10;&#10;Exempel:&#10;— Bygg sidan i Curious Brain-format: stor dramatisk rubrik, Kurzgesagt-inspirerad infografik-estetik, korthuggna faktarutor med ikonografi, energisk och nyfiken ton&#10;— Gör det till ett scroll-berättande med parallax-sektioner&#10;— Inkludera en inbyggd Socratic Seminar-guide med diskussionsprotokoll&#10;— Lägg till ett 'Myt vs. Fakta'-avsnitt med 4 vanliga missuppfattningar&#10;— Strukturera allt som en rättegångssimulering där eleven tar ställning" rows="6" oninput="compile()"></textarea>
+        <p class="hint">Allt du skriver här läggs in sist i prompten med hög prioritet — Claude följer dessa instruktioner även om de går emot standardinställningarna ovan.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PANEL 3: OUTPUT -->
+  <div class="panel output-panel">
+    <div class="panel-header">
+      <div class="panel-title">03 — Genererad prompt</div>
+      <div class="panel-subtitle">Klistra in direkt i Claude</div>
+    </div>
+    <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
+
+      <div class="section">
+        <div class="section-label">Förhandsgranskning — modulordning</div>
+        <ol class="outline-list" id="outlineList">
+          <li class="outline-item active" data-module="hero">
+            <div class="outline-num">1</div>
+            <div class="outline-content">
+              <div class="outline-title">🏛️ Hero-sektion</div>
+              <div class="outline-desc">Titel, underrubrik, dekorativ bakgrund</div>
+            </div>
+          </li>
+          <li class="outline-item active" data-module="intro">
+            <div class="outline-num">2</div>
+            <div class="outline-content">
+              <div class="outline-title">📝 Introduktionstext</div>
+              <div class="outline-desc">2 stycken, ingen källhänvisning</div>
+            </div>
+          </li>
+          <li class="outline-item active" data-module="mcq">
+            <div class="outline-num">3</div>
+            <div class="outline-content">
+              <div class="outline-title">🎯 Craig Barton MCQ</div>
+              <div class="outline-desc">4 frågor, 4 alternativ, med förklaring</div>
+            </div>
+          </li>
+          <li class="outline-item" data-module="timeline">
+            <div class="outline-num">4</div>
+            <div class="outline-content">
+              <div class="outline-title">📅 Interaktiv tidslinje</div>
+              <div class="outline-desc">6 händelser, vertikal, klickbar</div>
+            </div>
+          </li>
+          <li class="outline-item" data-module="flipcards">
+            <div class="outline-num">5</div>
+            <div class="outline-content">
+              <div class="outline-title">🃏 Flip cards</div>
+              <div class="outline-desc">6 kort, begrepp/definition</div>
+            </div>
+          </li>
+          <li class="outline-item" data-module="map">
+            <div class="outline-num">6</div>
+            <div class="outline-content">
+              <div class="outline-title">🗺️ Interaktiv karta</div>
+              <div class="outline-desc">Leaflet.js, 5 markörer, popup</div>
+            </div>
+          </li>
+          <li class="outline-item" data-module="persons">
+            <div class="outline-num">7</div>
+            <div class="outline-content">
+              <div class="outline-title">👤 Persongalleri</div>
+              <div class="outline-desc">4 personer, Wikimedia-bilder</div>
+            </div>
+          </li>
+          <li class="outline-item" data-module="stats">
+            <div class="outline-num">8</div>
+            <div class="outline-content">
+              <div class="outline-title">📊 Statistikflik</div>
+              <div class="outline-desc">2 diagram, Chart.js</div>
+            </div>
+          </li>
+          <li class="outline-item active" data-module="diagnostic">
+            <div class="outline-num">9</div>
+            <div class="outline-content">
+              <div class="outline-title">🔬 Diagnostisk avslutning</div>
+              <div class="outline-desc">Exitbiljett, 2 diskussionsfrågor</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="section" style="flex:1; display:flex; flex-direction:column;">
+        <div class="section-label">Kompilerad prompt</div>
+        <div class="output-prompt" id="promptOutput">
+          <span style="color:var(--text3); font-style:italic;">Fyll i material och konfiguration för att generera prompten...</span>
+        </div>
+        <div class="approach-selector">
+          <div class="approach-label">Hur ska Claude starta?</div>
+          <div class="approach-btns">
+            <button class="approach-btn active" data-approach="build" onclick="setApproach(this)">
+              <span class="approach-icon">🚀</span>
+              <span class="approach-name">Bygg direkt</span>
+              <span class="approach-desc">Leverera komplett kod</span>
+            </button>
+            <button class="approach-btn" data-approach="clarify" onclick="setApproach(this)">
+              <span class="approach-icon">🔍</span>
+              <span class="approach-name">Fråga först</span>
+              <span class="approach-desc">Ställ förtydligande frågor</span>
+            </button>
+            <button class="approach-btn" data-approach="discuss" onclick="setApproach(this)">
+              <span class="approach-icon">🧠</span>
+              <span class="approach-name">Diskutera</span>
+              <span class="approach-desc">Alternativ och upplägg</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">
+          <span>📋</span> Kopiera prompt till urklipp
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div><!-- /pane-html -->
+
+<!-- PPTX PANE -->
+<div class="tool-pane" id="pane-pptx">
+<div class="app">
+
+  <!-- PPTX PANEL 2 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">02 — Struktur & Slides</div>
+      <div class="panel-subtitle">Antal, upplägg och innehållstyper</div>
+    </div>
+    <div class="panel-body">
+
+      <div class="section">
+        <div class="section-label">Antal slides (exkl. titel och avslut)</div>
+        <div class="option-row" style="gap:12px;">
+          <input type="range" id="p-slideCount" min="4" max="20" value="10" oninput="document.getElementById('p-slideCountVal').textContent=this.value; pRebuildSlides(); pCompile()" style="flex:1;">
+          <span id="p-slideCountVal" style="font-size:16px; font-weight:700; color:var(--accent); min-width:24px; text-align:center;">10</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Berättarstruktur</div>
+        <div class="radio-group">
+          <label class="radio-btn active" data-group="p-structure" data-val="kronologisk" onclick="pSetRadio(this,'p-structure'); pCompile()">Kronologisk</label>
+          <label class="radio-btn" data-group="p-structure" data-val="tematisk" onclick="pSetRadio(this,'p-structure'); pCompile()">Tematisk</label>
+          <label class="radio-btn" data-group="p-structure" data-val="problembaserad" onclick="pSetRadio(this,'p-structure'); pCompile()">Problembaserad</label>
+          <label class="radio-btn" data-group="p-structure" data-val="jämförande" onclick="pSetRadio(this,'p-structure'); pCompile()">Jämförande</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Text på skärm</div>
+        <input type="range" id="p-screenDensity" min="1" max="4" value="2" oninput="document.getElementById('p-screenDensityLabel').textContent=pScreenLabels[this.value-1]; pCompile()">
+        <div class="range-labels">
+          <span>Extremt låg</span><span>Låg</span><span>Normal</span><span>Detaljerad</span>
+        </div>
+        <p class="hint" id="p-screenDensityLabel">Låg — nyckelord och korta fraser, max 3 punkter</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Talmanus / anteckningar</div>
+        <input type="range" id="p-notesDensity" min="1" max="3" value="2" oninput="document.getElementById('p-notesDensityLabel').textContent=pNotesLabels[this.value-1]; pCompile()">
+        <div class="range-labels">
+          <span>Låg</span><span>Mellan</span><span>Hög</span>
+        </div>
+        <p class="hint" id="p-notesDensityLabel">Mellan — ca 60-100 ord, fördjupning och kontext</p>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Innehållselement per slide</div>
+        <div class="module-grid">
+
+          <div class="module-card active" data-pmodule="speakernotes">
+            <div class="module-header" onclick="toggleModule(this.parentElement)">
+              <div class="module-toggle"></div>
+              <span class="module-icon">🎤</span>
+              <span class="module-name">Talaranteckningar</span>
+              <span class="module-badge">Alltid</span>
+            </div>
+          </div>
+
+          <div class="module-card active" data-pmodule="discussion">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">💬</span>
+              <span class="module-name">Diskussionsfrågor</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal diskussionsslides</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,4)">−</button>
+                  <span class="stepper-val" data-key="p_discuss_slides">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,4)">+</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Aktivitetsformat</span>
+                <label class="radio-btn active" data-group="p-discuss-type" data-val="epa" onclick="pSetRadio(this,'p-discuss-type'); pCompile()">EPA</label>
+                <label class="radio-btn" data-group="p-discuss-type" data-val="tps" onclick="pSetRadio(this,'p-discuss-type'); pCompile()">T-P-S</label>
+                <label class="radio-btn" data-group="p-discuss-type" data-val="open" onclick="pSetRadio(this,'p-discuss-type'); pCompile()">Öppen</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card active" data-pmodule="images">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🖼️</span>
+              <span class="module-name">Bildbeskrivningar</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <p class="hint" style="padding-top:6px;">Claude genererar detaljerade bildbeskrivningar per slide som du kan använda för AI-bildgenerering eller manuell bild-sökning.</p>
+              <div class="option-row">
+                <span class="option-label">Stil</span>
+                <label class="radio-btn active" data-group="p-img-style" data-val="fotorealistisk" onclick="pSetRadio(this,'p-img-style'); pCompile()">Fotorealistisk</label>
+                <label class="radio-btn" data-group="p-img-style" data-val="illustration" onclick="pSetRadio(this,'p-img-style'); pCompile()">Illustration</label>
+                <label class="radio-btn" data-group="p-img-style" data-val="infografik" onclick="pSetRadio(this,'p-img-style'); pCompile()">Infografik</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card" data-pmodule="mcq">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🎯</span>
+              <span class="module-name">Diagnostiska frågor</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <p class="hint" style="padding-top:6px;">Craig Barton-stil MCQ inkluderat som egna slides i presentationen.</p>
+              <div class="option-row">
+                <span class="option-label">Antal fråge-slides</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,4)">−</button>
+                  <span class="stepper-val" data-key="p_mcq_slides">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,4)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card" data-pmodule="timeline">
+            <div class="module-header" onclick="toggleModule(this.parentElement)">
+              <div class="module-toggle"></div>
+              <span class="module-icon">📅</span>
+              <span class="module-name">Tidslinjevisual</span>
+            </div>
+          </div>
+
+          <div class="module-card" data-pmodule="quotes">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">💭</span>
+              <span class="module-name">Citatslides</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Antal citat</span>
+                <div class="option-stepper">
+                  <button class="stepper-btn" onclick="stepVal(this,-1,1,4)">−</button>
+                  <span class="stepper-val" data-key="p_quotes">2</span>
+                  <button class="stepper-btn" onclick="stepVal(this,1,1,4)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="module-card" data-pmodule="stats">
+            <div class="module-header" onclick="toggleModule(this.parentElement)">
+              <div class="module-toggle"></div>
+              <span class="module-icon">📊</span>
+              <span class="module-name">Statistikvisual</span>
+            </div>
+          </div>
+
+          <div class="module-card active" data-pmodule="exit">
+            <div class="module-header" onclick="toggleExpand(this.parentElement)">
+              <div class="module-toggle" onclick="toggleModule(this.parentElement.parentElement); event.stopPropagation()"></div>
+              <span class="module-icon">🔬</span>
+              <span class="module-name">Avslutnings-slide</span>
+              <span class="module-badge">Rekommenderas</span>
+              <span class="module-expand-btn">▼</span>
+            </div>
+            <div class="module-options">
+              <div class="option-row">
+                <span class="option-label">Typ</span>
+                <label class="radio-btn active" data-group="p-exit-type" data-val="exitticket" onclick="pSetRadio(this,'p-exit-type'); pCompile()">Exitbiljett</label>
+                <label class="radio-btn" data-group="p-exit-type" data-val="summary" onclick="pSetRadio(this,'p-exit-type'); pCompile()">Sammanfattning</label>
+                <label class="radio-btn" data-group="p-exit-type" data-val="homework" onclick="pSetRadio(this,'p-exit-type'); pCompile()">Hemuppgift</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Avancerade instruktioner — fri text</div>
+        <textarea id="p-extraInstructions" rows="5"
+          placeholder="Här kan du go crazy. Specificera visuella koncept, pedagogiska strukturer eller tematiska grepp.&#10;&#10;Exempel:&#10;— Bygg presentationen kring ett genomgående detektivnarrativ&#10;— Varje slide ska öppna med en provocerande fråga&#10;— Inkludera källkritik-stopp efter varje faktablock&#10;— Lägg till en Tänk-Para-Dela-aktivitet vid slide 5 och 12"
+          oninput="pCompile()"></textarea>
+        <p class="hint">Läggs in sist med hög prioritet — Claude följer dessa även om de avviker från inställningarna ovan.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PPTX PANEL 3 -->
+  <div class="panel output-panel">
+    <div class="panel-header">
+      <div class="panel-title">03 — Genererad prompt</div>
+      <div class="panel-subtitle">Klistra in direkt i Claude</div>
+    </div>
+    <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
+
+      <div class="section">
+        <div class="section-label">Slide-disposition</div>
+        <p class="hint" style="margin-bottom:8px;">Uppskattad struktur — Claude anpassar ordning och innehåll baserat på källmaterialet.</p>
+        <div id="p-outlineList" style="font-size:12px;"></div>
+      </div>
+
+      <div class="section" style="flex:1; display:flex; flex-direction:column;">
+        <div class="section-label">Kompilerad prompt</div>
+        <div class="output-prompt" id="p-promptOutput">
+          <span style="color:var(--text3); font-style:italic;">Fyll i material och konfiguration för att generera prompten...</span>
+        </div>
+        <div class="approach-selector">
+          <div class="approach-label">Hur ska Claude starta?</div>
+          <div class="approach-btns">
+            <button class="approach-btn active" data-approach="build" onclick="pSetApproach(this)">
+              <span class="approach-icon">🚀</span>
+              <span class="approach-name">Bygg direkt</span>
+              <span class="approach-desc">Leverera komplett PPTX-spec</span>
+            </button>
+            <button class="approach-btn" data-approach="clarify" onclick="pSetApproach(this)">
+              <span class="approach-icon">🔍</span>
+              <span class="approach-name">Fråga först</span>
+              <span class="approach-desc">Förtydliga innehållet</span>
+            </button>
+            <button class="approach-btn" data-approach="discuss" onclick="pSetApproach(this)">
+              <span class="approach-icon">🧠</span>
+              <span class="approach-name">Diskutera</span>
+              <span class="approach-desc">Alternativ och upplägg</span>
+            </button>
+          </div>
+        </div>
+        <button class="copy-btn" id="p-copyBtn" onclick="pCopyPrompt()">
+          <span>📋</span> Kopiera prompt till urklipp
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div><!-- /pane-pptx -->
+</div><!-- /workspace -->
+
+<script>
+// ── PDF.JS CONFIG ──────────────────────────────────────────
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ── STATE ──────────────────────────────────────────────────
+const state = {
+  design: 'historia',
+  level: 'Historia 1a',
+  purpose: 'introduktion',
+  lang: 'svenska',
+  responsive: 'ja',
+  animate: 'ja',
+  hero_sub: 'ja',
+  hero_bg: 'ja',
+  intro_sources: 'nej',
+  mcq_explain: 'ja',
+  timeline_style: 'vertikal',
+  timeline_click: 'ja',
+  flip_type: 'begrepp',
+  map_lib: 'leaflet',
+  map_popup: 'ja',
+  persons_img: 'ja',
+  stats_type: 'bar',
+  diag_type: 'exitticket',
+  citations: 'nej',
+};
+
+const stepperVals = {
+  intro_paras: 2,
+  mcq_count: 4,
+  mcq_opts: 4,
+  timeline_events: 6,
+  flip_count: 6,
+  map_markers: 5,
+  persons_count: 4,
+  stats_charts: 2,
+  diag_discuss: 2,
+};
+
+let pdfText = '';
+let currentApproach = 'build';
+
+function setApproach(btn) {
+  document.querySelectorAll('.approach-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentApproach = btn.dataset.approach;
+  compile();
+}
+
+// ── TABS ──────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('#pane-html .tabs .tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  document.getElementById('textTab').style.display = tab === 'text' ? 'block' : 'none';
+  document.getElementById('pdfTab').style.display  = tab === 'pdf'  ? 'block' : 'none';
+}
+
+// ── PDF LOADING ────────────────────────────────────────────
+async function loadPDF(input) {
+  if (!input.files[0]) return;
+  const statusEl = document.getElementById('pdfStatus');
+  const zoneEl = document.getElementById('uploadZone');
+  statusEl.textContent = '⏳ Extraherar text...';
+
+  const file = input.files[0];
+  const arrayBuffer = await file.arrayBuffer();
+
+  try {
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    const maxPages = Math.min(pdf.numPages, 30);
+    for (let i = 1; i <= maxPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(item => item.str).join(' ') + '\n';
+    }
+    pdfText = fullText.trim();
+    zoneEl.classList.add('upload-success');
+    statusEl.style.color = 'var(--success)';
+    statusEl.textContent = `✓ ${file.name} — ${pdf.numPages} sidor, ${Math.round(pdfText.length/1000)}k tecken extraherade`;
+    document.getElementById('pdfActiveBadge').style.display = 'block';
+    compile();
+    pCompile();
+  } catch(e) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = '✗ Kunde inte läsa PDF: ' + e.message;
+  }
+}
+
+// ── RADIO BUTTONS ──────────────────────────────────────────
+function setRadio(el, group) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => {
+    b.classList.remove('active');
+    // Remove color variants
+    b.classList.remove('gold','teal','media','neutral');
+  });
+  el.classList.add('active');
+  // Apply color variant for design group
+  if (group === 'design') {
+    const colorMap = { historia:'gold', engelska:'teal', media:'media', neutral:'neutral', custom:'custom' };
+    if (colorMap[el.dataset.val]) el.classList.add(colorMap[el.dataset.val]);
+  }
+  state[group] = el.dataset.val;
+
+  if (group === 'design') updateDesignSystem();
+  if (group === 'design' || group === 'level') updateLevels();
+  compile();
+}
+
+function updateDesignSystem() {
+  const hint = document.getElementById('designHint');
+  const wrap = document.getElementById('customDesignWrap');
+  const hints = {
+    historia: 'Navy/gold, Playfair Display + Lora, akademisk-mörk estetik',
+    engelska: 'Teal accent, Spectral + DM Sans, modern pedagogisk estetik',
+    media:    'Djup svart/orange, Space Grotesk + Syne, industriell medieestetik',
+    neutral:  'Vit/grå, Inter, ren och kursagnostisk layout',
+    custom:   'Beskriv ditt eget designsystem nedan',
+  };
+  hint.textContent = hints[state.design] || '';
+  wrap.style.display = state.design === 'custom' ? 'block' : 'none';
+}
+
+function updateLevels() {
+  // Also sync PPTX level group if it exists (removed in panel merge)
+  const lg = document.getElementById('levelGroup');
+  const levelMap = {
+    historia: ['Historia 1a','Historia 1b','Historia 2','Historia 3'],
+    engelska: ['English B1','English B2','ESOL Beginner','ESOL Advanced'],
+    media:    ['Digitalt Skapande','Grafisk kommunikation','Fotografisk bild','Film och TV-produktion'],
+    neutral:  ['Gymnasienivå 1','Gymnasienivå 2','Gymnasienivå 3','Annan nivå'],
+  };
+  const levels = levelMap[state.design] || levelMap.neutral;
+  lg.innerHTML = levels.map(l =>
+    `<label class="radio-btn${state.level===l?' active':''}" data-group="level" data-val="${l}" onclick="setRadio(this,'level');compile()">${l}</label>`
+  ).join('');
+  if (!levels.includes(state.level)) {
+    state.level = levels[0];
+    lg.querySelector('.radio-btn').classList.add('active');
+  }
+}
+
+// ── STEPPERS ──────────────────────────────────────────────
+function stepVal(btn, dir, min, max) {
+  const valEl = btn.parentElement.querySelector('.stepper-val');
+  const key = valEl.dataset.key;
+  stepperVals[key] = Math.max(min, Math.min(max, stepperVals[key] + dir));
+  valEl.textContent = stepperVals[key];
+  compile();
+  updateOutlineDesc();
+}
+
+// ── MODULE TOGGLE ──────────────────────────────────────────
+function toggleModule(card) {
+  card.classList.toggle('active');
+  updateOutline();
+  compile();
+}
+
+function toggleExpand(card) {
+  card.classList.toggle('expanded');
+}
+
+// ── MODULE ORDER ──────────────────────────────────────────
+function moveModule(btn, event, dir) {
+  event.stopPropagation();
+  const card = btn.closest('.module-card');
+  const grid = card.parentElement;
+  const cards = Array.from(grid.children);
+  const idx = cards.indexOf(card);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= cards.length) return;
+  if (dir === -1) grid.insertBefore(card, cards[newIdx]);
+  else grid.insertBefore(cards[newIdx], card);
+
+  // Flash the moved card
+  card.classList.remove('just-moved');
+  void card.offsetWidth; // force reflow to restart animation
+  card.classList.add('just-moved');
+  setTimeout(() => card.classList.remove('just-moved'), 500);
+
+  updateOutline();
+
+  // Flash the corresponding outline item
+  const moduleName = card.dataset.module;
+  requestAnimationFrame(() => {
+    const outlineItem = document.querySelector(`.outline-item[data-module="${moduleName}"]`);
+    if (outlineItem) {
+      outlineItem.classList.remove('just-updated');
+      void outlineItem.offsetWidth;
+      outlineItem.classList.add('just-updated');
+      setTimeout(() => outlineItem.classList.remove('just-updated'), 400);
+    }
+  });
+
+  compile();
+}
+
+// ── OUTLINE ──────────────────────────────────────────────
+function updateOutline() {
+  const grid = document.getElementById('moduleGrid');
+  const outlineList = document.getElementById('outlineList');
+  const cards = Array.from(grid.children);
+
+  outlineList.innerHTML = '';
+  let num = 1;
+
+  cards.forEach(card => {
+    const moduleName = card.dataset.module;
+    const isActive = card.classList.contains('active');
+    const info = getModuleOutlineInfo(moduleName);
+
+    const li = document.createElement('li');
+    li.className = `outline-item${isActive ? ' active' : ''}`;
+    li.dataset.module = moduleName;
+    li.innerHTML = `
+      <div class="outline-num">${isActive ? num++ : '–'}</div>
+      <div class="outline-content">
+        <div class="outline-title">${info.icon} ${info.name}</div>
+        <div class="outline-desc">${info.desc()}</div>
+      </div>
+    `;
+    outlineList.appendChild(li);
+  });
+}
+
+function getModuleOutlineInfo(m) {
+  const map = {
+    hero: { icon:'🏛️', name:'Hero-sektion', desc: () => `Underrubrik: ${state.hero_sub==='ja'?'ja':'nej'}, Bakgrundsgrafik: ${state.hero_bg==='ja'?'ja':'nej'}` },
+    intro: { icon:'📝', name:'Introduktionstext', desc: () => `${stepperVals.intro_paras} stycken` },
+    mcq: { icon:'🎯', name:'Craig Barton MCQ', desc: () => `${stepperVals.mcq_count} frågor, ${stepperVals.mcq_opts} alternativ${state.mcq_explain==='ja'?', med förklaring':''}` },
+    timeline: { icon:'📅', name:'Interaktiv tidslinje', desc: () => `${stepperVals.timeline_events} händelser, ${state.timeline_style}` },
+    flipcards: { icon:'🃏', name:'Flip cards', desc: () => `${stepperVals.flip_count} kort, ${state.flip_type}` },
+    map: { icon:'🗺️', name:'Interaktiv karta', desc: () => `${state.map_lib}, ${stepperVals.map_markers} markörer` },
+    persons: { icon:'👤', name:'Persongalleri', desc: () => `${stepperVals.persons_count} personer` },
+    stats: { icon:'📊', name:'Statistikflik', desc: () => `${stepperVals.stats_charts} diagram, ${state.stats_type}` },
+    diagnostic: { icon:'🔬', name:'Diagnostisk avslutning', desc: () => `${state.diag_type}, ${stepperVals.diag_discuss} diskussionsfrågor` },
+  };
+  return map[m] || { icon:'⚙️', name: m, desc: () => '' };
+}
+
+function updateOutlineDesc() {
+  document.querySelectorAll('.outline-item').forEach(li => {
+    const m = li.dataset.module;
+    const info = getModuleOutlineInfo(m);
+    const descEl = li.querySelector('.outline-desc');
+    if (descEl) descEl.textContent = info.desc();
+  });
+}
+
+// ── CHAR COUNT ───────────────────────────────────────────
+function updateCharCount() {
+  const text = document.getElementById('sourceText').value;
+  document.getElementById('charCount').textContent = text.length.toLocaleString('sv');
+  document.getElementById('tokenEstimate').textContent = '~' + Math.round(text.length / 4).toLocaleString('sv');
+}
+
+// ── PROMPT COMPILATION ────────────────────────────────────
+function getSourceText() {
+  const tabText = document.getElementById('sourceText').value.trim();
+  const source = tabText || pdfText;
+  if (!source) return '';
+  const depth = parseInt(document.getElementById('sourceDepth').value);
+  const maxChars = depth === 1 ? 2000 : depth === 2 ? 5000 : 10000;
+  if (source.length > maxChars) {
+    return source.substring(0, maxChars) + '\n\n[... text trunkerad till ' + maxChars + ' tecken ...]';
+  }
+  return source;
+}
+
+function getActiveModules() {
+  return Array.from(document.querySelectorAll('.module-card.active')).map(c => c.dataset.module);
+}
+
+function getModuleSpec(m) {
+  const s = state;
+  const v = stepperVals;
+  const specs = {
+    hero: () => `
+=== MODUL: Hero-sektion ===
+Skapa en visuellt slående hero-sektion med:
+- Stor, elegant rubrik (ämnesnamnet)
+${s.hero_sub==='ja'?'- Underrubrik/ingress: ett kraftfullt citat eller en introducerande mening kopplad till ämnet\n':''}${s.hero_bg==='ja'?'- Dekorativ CSS-bakgrundsgrafik: subtilt geometriskt mönster eller gradient som passar designsystemet. Absolut inga externa bilder.\n':''}`,
+
+    intro: () => `
+=== MODUL: Introduktionstext ===
+Skriv ${v.intro_paras} välformulerade stycken som introducerar ämnet. Anpassa för ${s.level}-elever.
+Ton: tydlig, engagerande, historiskt/ämnesmässigt korrekt.
+${s.intro_sources==='ja'?'Inkludera inline-källhänvisningar i akademisk stil.':'Inga källhänvisningar i denna sektion.'}`,
+
+    mcq: () => `
+=== MODUL: Craig Barton Diagnostiska Frågor ===
+Skapa ${v.mcq_count} diagnostiska flervalsfrågor enligt Craig Barton-metodiken:
+KRITISKT: Varje distraktor (felaktigt svar) ska mappas till en NAMNGIVEN missuppfattning.
+Format per fråga:
+  - En tydlig fråga
+  - ${v.mcq_opts} svarsalternativ (1 korrekt + ${v.mcq_opts-1} distraktorer)
+  - Varje distraktor: etikett "Missuppfattning: [namn]" + kort förklaring varför det är fel
+  ${s.mcq_explain==='ja'?'- Visa detaljerad förklaring när rätt svar väljs':'- Ingen förklaring visas'}
+  - Implementera Fisher-Yates shuffling av svarsalternativen vid varje sidladdning
+Frågorna ska täcka olika aspekter av ämnet och utmana vanliga missuppfattningar.`,
+
+    timeline: () => `
+=== MODUL: Interaktiv Tidslinje ===
+Skapa en ${s.timeline_style} interaktiv tidslinje med ${v.timeline_events} nyckelår/-händelser.
+${s.timeline_click==='ja'?'Varje händelse är klickbar och visar en expanderad beskrivning (ca 50-80 ord).':'Händelserna visas med datum och kort beskrivning utan interaktion.'}
+Tidslinjen ska vara animerad med CSS (scroll-reveal eller liknande).`,
+
+    flipcards: () => `
+=== MODUL: Flip Cards ===
+Skapa ${v.flip_count} interaktiva flip-kort av typen "${state.flip_type}":
+${s.flip_type==='begrepp'?'Framsida: centralt begrepp / Baksida: definition och kontext':''}${s.flip_type==='person'?'Framsida: personnamn + porträttsymbol / Baksida: roll, tidsperiod, betydelse':''}${s.flip_type==='orsak'?'Framsida: orsak / Baksida: direkt följd och långsiktig konsekvens':''}
+CSS 3D flip-animation vid klick/hover. Rutnätslayout, responsiv.`,
+
+    map: () => `
+=== MODUL: Interaktiv Karta ===
+${s.map_lib==='leaflet'?`Implementera med Leaflet.js (CDN: https://unpkg.com/leaflet/dist/leaflet.js).
+Lägg till ${v.map_markers} historiskt relevanta platser som markörer på kartan.
+${s.map_popup==='ja'?'Varje markör visar en popup med platsens namn, datum och historisk betydelse (ca 40-60 ord).':''}`:`Skapa en SVG-baserad historisk karta med ${v.map_markers} markerade platser.
+Markörer med hover-tooltip. Ingen extern CDN krävs.`}`,
+
+    persons: () => `
+=== MODUL: Persongalleri ===
+Skapa ett galleri med ${v.persons_count} viktiga historiska personer kopplade till ämnet.
+Format per person: namn, levnadsår, titel/roll, kort biografi (60-80 ord), historisk betydelse.
+${s.persons_img==='ja'?`Använd Wikimedia Commons för porträttbilder. URL-format: https://upload.wikimedia.org/wikipedia/commons/thumb/[path]/200px-[filename]
+Om exakt URL är osäker, använd en SVG-platshållare med personens initialer istället.`:'Inga bilder — fokus på text och layout.'}`,
+
+    stats: () => `
+=== MODUL: Statistik och Diagram ===
+Skapa ${v.stats_charts} Chart.js-diagram (CDN: https://cdn.jsdelivr.net/npm/chart.js) med historiskt/ämnesmässigt relevanta data.
+Diagramtyp: ${s.stats_type==='bar'?'stapeldiagram':'s.stats_type==="line"?linjediagram":"blandat (stapel + linje)"'}
+Alla data ska vara faktabaserade och hämtade från källmaterialet. Inkludera rubrik och källhänvisning per diagram.`,
+
+    diagnostic: () => `
+=== MODUL: Diagnostisk Avslutning ===
+Avsluta sidan med:
+${s.diag_type==='exitticket'?`En "Exitbiljett"-sektion med:
+  - 2-3 korta faktafrågor (ej flerval) som eleven besvarar mentalt
+  - En självvärdering: "Vad förstår du nu som du inte förstod innan?"`:''}${s.diag_type==='reflection'?`En reflektionssektion med:
+  - En personlig kopplingsfråga
+  - En kritisk analysfråga`:''}${s.diag_type==='summary'?`En strukturerad sammanfattningssektion med:
+  - Nyckelbegrepp listade
+  - Huvudpoänger i punktform`:''}
+${v.diag_discuss} öppna diskussionsfrågor lämpliga för par- eller helklassdiskussion.`,
+  };
+  return specs[m] ? specs[m]() : '';
+}
+
+function compilePrompt() {
+  const subject = document.getElementById('subject').value.trim() || '[ÄMNE EJ ANGIVET]';
+  const sourceText = getSourceText();
+  const extraInstr = document.getElementById('extraInstructions').value.trim();
+  const activeModules = getActiveModules();
+
+  const designBlocks = {
+    historia: `
+== DESIGNSYSTEM: HISTORIA ==
+CSS-variabler (använd exakt dessa):
+  --primary: #1a1f3a
+  --secondary: #2d3561
+  --accent: #c9a84c
+  --accent-light: #f0d080
+  --text-primary: #f0ece0
+  --text-secondary: #b8b0a0
+  --bg-dark: #0f1220
+  --surface: #1a1f3a
+  --surface2: #252d4a
+
+Typografi:
+  Rubriker (h1–h3): 'Playfair Display', serif — importera från Google Fonts
+  Brödtext: 'Lora', serif — importera från Google Fonts
+  Knappar/UI: system-ui, sans-serif
+
+Estetik: Mörkt navy, guld-accenter, akademisk-historisk känsla.
+Bakgrundstextur: subtil noise-gradient på dark navy.
+Knappar: solid gold background, dark text, slight box-shadow.`,
+
+    engelska: `
+== DESIGNSYSTEM: ENGELSKA ==
+CSS-variabler (använd exakt dessa):
+  --primary: #0f2830
+  --secondary: #1a3f4a
+  --accent: #0ea5a0
+  --accent-light: #5dd8d4
+  --text-primary: #e8f4f4
+  --text-secondary: #9ecece
+  --bg-dark: #091820
+  --surface: #142530
+  --surface2: #1e3545
+
+Typografi:
+  Rubriker: 'Spectral', serif — importera från Google Fonts
+  Brödtext: 'DM Sans', sans-serif — importera från Google Fonts
+
+Estetik: Mörk teal, modern pedagogisk känsla, luftigt men strukturerat.`,
+
+    media: `
+== DESIGNSYSTEM: MEDIA ==
+CSS-variabler (använd exakt dessa):
+  --primary: #0a0a0a
+  --secondary: #141414
+  --accent: #ff6b00
+  --accent-light: #ff9a4d
+  --accent2: #e0ff00
+  --text-primary: #f5f5f5
+  --text-secondary: #a0a0a0
+  --bg-dark: #050505
+  --surface: #111111
+  --surface2: #1c1c1c
+
+Typografi:
+  Rubriker (h1–h2): 'Syne', sans-serif — importera från Google Fonts (font-weight: 700–800)
+  Brödtext + UI: 'Space Grotesk', sans-serif — importera från Google Fonts
+  Accent/teknisk text: monospace (code-liknande partier)
+
+Estetik: Djup svart bas, orange och gul-grön neonaccent, industriell medieproduktionskänsla.
+Kontrast och typografi ska signalera kreativt yrkeskunnande, inte akademisk tradition.
+Hero-sektioner gärna med stor, tät typografi i uppercase. Grid-layouts med tydliga kanter.
+Knappar: outlined style med accent-färg, slight glow på hover.
+Undvik runda former — föredra skarpa rektanglar och diagonala element.`,
+
+    neutral: `
+== DESIGNSYSTEM: NEUTRAL ==
+CSS-variabler (använd exakt dessa):
+  --primary: #ffffff
+  --secondary: #f4f4f5
+  --accent: #2563eb
+  --accent-light: #93c5fd
+  --text-primary: #18181b
+  --text-secondary: #52525b
+  --bg-dark: #f9fafb
+  --surface: #ffffff
+  --surface2: #f4f4f5
+
+Typografi:
+  Rubriker: 'Inter', sans-serif — importera från Google Fonts (font-weight: 600–700)
+  Brödtext: 'Inter', sans-serif
+
+Estetik: Vit/ljusgrå bakgrund, blå accent, ren och kursagnostisk layout.
+Ljust tema. Minimala skuggor. Tydliga kontraster för god läsbarhet.
+Passar material som ska fungera oberoende av ämnesidentitet.
+Knappar: solid blå, vit text, border-radius 6px.`,
+  };
+
+  const customText = document.getElementById('customDesignText').value.trim();
+  if (state.design === 'custom') {
+    designBlocks.custom = customText
+      ? `== DESIGNSYSTEM: EGET ==
+${customText}`
+      : `== DESIGNSYSTEM: EGET ==
+[Ingen designbeskrivning angiven — välj ett passande designsystem baserat på ämnet]`;
+  }
+
+  const designBlock = designBlocks[state.design] || designBlocks.neutral;
+
+  const moduleSpecs = activeModules.map(m => getModuleSpec(m)).join('\n');
+
+  let prompt = `Du är en expert på att bygga interaktiva pedagogiska webbsidor för gymnasieelever. Din uppgift är att skriva KOMPLETT, PRODUKTIONSKLAR HTML/CSS/JavaScript-kod för en interaktiv lärresurs.
+
+== ÄMNE ==
+${subject}
+
+== KURS OCH KONTEXT ==
+Kursnivå: ${state.level}
+Syfte: ${state.purpose.charAt(0).toUpperCase() + state.purpose.slice(1)}
+Målgrupp: Svenska gymnasieelever
+Språk i all text på sidan: ${state.lang}
+
+${designBlock}
+
+== TEKNISKA KRAV ==
+- En enda komplett HTML-fil (all CSS och JS inlineat)
+- ${state.responsive==='ja'?'Fullständigt responsiv layout (fungerar på mobil, surfplatta, dator)':'Desktop-fokuserad layout'}
+- ${state.animate==='ja'?'Smooth scroll-animationer och CSS-övergångar (requestAnimationFrame eller Intersection Observer)':'Minimal animation'}
+- Inga externa resurser förutom Google Fonts och eventuellt specificerade CDN-bibliotek
+- Inga browser confirm()-dialoger, alert(), eller prompt()
+- Inga em-dash (—) i svensk text — använd komma, semikolon eller omformuleringar
+- Alla interaktiva element ska ha hover-states och fokus-tillgänglighet
+- Kommentera koden kortfattat vid komplexa JS-sektioner
+
+== KÄLLMATERIAL ==
+${sourceText ? ('Basera sidans innehåll på följande material. Håll dig faktamässigt korrekt:\n\n' + sourceText) : '[INGET KÄLLMATERIAL ANGIVET — generera historiskt korrekt innehåll baserat på ämnesnamnet]'}
+
+== MODULSPECIFIKATIONER ==
+Bygg sidan i exakt denna ordning:
+${moduleSpecs}
+${extraInstr ? `\n== EXTRA INSTRUKTIONER ==\n${extraInstr}` : ''}
+
+== STARTINSTRUKTION ==
+${currentApproach === 'build' ?
+  'Bygg sidan direkt. Svara ENBART med komplett, körbar HTML-kod utan introduktionstext eller förklaring.' :
+currentApproach === 'clarify' ?
+  'Ställ 3–5 förtydligande frågor innan du börjar bygga. Frågorna ska handla om val som påverkar slutresultatet väsentligt — t.ex. specifika händelser att inkludera, personas för persongalleriet, vilka begrepp som ska finnas på flip-korten, eller prioriteringsordning mellan moduler. Bygg INTE sidan förrän du fått svar.' :
+  'Presentera en omfattande diskussion kring upplägget. Ge minst 3 alternativa strukturella ansatser med tydliga för- och nackdelar. Diskutera pedagogiska val, modulkombinationer, visuella möjligheter och eventuella risker. Avsluta med en rekommendation men bygg INTE sidan ännu — invänta godkännande.'
+}
+${currentApproach === 'build' ? '\n== OUTPUTKRAV ==\nSvara ENBART med komplett, körbar HTML-kod.\nBörja med <!DOCTYPE html> och avsluta med </html>.\\nIngen introduktionstext, ingen förklaring, inga markdown-kodblock.\\nKoden ska fungera direkt när den sparas som .html-fil och öppnas i webbläsaren.' : ''}`;
+
+  return prompt;
+}
+
+function updateTokenCounter(tokens) {
+  document.getElementById('tokenCount').textContent = tokens.toLocaleString('sv');
+  const dot = document.getElementById('tokenDot');
+  dot.className = tokens < 4000 ? 'token-dot' : tokens < 8000 ? 'token-dot warn' : 'token-dot over';
+}
+
+function compile() {
+  updateOutline();
+  updateOutlineDesc();
+  const prompt = compilePrompt();
+  const outputEl = document.getElementById('promptOutput');
+  const highlighted = prompt
+    .replace(/^(== .+ ==)$/gm, '<span class="prompt-section-tag">$1</span>')
+    .replace(/^(=== .+ ===)$/gm, '<span style="color:var(--gold)">$1</span>');
+  outputEl.innerHTML = highlighted;
+  updateTokenCounter(Math.round(prompt.length / 4));
+}
+
+// ── COPY ─────────────────────────────────────────────────
+async function copyPrompt() {
+  const prompt = compilePrompt();
+  try {
+    await navigator.clipboard.writeText(prompt);
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> Kopierat!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span>📋</span> Kopiera prompt till urklipp';
+    }, 2000);
+  } catch(e) {
+    alert('Kunde inte kopiera. Markera texten manuellt.');
+  }
+}
+
+// ── DRAG ZONE ─────────────────────────────────────────────
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    document.getElementById('pdfInput').files = dt.files;
+    loadPDF(document.getElementById('pdfInput'));
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// PPTX MODULE
+// ══════════════════════════════════════════════════════════
+
+// ── MAIN TAB SWITCH ───────────────────────────────────────
+function switchMainTab(tab) {
+  document.querySelectorAll('.main-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='html') || (i===1 && tab==='pptx'));
+  });
+  document.getElementById('pane-html').classList.toggle('active', tab==='html');
+  document.getElementById('pane-pptx').classList.toggle('active', tab==='pptx');
+  document.body.classList.toggle('pptx-mode', tab==='pptx');
+  if (tab === 'pptx') pCompile();
+}
+
+// ── PPTX STATE ────────────────────────────────────────────
+const pState = {
+  'p-design': 'historia',
+  'p-level': 'Historia 1a',
+  'p-purpose': 'introduktion',
+  'p-lang': 'svenska',
+  'p-structure': 'kronologisk',
+  'p-discuss-type': 'epa',
+  'p-img-style': 'fotorealistisk',
+  'p-exit-type': 'exitticket',
+  'p-citations': 'nej',
+};
+
+const pStepperVals = {
+  p_discuss_slides: 2,
+  p_mcq_slides: 2,
+  p_quotes: 2,
+};
+
+let pPdfText = '';
+
+const pScreenLabels = [
+  'Extremt låg — enbart rubrik och max 2 nyckelord',
+  'Låg — nyckelord och korta fraser, max 3 punkter',
+  'Normal — korta meningar, 3-4 punkter per slide',
+  'Detaljerad — fullständiga meningar, handout-lämplig',
+];
+const pNotesLabels = [
+  'Låg — ca 30-50 ord, stöd för fri improvisation',
+  'Mellan — ca 60-100 ord, fördjupning och kontext',
+  'Hög — ca 120-180 ord, fullständigt manus',
+];
+let pCurrentApproach = 'build';
+
+// ── PPTX RADIO ────────────────────────────────────────────
+function pSetRadio(el, group) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => {
+    b.classList.remove('active','gold','teal','media','neutral','custom');
+  });
+  el.classList.add('active');
+  // design/level/lang/purpose handled by shared setRadio
+  pState[group] = el.dataset.val;
+  pCompile();
+}
+
+// pUpdateDesignSystem removed — design is now shared via state.design
+
+// pUpdateLevels removed — level is now shared
+
+// ── PPTX APPROACH ─────────────────────────────────────────
+function pSetApproach(btn) {
+  document.querySelectorAll('#pane-pptx .approach-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pCurrentApproach = btn.dataset.approach;
+  pCompile();
+}
+
+// ── PPTX PDF ──────────────────────────────────────────────
+// pSwitchTab removed — uses shared switchTab
+
+// pLoadPDF removed — shared loadPDF handles PDF
+
+// p-uploadZone listeners removed — PDF handled by shared uploadZone
+
+// ── PPTX SOURCE TEXT ──────────────────────────────────────
+// p-sourceText listener removed — uses shared sourceText
+
+function pGetSourceText() {
+  const tab = document.getElementById('sourceText').value.trim();
+  const src = tab || pdfText || pPdfText;  // pdfText is the shared PDF
+  if (!src) return '';
+  const depth = parseInt(document.getElementById('sourceDepth').value);
+  const max = depth===1?2000:depth===2?5000:10000;
+  return src.length>max ? src.substring(0,max)+'\n\n[... trunkerad till '+max+' tecken ...]' : src;
+}
+
+// ── PPTX ACTIVE MODULES ───────────────────────────────────
+function pGetActiveModules() {
+  return Array.from(document.querySelectorAll('#pane-pptx .module-card.active')).map(c => c.dataset.pmodule);
+}
+
+// ── SLIDE DISPOSITION ─────────────────────────────────────
+function pRebuildSlides() {
+  const n = parseInt(document.getElementById('p-slideCount').value);
+  const subject = document.getElementById('subject').value.trim() || 'Ämne';
+  const struct = pState['p-structure'];
+  const ol = document.getElementById('p-outlineList');
+  if (!ol) return;
+
+  const structureLabels = {
+    kronologisk: (i,n) => i===1?'Bakgrund / Kontext': i===n?'Konsekvenser / Efterspel':'Fas '+(i-1),
+    tematisk: (i,n) => 'Tema '+i,
+    problembaserad: (i,n) => i===1?'Problembeskrivning': i===2?'Orsaksanalys': i===n?'Lösningar / Slutsats':'Aspekt '+(i-1),
+    jämförande: (i,n) => i<=Math.ceil(n/2)?'Perspektiv A — del '+i:'Perspektiv B — del '+(i-Math.ceil(n/2)),
+  };
+
+  let html = '<div class="pptx-outline-item title-slide"><div class="pptx-outline-num">T</div><span style="color:var(--text2);">Titelslide — '+subject+'</span></div>';
+  for (let i=1;i<=n;i++) {
+    const label = (structureLabels[struct]||structureLabels.kronologisk)(i,n);
+    html += '<div class="pptx-outline-item"><div class="pptx-outline-num">'+i+'</div><span style="color:var(--text2);">'+label+'</span></div>';
+  }
+  const active = pGetActiveModules();
+  if (active.includes('mcq')) {
+    for (let i=0;i<pStepperVals.p_mcq_slides;i++)
+      html += '<div class="pptx-outline-item"><div class="pptx-outline-num" style="background:var(--gold);color:#1a1200;">Q</div><span style="color:var(--text2);">Diagnostisk fråga '+(i+1)+'</span></div>';
+  }
+  if (active.includes('exit')) {
+    const elabel = pState['p-exit-type']==='exitticket'?'Exitbiljett':pState['p-exit-type']==='summary'?'Sammanfattning':'Hemuppgift';
+    html += '<div class="pptx-outline-item end-slide"><div class="pptx-outline-num">E</div><span style="color:var(--text2);">'+elabel+'</span></div>';
+  }
+  ol.innerHTML = html;
+}
+
+function pCompilePrompt() {
+  const subject    = document.getElementById('subject').value.trim() || '[ÄMNE EJ ANGIVET]';
+  const sourceText = pGetSourceText(); // uses shared sourceText + pdfText
+  const extra      = document.getElementById('p-extraInstructions').value.trim();
+  const slideCount = parseInt(document.getElementById('p-slideCount').value);
+  const screenDensity = parseInt(document.getElementById('p-screenDensity').value);
+  const notesDensity  = parseInt(document.getElementById('p-notesDensity').value);
+  const active     = pGetActiveModules();
+  const d          = state.design;
+
+  const designBlocks = {
+    historia: 'Tema: HISTORIA — Mörkt navy (#1a1f3a), guld-accent (#c9a84c). Rubriker i Playfair Display, brödtext i Lora.',
+    engelska: 'Tema: ENGELSKA — Mörkt teal (#0f2830), teal-accent (#0ea5a0). Rubriker i Spectral, brödtext i DM Sans.',
+    media:    'Tema: MEDIA — Djup svart (#0a0a0a), orange accent (#ff6b00) + neon-gul (#e0ff00). Rubriker i Syne ExtraBold, brödtext i Space Grotesk.',
+    neutral:  'Tema: NEUTRAL — Vitt/ljusgrått, blå accent (#2563eb). Inter genomgående. Rent och läsbart.',
+  };
+  const customTxt = document.getElementById('customDesignText').value.trim();
+  if (d === 'custom') designBlocks.custom = customTxt || '[Inget designsystem angivet]';
+  const designBlock = designBlocks[d] || designBlocks.neutral;
+
+  const screenDescs = [
+    'EXTREMT LÅG — enbart rubrik + max 2 nyckelord. Nästan bildspelslikt. Talaren bär allt innehåll.',
+    'LÅG — korta nyckelfraser, max 3 punkter per slide. Inga fullständiga meningar.',
+    'NORMAL — korta meningar, 3-4 punkter. Balans mellan läsbarhet och luftighet.',
+    'DETALJERAD — fullständiga meningar, 5-6 punkter. Fungerar som handout utan talmanus.',
+  ];
+  const notesDescs = [
+    'KORT talmanus — ca 30-50 ord. Ger struktur men läraren improviserar fritt.',
+    'MELLANLÅNGT talmanus — ca 60-100 ord per slide. Fördjupning, kontext och pedagogiska tips.',
+    'DETALJERAT talmanus — ca 120-180 ord. Fullständigt manus som kan läsas rakt upp. Inkludera övergångssatser.',
+  ];
+  const screenDesc = screenDescs[screenDensity - 1];
+  const notesDesc  = notesDescs[notesDensity - 1];
+
+  const moduleInstructions = [];
+  if (active.includes('speakernotes')) moduleInstructions.push('TALARANTECKNINGAR: Varje slide ska ha detaljerade talaranteckningar (ca 80-120 ord) med fördjupning, kontext och pedagogiska tips för läraren.');
+  if (active.includes('discussion')) {
+    const dtype = pState['p-discuss-type'];
+    const dformat = dtype==='epa'?'EPA-aktivitet (Enskilt → Par → Alla)':dtype==='tps'?'Think-Pair-Share-aktivitet':'öppen helklassdiskussion';
+    moduleInstructions.push('DISKUSSIONSSLIDES: Inkludera '+pStepperVals.p_discuss_slides+' dedikerade diskussionsslides med '+dformat+'.');
+  }
+  if (active.includes('images')) {
+    const istyle = pState['p-img-style'];
+    const iformat = istyle==='fotorealistisk'?'fotorealistisk AI-bildgenerering (Midjourney/DALL-E)':istyle==='illustration'?'digital illustration':'infografik';
+    moduleInstructions.push('BILDBESKRIVNINGAR: Generera en detaljerad bildbeskrivning för varje slide avsedd för '+iformat+'. Placera beskrivningen i hakparenteser: [BILD: ...]');
+  }
+  if (active.includes('mcq')) moduleInstructions.push('DIAGNOSTISKA FRÅGOR: Inkludera '+pStepperVals.p_mcq_slides+' Craig Barton-stil MCQ-slides med 4 alternativ (A-D), korrekt svar markerat, och förklaring av distraktorer i talaranteckningarna.');
+  if (active.includes('timeline')) moduleInstructions.push('TIDSLINJE: Inkludera en slide med en visuell tidslinjedisposition (horisontell, noder med år och etikett).');
+  if (active.includes('quotes')) moduleInstructions.push('CITATSLIDES: Inkludera '+pStepperVals.p_quotes+' citatslides med kraftfulla historiska eller relevanta citat. Stor typografi, källhänvisning, kort kontextfras.');
+  if (active.includes('stats')) moduleInstructions.push('STATISTIKVISUAL: Inkludera en slide med statistik/data. Beskriv diagramtyp, axlar, och exakta värden som kan skapas i PowerPoint.');
+  if (active.includes('exit')) {
+    const etype = pState['p-exit-type'];
+    const edesc = etype==='exitticket'?'Exitbiljett med 3 korta faktafrågor och en reflektionsfråga':etype==='summary'?'sammanfattningsslide med nyckelbegrepp och huvudpoänger i punktform':'hemuppgiftsslide med tydlig instruktion och deadline-plats';
+    moduleInstructions.push('AVSLUTNING: Sista sliden är en '+edesc+'.');
+  }
+
+  const approachBlock = pCurrentApproach === 'build'
+    ? 'Skapa en komplett, detaljerad PowerPoint-specifikation enligt formatet nedan. Leverera ALLA slides utan undantag.'
+    : pCurrentApproach === 'clarify'
+    ? 'Ställ 3-5 förtydligande frågor om innehållet innan du skapar specifikationen. Skapa INTE specifikationen förrän du fått svar.'
+    : 'Presentera en ingående diskussion om upplägget. Föreslå minst 3 alternativa strukturer med motivering. Avsluta med rekommendation men skapa INTE specifikationen ännu.';
+
+  const structure = pState['p-structure'];
+  const level     = state.level;
+  const purpose   = state.purpose;
+  const lang      = state.lang;
+  const imgLine   = active.includes('images') ? '\nBild: [BILD: detaljerad beskrivning]' : '';
+  const notesLine = active.includes('speakernotes') ? '\nTalaranteckningar: [fullständiga anteckningar]' : '';
+  const sourceBlock = sourceText
+    ? '== KÄLLMATERIAL ==\nBasera innehållet på följande material:\n\n' + sourceText
+    : '== KÄLLMATERIAL ==\n[Inget källmaterial — generera faktamässigt korrekt innehåll baserat på ämnesnamnet]';
+  const extraBlock = extra ? '\n== EXTRA INSTRUKTIONER ==\n' + extra : '';
+
+  const lines = [
+    'Du är en expert på att skapa pedagogiska PowerPoint-presentationer för gymnasieundervisning. Din uppgift är att skriva en KOMPLETT, DETALJERAD PowerPoint-specifikation som en lärare kan implementera direkt i PowerPoint.',
+    '',
+    '== ÄMNE ==',
+    subject,
+    '',
+    '== KURS OCH KONTEXT ==',
+    'Kursnivå: ' + level,
+    'Syfte: ' + purpose,
+    'Berättarstruktur: ' + structure,
+    'Målgrupp: Svenska gymnasieelever',
+    'Språk: ' + lang,
+    '',
+    '== DESIGN OCH VISUELL PROFIL ==',
+    designBlock,
+    'Bildformat: 16:9 widescreen.',
+    'Källhänvisningar: ' + (state.citations === 'ja' ? 'Inkludera källhänvisningar på relevanta slides och i talaranteckningar.' : 'Inga källhänvisningar.'),
+    '',
+    '== TEXTMÄNGD ==',
+    'Text på skärm: ' + screenDesc,
+    'Talmanus: ' + notesDesc,
+    '',
+    '== PRESENTATIONSSTRUKTUR ==',
+    'Total slides: ' + (slideCount + 2) + ' (titelslide + ' + slideCount + ' innehållsslides + avslutning)',
+    'Struktur: ' + structure,
+    '',
+    sourceBlock,
+    '',
+    '== KRAV PER SLIDE ==',
+    'Specificera varje slide med följande format:',
+    '',
+    'SLIDE [nummer]: [Rubrik]',
+    'Layout: [beskriv layout]',
+    'Rubrik: [exakt rubrik]',
+    'Innehåll: [punkter/text/citat]' + imgLine + notesLine,
+    '',
+    '== PEDAGOGISKA TILLÄGG ==',
+    moduleInstructions.join('\n'),
+    extraBlock,
+    '',
+    '== STARTINSTRUKTION ==',
+    approachBlock,
+  ];
+
+  return lines.join('\n');
+}
+
+function pCompile() {
+  pRebuildSlides();
+  const prompt = pCompilePrompt();
+  const el = document.getElementById('p-promptOutput');
+  if (!el) return;
+  el.innerHTML = prompt.replace(/^(== .+ ==)$/gm, '<span class="prompt-section-tag">$1</span>');
+  updateTokenCounter(Math.round(prompt.length / 4));
+}
+
+async function pCopyPrompt() {
+  const prompt = pCompilePrompt();
+  try {
+    await navigator.clipboard.writeText(prompt);
+    const btn = document.getElementById('p-copyBtn');
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> Kopierat!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span>📋</span> Kopiera prompt till urklipp';
+    }, 2000);
+  } catch(e) { alert('Kunde inte kopiera.'); }
+}
+
+// ── RESET ────────────────────────────────────────────────
+function resetAll() {
+  const htmlDefaults = {
+    design: 'historia', level: 'Historia 1a', purpose: 'introduktion',
+    lang: 'svenska', responsive: 'ja', animate: 'ja', hero_sub: 'ja',
+    hero_bg: 'ja', intro_sources: 'nej', mcq_explain: 'ja',
+    citations: 'nej', timeline_style: 'vertikal', timeline_click: 'ja',
+    flip_type: 'begrepp', map_lib: 'leaflet', map_popup: 'ja',
+    persons_img: 'ja', stats_type: 'bar', diag_type: 'exitticket',
+  };
+  Object.assign(state, htmlDefaults);
+  Object.assign(stepperVals, {
+    intro_paras:2, mcq_count:4, mcq_opts:4, timeline_events:6,
+    flip_count:6, map_markers:5, persons_count:4, stats_charts:2, diag_discuss:2,
+  });
+  document.querySelectorAll('#pane-html [data-group]').forEach(el => {
+    const group = el.dataset.group;
+    const val   = el.dataset.val;
+    el.classList.remove('active','gold','teal','media','neutral','custom');
+    if (htmlDefaults[group] === val) {
+      el.classList.add('active');
+      if (group === 'design') {
+        const cm = {historia:'gold',engelska:'teal',media:'media',neutral:'neutral',custom:'custom'};
+        if (cm[val]) el.classList.add(cm[val]);
+      }
+    }
+  });
+  document.querySelectorAll('#pane-html .stepper-val').forEach(el => {
+    el.textContent = stepperVals[el.dataset.key] || el.textContent;
+  });
+  document.getElementById('subject').value = '';
+  document.getElementById('sourceText').value = '';
+  document.getElementById('extraInstructions').value = '';
+  document.getElementById('customDesignText').value = '';
+  document.getElementById('sourceDepth').value = 2;
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('tokenEstimate').textContent = '~0';
+  document.getElementById('pdfActiveBadge').style.display = 'none';
+  pdfText = '';
+  const defaultActive = ['hero','intro','mcq','diagnostic'];
+  document.querySelectorAll('#pane-html .module-card').forEach(card => {
+    const m = card.dataset.module;
+    card.classList.toggle('active', defaultActive.includes(m));
+  });
+  currentApproach = 'build';
+  document.querySelectorAll('#pane-html .approach-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.approach === 'build');
+  });
+  updateDesignSystem();
+  updateLevels();
+  compile();
+}
+
+// ── SHARED PANEL COLLAPSE ────────────────────────────────
+function toggleSharedPanel() {
+  const panel = document.querySelector('.shared-panel');
+  const btn   = document.getElementById('collapseBtnLabel');
+  const collapsed = panel.classList.toggle('collapsed');
+  btn.textContent = collapsed ? 'Fäll ut' : 'Fäll ihop';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+compile();
+pRebuildSlides();
+</script>
+
+</body>
+</html>
