@@ -2,26 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAO Digit Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PAO Trainer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:          #f5f3ef;
-      --bg-card:     #eceae4;
-      --text:        #1a1814;
-      --text-muted:  #7a7568;
-      --border:      #ccc9c0;
-      --border-soft: #dedad2;
-      --accent:      #1a1814;
-
-      --green-bg:    #eaf5ec;
-      --green-border:#a8d5ae;
-      --green-text:  #1e6b30;
-      --red-bg:      #fbeaea;
-      --red-border:  #e0a8a8;
-      --red-text:    #7a1e1e;
+      --bg:           #f5f3ef;
+      --bg-card:      #eceae4;
+      --text:         #1a1814;
+      --text-muted:   #7a7568;
+      --border:       #ccc9c0;
+      --border-soft:  #dedad2;
+      --accent:       #1a1814;
+      --green-bg:     #eaf5ec;
+      --green-border: #a8d5ae;
+      --green-text:   #1e6b30;
+      --red-bg:       #fbeaea;
+      --red-border:   #e0a8a8;
+      --red-text:     #7a1e1e;
+      --amber-bg:     #fdf5e4;
+      --amber-border: #e0cc88;
+      --amber-text:   #7a5a00;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,560 +33,897 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 3rem 1.5rem 5rem;
+      padding-bottom: 5rem;
     }
 
-    .app {
-      max-width: 640px;
-      margin: 0 auto;
-    }
+    .app { max-width: 640px; margin: 0 auto; }
 
-    /* ── Header ── */
-    .app-eyebrow {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
+    /* ── Tab nav ── */
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 14px 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      background: transparent;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
     }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 
-    .app-heading {
-      font-size: 42px;
-      font-weight: 800;
-      line-height: 1.05;
-      margin-bottom: 2.5rem;
+    /* ── Tab content ── */
+    .tab-content { display: none; padding: 2rem 1.5rem; }
+    .tab-content.active { display: block; }
+
+    /* ── Shared typography ── */
+    .eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .heading { font-size: 36px; font-weight: 800; line-height: 1.05; margin-bottom: 2rem; }
+    .phase-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 2rem;
     }
 
     /* ── Phases ── */
     .phase { display: none; }
-    .phase.active {
-      display: block;
-      animation: fadeUp 0.3s ease both;
-    }
+    .phase.active { display: block; animation: fadeUp 0.3s ease both; }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0);   }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Config grid ── */
-    .config-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 1.75rem;
-    }
-
+    /* ── Inputs ── */
     .field-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 9px;
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 9px;
     }
-
     input[type="range"] {
-      display: block;
-      width: 100%;
-      margin-bottom: 9px;
-      accent-color: var(--accent);
-      cursor: pointer;
+      display: block; width: 100%; margin-bottom: 9px;
+      accent-color: var(--accent); cursor: pointer; height: 20px;
     }
-
     input[type="number"] {
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      font-weight: 700;
-      width: 100%;
-      padding: 8px 10px;
-      text-align: center;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg-card);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
+      font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700;
+      width: 100%; padding: 8px 10px; text-align: center;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg-card); color: var(--text);
+      outline: none; transition: border-color 0.15s;
     }
     input[type="number"]:focus { border-color: var(--accent); }
     input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
 
     /* ── Buttons ── */
     .btn-primary {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      border-radius: 10px;
-      border: none;
-      background: var(--accent);
-      color: var(--bg);
+      display: block; width: 100%; padding: 15px;
+      font-family: 'Syne', sans-serif; font-size: 15px;
+      font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+      border-radius: 10px; border: none;
+      background: var(--accent); color: var(--bg);
       transition: opacity 0.15s, transform 0.1s;
     }
     .btn-primary:hover  { opacity: 0.85; }
     .btn-primary:active { transform: scale(0.98); }
 
     .btn-ghost {
-      display: block;
-      width: 100%;
-      padding: 13px;
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text);
+      display: block; width: 100%; padding: 13px;
+      font-family: 'Syne', sans-serif; font-size: 14px;
+      font-weight: 700; letter-spacing: 0.05em; cursor: pointer;
+      border-radius: 10px; border: 1px solid var(--border);
+      background: transparent; color: var(--text);
       transition: background 0.15s, transform 0.1s;
     }
     .btn-ghost:hover  { background: var(--bg-card); }
     .btn-ghost:active { transform: scale(0.98); }
 
-    /* ── Study phase ── */
-    .phase-eyebrow {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 2rem;
+    .btn-danger {
+      display: block; width: 100%; padding: 11px;
+      font-family: 'Syne', sans-serif; font-size: 13px;
+      font-weight: 700; letter-spacing: 0.05em; cursor: pointer;
+      border-radius: 10px; border: 1px solid var(--red-border);
+      background: transparent; color: var(--red-text);
+      transition: background 0.15s;
     }
+    .btn-danger:hover { background: var(--red-bg); }
 
-    .digits-display {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px 24px;
-      justify-content: center;
-      margin: 1.5rem 0 2.5rem;
+    .btn-sm {
+      flex: 1; padding: 9px;
+      font-family: 'Syne', sans-serif; font-size: 12px;
+      font-weight: 700; cursor: pointer; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); transition: opacity 0.15s;
     }
+    .btn-sm.danger { background: var(--red-text); color: #fff; border-color: var(--red-text); }
+    .btn-sm:hover { opacity: 0.8; }
 
-    .chunk {
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--text);
-      line-height: 1;
-    }
-
-    .countdown-wrap {
-      background: var(--bg-card);
-      border-radius: 999px;
-      height: 5px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .countdown-bar {
-      height: 100%;
-      background: var(--accent);
-      width: 100%;
-      transform-origin: left;
-    }
-    .countdown-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: right;
-    }
-
-    /* ── Recall phase ── */
-    .recall-heading {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .recall-hint {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-    }
-    .recall-input {
-      font-family: 'Space Mono', monospace;
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      width: 100%;
-      text-align: center;
-      padding: 18px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: var(--bg-card);
-      color: var(--text);
-      outline: none;
-      margin-bottom: 14px;
-      transition: border-color 0.15s;
-    }
-    .recall-input:focus { border-color: var(--accent); }
-
-    /* ── Feedback phase ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 1.75rem;
-    }
+    /* ── Stats cards ── */
     .stat-card {
-      background: var(--bg-card);
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
+      background: var(--bg-card); border-radius: 10px;
+      padding: 12px 8px; text-align: center;
       border: 1px solid var(--border-soft);
     }
     .stat-num {
-      font-family: 'Space Mono', monospace;
-      font-size: 22px;
-      font-weight: 700;
-      display: block;
+      font-family: 'Space Mono', monospace; font-size: 20px;
+      font-weight: 700; display: block;
     }
     .stat-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
     }
 
+    /* ══════════════════════════════════════
+       DIGIT TRAINER
+    ══════════════════════════════════════ */
+    .config-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px; margin-bottom: 1.75rem;
+    }
+    .digits-display {
+      display: flex; flex-wrap: wrap;
+      gap: 18px 24px; justify-content: center;
+      margin: 1.5rem 0 2.5rem;
+    }
+    .chunk {
+      font-family: 'Space Mono', monospace; font-weight: 700;
+      letter-spacing: 0.04em; color: var(--text); line-height: 1;
+    }
+    .countdown-wrap {
+      background: var(--bg-card); border-radius: 999px;
+      height: 5px; overflow: hidden; margin-bottom: 10px;
+    }
+    .countdown-bar { height: 100%; background: var(--accent); width: 100%; transform-origin: left; }
+    .countdown-label {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      color: var(--text-muted); text-align: right;
+    }
+    .recall-heading { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .recall-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .recall-input {
+      font-family: 'Space Mono', monospace; font-size: 28px;
+      font-weight: 700; letter-spacing: 0.1em; width: 100%;
+      text-align: center; padding: 18px;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--bg-card); color: var(--text);
+      outline: none; margin-bottom: 14px; transition: border-color 0.15s;
+    }
+    .recall-input:focus { border-color: var(--accent); }
     .feedback-card {
-      border-radius: 12px;
-      padding: 1.75rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--border-soft);
+      border-radius: 12px; padding: 1.75rem;
+      margin-bottom: 1.5rem; border: 1px solid var(--border-soft);
     }
-    .feedback-card.correct {
-      background: var(--green-bg);
-      border-color: var(--green-border);
-    }
-    .feedback-card.wrong {
-      background: var(--red-bg);
-      border-color: var(--red-border);
-    }
-
-    .feedback-verdict {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 1rem;
-    }
+    .feedback-card.correct { background: var(--green-bg); border-color: var(--green-border); }
+    .feedback-card.wrong   { background: var(--red-bg);   border-color: var(--red-border);   }
+    .feedback-verdict { font-size: 22px; font-weight: 800; margin-bottom: 1rem; }
     .feedback-card.correct .feedback-verdict { color: var(--green-text); }
-    .feedback-card.wrong  .feedback-verdict { color: var(--red-text);   }
-
+    .feedback-card.wrong   .feedback-verdict { color: var(--red-text);   }
     .comparison { display: flex; flex-direction: column; gap: 12px; }
-    .comp-row   { display: flex; flex-direction: column; gap: 4px; }
+    .comp-row   { display: flex; flex-direction: column; gap: 4px;  }
     .comp-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
     }
     .comp-digits {
-      font-family: 'Space Mono', monospace;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      word-break: break-all;
-      line-height: 1.7;
+      font-family: 'Space Mono', monospace; font-size: 20px;
+      font-weight: 700; letter-spacing: 0.06em;
+      word-break: break-all; line-height: 1.7;
     }
     .d-ok  { color: var(--green-text); }
     .d-err { color: var(--red-text);   }
+    .score-line { font-size: 13px; color: var(--text-muted); margin-top: 1rem; }
+    .dt-stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 1.75rem;
+    }
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    .score-line {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 1rem;
+    /* ══════════════════════════════════════
+       PAO GRINDER
+    ══════════════════════════════════════ */
+
+    /* Box display */
+    .box-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 8px; margin-bottom: 1rem;
+    }
+    .box-card {
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: 10px; padding: 10px 6px; text-align: center;
+    }
+    .box-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      display: block; margin-bottom: 4px;
+    }
+    .box-count {
+      font-family: 'Space Mono', monospace; font-size: 22px;
+      font-weight: 700; display: block; margin-bottom: 6px;
+    }
+    .box-bar-wrap { background: var(--border-soft); border-radius: 999px; height: 3px; overflow: hidden; }
+    .box-bar { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+
+    .overdue-note {
+      font-size: 12px; color: var(--amber-text);
+      margin-bottom: 1.25rem; padding: 10px 14px;
+      background: var(--amber-bg); border: 1px solid var(--amber-border);
+      border-radius: 8px; display: none;
     }
 
-    .action-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .grinder-config-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 18px; margin-bottom: 1.75rem;
     }
+
+    /* Reset confirm */
+    .reset-area { margin-top: 1.5rem; }
+    .reset-confirm {
+      display: none; margin-top: 10px; padding: 12px;
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      border-radius: 10px; font-size: 13px; color: var(--red-text);
+    }
+    .reset-confirm-btns { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* Practice screen */
+    .practice-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 10px;
+    }
+    .progress-text { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .timer-display {
+      font-family: 'Space Mono', monospace; font-size: 15px;
+      font-weight: 700; color: var(--text-muted);
+    }
+    .practice-progress-wrap {
+      background: var(--bg-card); border-radius: 999px;
+      height: 4px; overflow: hidden; margin-bottom: 2rem;
+    }
+    .practice-progress-bar {
+      height: 100%; background: var(--accent); transition: width 0.3s ease;
+    }
+
+    .pair-display {
+      font-family: 'Space Mono', monospace; font-size: 96px;
+      font-weight: 700; text-align: center;
+      letter-spacing: 0.08em; line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    /* 2×2 category grid */
+    .cat-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 1.25rem;
+    }
+    .cat-cell { min-height: 72px; }
+
+    .cat-trigger {
+      width: 100%; height: 100%; min-height: 72px;
+      padding: 14px; font-family: 'Syne', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.04em;
+      cursor: pointer; border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-card); color: var(--text);
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .cat-trigger:hover  { background: var(--border-soft); border-color: var(--accent); }
+    .cat-trigger:active { transform: scale(0.97); }
+
+    .cat-yn-wrap { display: flex; width: 100%; gap: 6px; min-height: 72px; }
+    .cat-yes, .cat-no {
+      flex: 1; font-family: 'Syne', sans-serif; font-size: 20px;
+      font-weight: 700; cursor: pointer; border-radius: 10px;
+      transition: opacity 0.1s, transform 0.1s;
+    }
+    .cat-yes:active, .cat-no:active { transform: scale(0.95); }
+    .cat-yes { background: var(--green-bg); color: var(--green-text); border: 1.5px solid var(--green-border); }
+    .cat-no  { background: var(--red-bg);   color: var(--red-text);   border: 1.5px solid var(--red-border);   }
+    .cat-yes:hover { opacity: 0.75; }
+    .cat-no:hover  { opacity: 0.75; }
+
+    .cat-rated {
+      width: 100%; min-height: 72px; border-radius: 10px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      gap: 4px; border: 1.5px solid transparent;
+    }
+    .cat-rated .cat-icon { font-size: 22px; }
+    .rated-yes { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+    .rated-no  { background: var(--red-bg);   color: var(--red-text);   border-color: var(--red-border);   }
+
+    /* Result panel */
+    .result-panel {
+      border-radius: 12px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem; animation: fadeUp 0.2s ease both;
+    }
+    .res-great { background: var(--green-bg); border: 1px solid var(--green-border); }
+    .res-ok    { background: var(--amber-bg); border: 1px solid var(--amber-border); }
+    .res-fail  { background: var(--red-bg);   border: 1px solid var(--red-border);   }
+    .result-verdict { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+    .res-great .result-verdict { color: var(--green-text); }
+    .res-ok    .result-verdict { color: var(--amber-text); }
+    .res-fail  .result-verdict { color: var(--red-text);   }
+    .result-meta { font-size: 13px; color: var(--text-muted); }
+
+    /* Summary */
+    .g-stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 8px; margin-bottom: 1.5rem;
+    }
+    .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 1rem; }
+    .summary-table th {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .summary-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-soft); }
+    .summary-table .mono { font-family: 'Space Mono', monospace; font-weight: 700; }
+    .row-ok   td { color: var(--green-text); }
+    .row-warn td { color: var(--amber-text); }
+    .row-fail td { color: var(--red-text);   }
 
     /* ── Responsive ── */
     @media (max-width: 600px) {
-      body { padding: 2rem 1rem 4rem; }
-
-      .app-heading { font-size: 30px; margin-bottom: 1.75rem; }
-
-      /* Stack config to 1 column on small phones */
-      .config-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-
-      /* Larger touch targets for range inputs */
-      input[type="range"] {
-        height: 28px;
-        margin-bottom: 10px;
-      }
-
-      /* Bigger number boxes for fat fingers */
-      input[type="number"] {
-        font-size: 16px; /* prevents iOS zoom on focus */
-        padding: 11px 10px;
-      }
-
-      /* Digits scale down gracefully */
+      .tab-content { padding: 1.25rem 1rem; }
+      .heading { font-size: 28px; margin-bottom: 1.5rem; }
+      .config-grid { grid-template-columns: 1fr; gap: 16px; }
+      .grinder-config-grid { grid-template-columns: 1fr; }
+      .pair-display { font-size: 72px; margin-bottom: 1.5rem; }
       .chunk { font-size: clamp(20px, 7vw, 36px) !important; }
-      .digits-display { gap: 14px 18px; }
-
-      /* Recall input: prevent iOS zoom (font-size >= 16px) */
-      .recall-input {
-        font-size: 22px;
-        padding: 14px;
-        letter-spacing: 0.06em;
-      }
-
-      /* Taller tap targets on buttons */
+      .recall-input { font-size: 22px; padding: 14px; }
       .btn-primary { padding: 17px; font-size: 16px; }
-      .btn-ghost   { padding: 15px; font-size: 15px; }
-
-      /* Stack action buttons vertically */
-      .action-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-
-      /* Feedback digits a bit smaller */
-      .comp-digits { font-size: 16px; letter-spacing: 0.04em; }
-
-      /* Stats cards tighter */
-      .stat-num   { font-size: 18px; }
-      .stat-label { font-size: 9px;  }
+      .action-row { grid-template-columns: 1fr; }
+      .dt-stats-row .stat-num { font-size: 18px; }
+      .g-stats-row { grid-template-columns: repeat(2, 1fr); }
+      .box-count { font-size: 18px; }
     }
-
-    /* Very small phones */
-    @media (max-width: 360px) {
-      .app-heading { font-size: 26px; }
-      .recall-input { font-size: 18px; }
+    @media (max-width: 380px) {
+      .pair-display { font-size: 56px; }
+      .heading { font-size: 24px; }
     }
   </style>
 </head>
 <body>
 <div class="app">
 
-  <p class="app-eyebrow">Memory Training</p>
-  <h1 class="app-heading">PAO Digit<br>Trainer</h1>
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('digit')">Digit Trainer</button>
+    <button class="tab-btn"        onclick="switchTab('grinder')">PAO Grinder</button>
+  </nav>
 
-  <!-- CONFIG -->
-  <div id="phase-config" class="phase active">
-    <div class="config-grid">
-      <div>
-        <label class="field-label" for="numDigits">Digits</label>
-        <input type="range" id="numDigits" min="1" max="100" step="1" value="18"
-          oninput="document.getElementById('digitsBox').value = this.value">
-        <input type="number" id="digitsBox" min="1" max="9999" value="18"
-          oninput="document.getElementById('numDigits').value = Math.min(this.value, 100)">
+  <!-- ════════ TAB 1: DIGIT TRAINER ════════ -->
+  <div id="tab-digit" class="tab-content active">
+    <p class="eyebrow">Memory Training</p>
+    <h1 class="heading">PAO Digit<br>Trainer</h1>
+
+    <div id="phase-config" class="phase active">
+      <div class="config-grid">
+        <div>
+          <label class="field-label" for="numDigits">Digits</label>
+          <input type="range" id="numDigits" min="1" max="100" step="1" value="18"
+            oninput="get('digitsBox').value = this.value">
+          <input type="number" id="digitsBox" min="1" max="9999" value="18"
+            oninput="get('numDigits').value = Math.min(this.value, 100)">
+        </div>
+        <div>
+          <label class="field-label" for="studyTime">Study time (s)</label>
+          <input type="range" id="studyTime" min="1" max="120" step="1" value="30"
+            oninput="get('timeBox').value = this.value">
+          <input type="number" id="timeBox" min="1" max="3600" value="30"
+            oninput="get('studyTime').value = Math.min(this.value, 120)">
+        </div>
+        <div>
+          <label class="field-label" for="chunkSize">Chunk size</label>
+          <input type="range" id="chunkSize" min="1" max="10" step="1" value="6"
+            oninput="get('chunkBox').value = this.value">
+          <input type="number" id="chunkBox" min="1" max="20" value="6"
+            oninput="get('chunkSize').value = Math.min(Math.max(this.value,1),10)">
+        </div>
       </div>
-      <div>
-        <label class="field-label" for="studyTime">Study time (s)</label>
-        <input type="range" id="studyTime" min="1" max="120" step="1" value="30"
-          oninput="document.getElementById('timeBox').value = this.value">
-        <input type="number" id="timeBox" min="1" max="3600" value="30"
-          oninput="document.getElementById('studyTime').value = Math.min(this.value, 120)">
+      <button class="btn-primary" onclick="startSession()">Start session</button>
+    </div>
+
+    <div id="phase-study" class="phase">
+      <p class="phase-eyebrow">Memorise these digits</p>
+      <div class="digits-display" id="digitsDisplay"></div>
+      <div class="countdown-wrap">
+        <div class="countdown-bar" id="countdownBar"></div>
       </div>
-      <div>
-        <label class="field-label" for="chunkSize">Chunk size</label>
-        <input type="range" id="chunkSize" min="1" max="10" step="1" value="6"
-          oninput="document.getElementById('chunkBox').value = this.value">
-        <input type="number" id="chunkBox" min="1" max="20" value="6"
-          oninput="document.getElementById('chunkSize').value = Math.min(Math.max(this.value, 1), 10)">
+      <p class="countdown-label" id="countdownLabel"></p>
+    </div>
+
+    <div id="phase-recall" class="phase">
+      <p class="phase-eyebrow">Recall</p>
+      <p class="recall-heading">Enter the digits you memorised</p>
+      <p class="recall-hint" id="recallHint"></p>
+      <input type="text" class="recall-input" id="recallInput"
+        inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false"
+        placeholder="···"
+        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+        onkeydown="if (event.key === 'Enter') checkAnswer()">
+      <button class="btn-ghost" onclick="checkAnswer()">Check answer</button>
+    </div>
+
+    <div id="phase-feedback" class="phase">
+      <div class="dt-stats-row" id="dtStatsRow"></div>
+      <div class="feedback-card" id="feedbackCard">
+        <p class="feedback-verdict" id="feedbackVerdict"></p>
+        <div class="comparison" id="comparison"></div>
+        <p class="score-line" id="scoreLine"></p>
+      </div>
+      <div class="action-row">
+        <button class="btn-primary" onclick="startSession()">New sequence</button>
+        <button class="btn-ghost"   onclick="resetToConfig()">Change settings</button>
       </div>
     </div>
-    <button class="btn-primary" onclick="startSession()">Start session</button>
   </div>
 
-  <!-- STUDY -->
-  <div id="phase-study" class="phase">
-    <p class="phase-eyebrow">Memorise these digits</p>
-    <div class="digits-display" id="digitsDisplay"></div>
-    <div class="countdown-wrap">
-      <div class="countdown-bar" id="countdownBar"></div>
+  <!-- ════════ TAB 2: PAO GRINDER ════════ -->
+  <div id="tab-grinder" class="tab-content">
+
+    <!-- SETUP -->
+    <div id="grinder-setup">
+      <p class="eyebrow">Leitner System</p>
+      <h2 class="heading">PAO Grinder</h2>
+
+      <div class="box-grid" id="boxDisplay"></div>
+      <div class="overdue-note" id="overdueNote"></div>
+
+      <div class="grinder-config-grid">
+        <div>
+          <label class="field-label" for="grinderCount">Pairs per session</label>
+          <input type="range" id="grinderCount" min="5" max="50" step="1" value="10"
+            oninput="get('grinderCountBox').value = this.value">
+          <input type="number" id="grinderCountBox" min="1" max="100" value="10"
+            oninput="get('grinderCount').value = Math.min(this.value, 50)">
+        </div>
+        <div>
+          <label class="field-label" for="speedSlider">Speed limit (s)</label>
+          <input type="range" id="speedSlider" min="3" max="30" step="1" value="8"
+            oninput="get('speedBox').value = this.value">
+          <input type="number" id="speedBox" min="1" max="120" value="8"
+            oninput="get('speedSlider').value = Math.min(this.value, 30)">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="startGrinderSession()">Start grinding</button>
+
+      <div class="reset-area">
+        <button class="btn-danger" onclick="showResetConfirm()">Reset all progress</button>
+        <div class="reset-confirm" id="resetConfirm">
+          This will return all 100 pairs to Box 1. Cannot be undone.
+          <div class="reset-confirm-btns">
+            <button class="btn-sm danger" onclick="doReset()">Yes, reset</button>
+            <button class="btn-sm"        onclick="hideResetConfirm()">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <p class="countdown-label" id="countdownLabel"></p>
-  </div>
 
-  <!-- RECALL -->
-  <div id="phase-recall" class="phase">
-    <p class="phase-eyebrow">Recall</p>
-    <p class="recall-heading">Enter the digits you memorised</p>
-    <p class="recall-hint" id="recallHint"></p>
-    <input type="text" class="recall-input" id="recallInput"
-      inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false"
-      placeholder="···"
-      oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-      onkeydown="if (event.key === 'Enter') checkAnswer()">
-    <button class="btn-ghost" onclick="checkAnswer()">Check answer</button>
-  </div>
+    <!-- PRACTICE -->
+    <div id="grinder-practice" style="display:none">
+      <div class="practice-header">
+        <span class="progress-text" id="gProgressText">1 / 10</span>
+        <span class="timer-display" id="gTimer">0.0s</span>
+      </div>
+      <div class="practice-progress-wrap">
+        <div class="practice-progress-bar" id="gProgressBar" style="width:0%"></div>
+      </div>
 
-  <!-- FEEDBACK -->
-  <div id="phase-feedback" class="phase">
-    <div class="stats-row" id="statsRow"></div>
-    <div class="feedback-card" id="feedbackCard">
-      <p class="feedback-verdict" id="feedbackVerdict"></p>
-      <div class="comparison" id="comparison"></div>
-      <p class="score-line" id="scoreLine"></p>
+      <div class="pair-display" id="gPairNumber">00</div>
+
+      <div class="cat-grid" id="gCatGrid"></div>
+
+      <div class="result-panel" id="gResultPanel" style="display:none">
+        <div class="result-verdict" id="gResultVerdict"></div>
+        <div class="result-meta"    id="gResultMeta"></div>
+      </div>
+
+      <button class="btn-primary" id="gNextBtn" style="display:none" onclick="nextPair()">Next →</button>
     </div>
-    <div class="action-row">
-      <button class="btn-primary" onclick="startSession()">New sequence</button>
-      <button class="btn-ghost"   onclick="resetToConfig()">Change settings</button>
-    </div>
-  </div>
 
-</div>
+    <!-- SUMMARY -->
+    <div id="grinder-summary" style="display:none">
+      <p class="eyebrow">Session complete</p>
+      <h2 class="heading" style="font-size:28px; margin-bottom:1.25rem">Results</h2>
+      <div class="g-stats-row" id="gSummaryStats"></div>
+      <div id="gSummaryTable"></div>
+      <div style="margin-top:1.5rem">
+        <button class="btn-primary" onclick="returnToSetup()">Back to setup</button>
+      </div>
+    </div>
+
+  </div><!-- /tab-grinder -->
+</div><!-- /app -->
 
 <script>
-  let sequence = '';
-  let countdownTimer = null;
-  let stats = { attempts: 0, perfect: 0, totalDigits: 0, correctDigits: 0 };
+/* ══════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════ */
+function get(id) { return document.getElementById(id); }
 
-  function get(id) { return document.getElementById(id); }
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0) === (tab === 'digit'));
+  });
+  get('tab-digit').classList.toggle('active',   tab === 'digit');
+  get('tab-grinder').classList.toggle('active', tab === 'grinder');
+}
 
-  function getDigits()    { return Math.max(1, parseInt(get('digitsBox').value)  || 18); }
-  function getTime()      { return Math.max(1, parseInt(get('timeBox').value)    || 30); }
-  function getChunkSize() { return Math.max(1, parseInt(get('chunkBox').value)   || 6);  }
+/* ══════════════════════════════════════════
+   DIGIT TRAINER
+══════════════════════════════════════════ */
+let sequence = '', countdownTimer = null;
+let dtStats = { attempts: 0, perfect: 0, totalDigits: 0, correctDigits: 0 };
 
-  function showPhase(id) {
-    document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
-    get(id).classList.add('active');
+function getDigits()    { return Math.max(1, parseInt(get('digitsBox').value)  || 18); }
+function getTime()      { return Math.max(1, parseInt(get('timeBox').value)    || 30); }
+function getChunkSize() { return Math.max(1, parseInt(get('chunkBox').value)   || 6);  }
+
+function showPhase(id) {
+  document.querySelectorAll('#tab-digit .phase').forEach(el => el.classList.remove('active'));
+  get(id).classList.add('active');
+}
+
+function generateSequence(n) {
+  let s = '';
+  for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
+  return s;
+}
+
+function chunkFontSize(sz) {
+  if (sz <= 3) return '44px'; if (sz <= 6) return '36px';
+  if (sz <= 9) return '28px'; return '22px';
+}
+
+function renderChunks(seq) {
+  const el = get('digitsDisplay'), sz = getChunkSize(), fs = chunkFontSize(sz);
+  el.innerHTML = '';
+  for (let i = 0; i < seq.length; i += sz) {
+    const s = document.createElement('span');
+    s.className = 'chunk'; s.style.fontSize = fs;
+    s.textContent = seq.slice(i, i + sz);
+    el.appendChild(s);
   }
+}
 
-  function generateSequence(n) {
-    let s = '';
-    for (let i = 0; i < n; i++) s += Math.floor(Math.random() * 10);
-    return s;
-  }
+function startSession() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  const n = getDigits(), t = getTime();
+  sequence = generateSequence(n);
+  renderChunks(sequence);
+  get('recallHint').textContent = `${n} digit${n !== 1 ? 's' : ''} — type without spaces`;
+  get('recallInput').value = '';
+  showPhase('phase-study');
+  startCountdown(t);
+}
 
-  function chunkFontSize(size) {
-    if (size <= 3)  return '44px';
-    if (size <= 6)  return '36px';
-    if (size <= 9)  return '28px';
-    return '22px';
-  }
+function startCountdown(seconds) {
+  const bar = get('countdownBar'), label = get('countdownLabel');
+  let rem = seconds;
+  bar.style.transition = 'none'; bar.style.width = '100%';
+  void bar.offsetWidth;
+  bar.style.transition = `width ${seconds}s linear`; bar.style.width = '0%';
+  label.textContent = rem + 's';
+  countdownTimer = setInterval(() => {
+    rem--;
+    label.textContent = rem + 's';
+    if (rem <= 0) { clearInterval(countdownTimer); showPhase('phase-recall'); get('recallInput').focus(); }
+  }, 1000);
+}
 
-  function renderChunks(seq) {
-    const el = get('digitsDisplay');
-    const size = getChunkSize();
-    const fs = chunkFontSize(size);
-    el.innerHTML = '';
-    for (let i = 0; i < seq.length; i += size) {
-      const span = document.createElement('span');
-      span.className = 'chunk';
-      span.style.fontSize = fs;
-      span.textContent = seq.slice(i, i + size);
-      el.appendChild(span);
+function checkAnswer() {
+  const userInput = get('recallInput').value.trim(), correct = sequence, n = correct.length;
+  dtStats.attempts++; dtStats.totalDigits += n;
+  let cc = 0, acH = '', auH = '';
+  for (let i = 0; i < Math.max(correct.length, userInput.length); i++) {
+    const c = correct[i] || '', u = userInput[i] || '_';
+    if (c !== '' && c === u) {
+      cc++;
+      acH += `<span class="d-ok">${c}</span>`;
+      auH += `<span class="d-ok">${u}</span>`;
+    } else {
+      acH += `<span class="d-err">${c || '_'}</span>`;
+      auH += `<span class="d-err">${u}</span>`;
     }
   }
+  dtStats.correctDigits += cc;
+  const ok = userInput === correct;
+  if (ok) dtStats.perfect++;
+  get('feedbackCard').className = 'feedback-card ' + (ok ? 'correct' : 'wrong');
+  get('feedbackVerdict').textContent = ok ? '✓ Perfect recall' : '✗ Not quite';
+  get('comparison').innerHTML = `
+    <div class="comp-row"><span class="comp-label">Target</span>
+      <span class="comp-digits">${acH}</span></div>
+    <div class="comp-row"><span class="comp-label">Your answer</span>
+      <span class="comp-digits">${userInput ? auH : '<span style="color:#7a7568">—</span>'}</span></div>`;
+  get('scoreLine').textContent = `${cc} of ${n} digits correct (${Math.round(cc/n*100)}%)`;
+  get('dtStatsRow').innerHTML = `
+    <div class="stat-card"><span class="stat-num">${dtStats.attempts}</span><span class="stat-label">Attempts</span></div>
+    <div class="stat-card"><span class="stat-num">${dtStats.perfect}</span><span class="stat-label">Perfect</span></div>
+    <div class="stat-card"><span class="stat-num">${Math.round(dtStats.correctDigits/dtStats.totalDigits*100)}%</span><span class="stat-label">Accuracy</span></div>`;
+  showPhase('phase-feedback');
+}
 
-  function startSession() {
-    if (countdownTimer) clearInterval(countdownTimer);
-    const n = getDigits(), t = getTime();
-    sequence = generateSequence(n);
-    renderChunks(sequence);
-    get('recallHint').textContent = `${n} digit${n !== 1 ? 's' : ''} — type without spaces`;
-    get('recallInput').value = '';
-    showPhase('phase-study');
-    startCountdown(t);
+function resetToConfig() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  dtStats = { attempts: 0, perfect: 0, totalDigits: 0, correctDigits: 0 };
+  showPhase('phase-config');
+}
+
+/* ══════════════════════════════════════════
+   PAO GRINDER — LEITNER DATA
+══════════════════════════════════════════ */
+const STORAGE_KEY  = 'pao_grinder_v1';
+const DUE_DAYS     = [0, 1, 2, 4, 8, 16]; // days per box
+const BOX_WEIGHTS  = [0, 32, 16, 8, 4, 2]; // selection weight per box
+let gData = null;
+
+function freshData() {
+  const pairs = {};
+  for (let i = 0; i < 100; i++) {
+    const k = String(i).padStart(2, '0');
+    pairs[k] = { box: 1, lastReviewed: null, reviews: 0, correct: 0, avgTime: 0 };
   }
+  return { pairs, sessions: 0 };
+}
 
-  function startCountdown(seconds) {
-    const bar   = get('countdownBar');
-    const label = get('countdownLabel');
-    let remaining = seconds;
+function initData() {
+  try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return freshData();
+}
 
-    bar.style.transition = 'none';
-    bar.style.width = '100%';
-    void bar.offsetWidth; // force reflow
-    bar.style.transition = `width ${seconds}s linear`;
-    bar.style.width = '0%';
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(gData)); } catch(e) {}
+}
 
-    label.textContent = remaining + 's';
-    countdownTimer = setInterval(() => {
-      remaining--;
-      label.textContent = remaining + 's';
-      if (remaining <= 0) {
-        clearInterval(countdownTimer);
-        showPhase('phase-recall');
-        get('recallInput').focus();
-      }
-    }, 1000);
+function isOverdue(p) {
+  if (!p.lastReviewed) return true;
+  return (Date.now() - p.lastReviewed) / 86400000 >= DUE_DAYS[p.box];
+}
+
+function updateBoxDisplay() {
+  const counts = [0,0,0,0,0,0];
+  let overdue = 0;
+  Object.values(gData.pairs).forEach(p => { counts[p.box]++; if (isOverdue(p)) overdue++; });
+  let html = '';
+  for (let b = 1; b <= 5; b++) {
+    html += `<div class="box-card">
+      <span class="box-label">Box ${b}</span>
+      <span class="box-count">${counts[b]}</span>
+      <div class="box-bar-wrap"><div class="box-bar" style="width:${counts[b]}%"></div></div>
+    </div>`;
   }
+  get('boxDisplay').innerHTML = html;
+  const note = get('overdueNote');
+  if (overdue > 0) {
+    note.style.display = 'block';
+    note.innerHTML = `<strong>${overdue} pair${overdue !== 1 ? 's' : ''} due for review</strong> — these will be prioritised.`;
+  } else {
+    note.style.display = 'none';
+  }
+}
 
-  function checkAnswer() {
-    const userInput = get('recallInput').value.trim();
-    const correct   = sequence;
-    const n         = correct.length;
+/* ══════════════════════════════════════════
+   PAO GRINDER — PAIR SELECTION
+══════════════════════════════════════════ */
+function selectPairs(n) {
+  const overdue = [], notDue = [];
+  Object.entries(gData.pairs).forEach(([k, p]) =>
+    (isOverdue(p) ? overdue : notDue).push({ k, box: p.box })
+  );
+  // Sort overdue: lower box first, randomise within same box
+  overdue.sort((a, b) => a.box - b.box || Math.random() - 0.5);
 
-    stats.attempts++;
-    stats.totalDigits += n;
+  const selected = [];
+  for (const p of overdue) { if (selected.length >= n) break; selected.push(p.k); }
 
-    let correctCount = 0;
-    let acHTML = '', auHTML = '';
-
-    for (let i = 0; i < Math.max(correct.length, userInput.length); i++) {
-      const c = correct[i]  || '';
-      const u = userInput[i] || '_';
-      if (c !== '' && c === u) {
-        correctCount++;
-        acHTML += `<span class="d-ok">${c}</span>`;
-        auHTML += `<span class="d-ok">${u}</span>`;
-      } else {
-        acHTML += `<span class="d-err">${c || '_'}</span>`;
-        auHTML += `<span class="d-err">${u}</span>`;
-      }
+  if (selected.length < n) {
+    const pool = [];
+    notDue.forEach(p => { const w = BOX_WEIGHTS[p.box] || 1; for (let i=0;i<w;i++) pool.push(p.k); });
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]];
     }
+    const seen = new Set(selected);
+    for (const k of pool) {
+      if (selected.length >= n) break;
+      if (!seen.has(k)) { seen.add(k); selected.push(k); }
+    }
+  }
+  // Final shuffle
+  for (let i = selected.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
+  return selected;
+}
 
-    stats.correctDigits += correctCount;
-    const isPerfect = userInput === correct;
-    if (isPerfect) stats.perfect++;
+/* ══════════════════════════════════════════
+   PAO GRINDER — SESSION
+══════════════════════════════════════════ */
+const CATS = ['person', 'action', 'location', 'sensory'];
+const CAT_LABELS = { person: 'Person', action: 'Action', location: 'Location', sensory: 'Sensory ×3' };
 
-    // Feedback card
-    const card = get('feedbackCard');
-    card.className = 'feedback-card ' + (isPerfect ? 'correct' : 'wrong');
-    get('feedbackVerdict').textContent = isPerfect ? '✓ Perfect recall' : '✗ Not quite';
+let gSession = { pairs: [], index: 0, results: [], startTime: 0, ratings: {} };
+let gTimerInterval = null;
 
-    get('comparison').innerHTML = `
-      <div class="comp-row">
-        <span class="comp-label">Target</span>
-        <span class="comp-digits">${acHTML}</span>
-      </div>
-      <div class="comp-row">
-        <span class="comp-label">Your answer</span>
-        <span class="comp-digits">${userInput ? auHTML : '<span style="color:#7a7568">—</span>'}</span>
-      </div>`;
+function startGrinderSession() {
+  const n = Math.max(1, parseInt(get('grinderCountBox').value) || 10);
+  gSession = { pairs: selectPairs(n), index: 0, results: [], startTime: 0, ratings: {} };
+  gData.sessions++;
+  saveData();
+  showGScreen('grinder-practice');
+  showPair(0);
+}
 
-    const pct = Math.round((correctCount / n) * 100);
-    get('scoreLine').textContent = `${correctCount} of ${n} digits correct (${pct}%)`;
+function showPair(idx) {
+  gSession.ratings = {};
+  gSession.startTime = Date.now();
+  const total = gSession.pairs.length;
+  get('gProgressText').textContent = `${idx + 1} / ${total}`;
+  get('gProgressBar').style.width   = `${(idx / total) * 100}%`;
+  get('gPairNumber').textContent     = gSession.pairs[idx];
+  renderCatButtons();
+  get('gResultPanel').style.display = 'none';
+  get('gNextBtn').style.display     = 'none';
+  startGTimer();
+}
 
-    // Session stats
-    const acc = Math.round(stats.correctDigits / stats.totalDigits * 100);
-    get('statsRow').innerHTML = `
-      <div class="stat-card">
-        <span class="stat-num">${stats.attempts}</span>
-        <span class="stat-label">Attempts</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-num">${stats.perfect}</span>
-        <span class="stat-label">Perfect</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-num">${acc}%</span>
-        <span class="stat-label">Accuracy</span>
-      </div>`;
+function renderCatButtons() {
+  const grid = get('gCatGrid');
+  grid.innerHTML = '';
+  CATS.forEach(cat => {
+    const cell = document.createElement('div');
+    cell.className = 'cat-cell'; cell.id = `cat-${cat}`;
+    const btn = document.createElement('button');
+    btn.className = 'cat-trigger';
+    btn.textContent = CAT_LABELS[cat];
+    btn.onclick = () => openCat(cat);
+    cell.appendChild(btn); grid.appendChild(cell);
+  });
+}
 
-    showPhase('phase-feedback');
+function openCat(cat) {
+  if (gSession.ratings[cat] !== undefined) return;
+  const cell = get(`cat-${cat}`);
+  cell.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'cat-yn-wrap';
+  const y = document.createElement('button'); y.className = 'cat-yes'; y.textContent = '✓'; y.onclick = () => rateCat(cat, true);
+  const n = document.createElement('button'); n.className = 'cat-no';  n.textContent = '✗'; n.onclick = () => rateCat(cat, false);
+  wrap.appendChild(y); wrap.appendChild(n); cell.appendChild(wrap);
+}
+
+function rateCat(cat, remembered) {
+  gSession.ratings[cat] = remembered;
+  const cell = get(`cat-${cat}`);
+  cell.innerHTML = '';
+  const div = document.createElement('div');
+  div.className = `cat-rated ${remembered ? 'rated-yes' : 'rated-no'}`;
+  div.innerHTML = `<span class="cat-icon">${remembered ? '✓' : '✗'}</span>${CAT_LABELS[cat]}`;
+  cell.appendChild(div);
+  if (CATS.every(c => gSession.ratings[c] !== undefined)) allCatsRated();
+}
+
+function allCatsRated() {
+  stopGTimer();
+  const elapsed   = (Date.now() - gSession.startTime) / 1000;
+  const threshold = Math.max(1, parseInt(get('speedBox').value) || 8);
+  const pair      = gSession.pairs[gSession.index];
+  const pd        = gData.pairs[pair];
+  const cc        = CATS.filter(c => gSession.ratings[c]).length;
+  const allOk     = cc === 4;
+  const isFast    = elapsed <= threshold;
+  const oldBox    = pd.box;
+  let newBox, verdict, cls;
+
+  if (allOk && isFast) {
+    newBox  = Math.min(5, oldBox + 1);
+    verdict = newBox > oldBox ? `↑ Promoted to Box ${newBox}` : '★ Box 5 — master level!';
+    cls     = 'res-great';
+  } else if (allOk) {
+    newBox  = oldBox;
+    verdict = `→ Correct but slow — staying in Box ${oldBox}`;
+    cls     = 'res-ok';
+  } else if (cc === 3) {
+    newBox  = oldBox;
+    verdict = `→ Almost — staying in Box ${oldBox}`;
+    cls     = 'res-ok';
+  } else {
+    newBox  = 1;
+    verdict = '↓ Back to Box 1';
+    cls     = 'res-fail';
   }
 
-  function resetToConfig() {
-    if (countdownTimer) clearInterval(countdownTimer);
-    stats = { attempts: 0, perfect: 0, totalDigits: 0, correctDigits: 0 };
-    showPhase('phase-config');
-  }
+  pd.box = newBox; pd.lastReviewed = Date.now(); pd.reviews++;
+  if (allOk) pd.correct++;
+  pd.avgTime = pd.avgTime ? pd.avgTime * 0.7 + elapsed * 0.3 : elapsed;
+  saveData();
+
+  gSession.results.push({ pair, cc, elapsed, oldBox, newBox });
+
+  const panel = get('gResultPanel');
+  panel.style.display = 'block';
+  panel.className = `result-panel ${cls}`;
+  get('gResultVerdict').textContent = verdict;
+  get('gResultMeta').textContent    = `${cc}/4 correct · ${elapsed.toFixed(1)}s · ${isFast ? 'Fast ✓' : `Over ${threshold}s ✗`}`;
+
+  const btn = get('gNextBtn');
+  btn.style.display = 'block';
+  btn.textContent   = gSession.index < gSession.pairs.length - 1 ? 'Next →' : 'See results';
+}
+
+function nextPair() {
+  gSession.index++;
+  if (gSession.index >= gSession.pairs.length) showSummary();
+  else showPair(gSession.index);
+}
+
+function showSummary() {
+  showGScreen('grinder-summary');
+  updateBoxDisplay();
+  const R = gSession.results;
+  const perfect  = R.filter(r => r.cc === 4).length;
+  const promoted = R.filter(r => r.newBox > r.oldBox).length;
+  const avgTime  = R.reduce((s, r) => s + r.elapsed, 0) / R.length;
+
+  get('gSummaryStats').innerHTML = `
+    <div class="stat-card"><span class="stat-num">${R.length}</span><span class="stat-label">Reviewed</span></div>
+    <div class="stat-card"><span class="stat-num">${perfect}</span><span class="stat-label">Perfect</span></div>
+    <div class="stat-card"><span class="stat-num">${promoted}</span><span class="stat-label">Promoted</span></div>
+    <div class="stat-card"><span class="stat-num">${avgTime.toFixed(1)}s</span><span class="stat-label">Avg time</span></div>`;
+
+  let html = `<table class="summary-table">
+    <thead><tr><th>Pair</th><th>Score</th><th>Time</th><th>Box</th></tr></thead><tbody>`;
+  R.forEach(r => {
+    const cls = r.cc === 4 ? 'row-ok' : r.cc === 3 ? 'row-warn' : 'row-fail';
+    html += `<tr class="${cls}">
+      <td><span class="mono">${r.pair}</span></td>
+      <td>${r.cc}/4</td><td>${r.elapsed.toFixed(1)}s</td>
+      <td>${r.oldBox} → ${r.newBox}</td></tr>`;
+  });
+  get('gSummaryTable').innerHTML = html + '</tbody></table>';
+}
+
+function returnToSetup() { updateBoxDisplay(); showGScreen('grinder-setup'); }
+
+function showGScreen(id) {
+  ['grinder-setup','grinder-practice','grinder-summary'].forEach(s => {
+    get(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+/* ── Grinder timer ── */
+function startGTimer() {
+  clearInterval(gTimerInterval);
+  const t0 = Date.now();
+  gTimerInterval = setInterval(() => {
+    get('gTimer').textContent = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+  }, 100);
+}
+function stopGTimer() { clearInterval(gTimerInterval); }
+
+/* ── Reset ── */
+function showResetConfirm() { get('resetConfirm').style.display = 'block'; }
+function hideResetConfirm() { get('resetConfirm').style.display = 'none'; }
+function doReset() { gData = freshData(); saveData(); hideResetConfirm(); updateBoxDisplay(); }
+
+/* ══ INIT ══ */
+gData = initData();
+updateBoxDisplay();
 </script>
 </body>
 </html>
