@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verktyg &amp; Resurser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --border: #e8e4dc;
+    --accent: #c0392b;
+    --accent2: #2c3e50;
+    --text: #1a1814;
+    --text2: #5a5650;
+    --text3: #9a9690;
+    --tag-history: #7b4f2e;
+    --tag-history-bg: #f5ede4;
+    --tag-english: #2e5c7b;
+    --tag-english-bg: #e4eff5;
+    --tag-media: #3a2e6b;
+    --tag-media-bg: #edeaf5;
+    --tag-verktyg: #2e6b3a;
+    --tag-verktyg-bg: #e4f5ea;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Subtle grain texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .header-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--text2);
+    max-width: 480px;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    display: none;
+  }
+
+  /* CARDS */
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.18s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.18s ease;
+    transform-origin: bottom;
+  }
+
+  .card:hover {
+    border-color: var(--border);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    transform: translateX(3px);
+  }
+
+  .card:hover::before {
+    transform: scaleY(1);
+  }
+
+  .card-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    width: 38px;
+    text-align: center;
+  }
+
+  .card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+
+  .tag-historia { background: var(--tag-history-bg); color: var(--tag-history); }
+  .tag-engelska { background: var(--tag-english-bg); color: var(--tag-english); }
+  .tag-media    { background: var(--tag-media-bg);   color: var(--tag-media);   }
+  .tag-verktyg  { background: var(--tag-verktyg-bg); color: var(--tag-verktyg); }
+
+  .card-arrow {
+    color: var(--text3);
+    font-size: 14px;
+    transition: transform 0.18s, color 0.18s;
+  }
+
+  .card:hover .card-arrow {
+    transform: translateX(4px);
+    color: var(--accent);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 32px 0 48px;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .footer-link {
+    font-size: 12px;
+    color: var(--text3);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.15s;
+  }
+
+  .footer-link:hover { color: var(--text2); }
+
+  /* STAGGER ANIMATION */
+  .card {
+    opacity: 0;
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="header-eyebrow">Hamsterwithamachinegun · GitHub Pages</div>
+    <h1>Verktyg &amp; Resurser</h1>
+    <p class="header-sub">Interaktiva pedagogiska verktyg och applikationer för undervisning och lärande.</p>
+  </header>
+
+  <!-- SEKTION: VERKTYG -->
+  <div class="section">
+    <div class="section-title">Verktyg</div>
+    <div class="card-list">
+
+      <a class="card" href="prompt-kompilator.html">
+        <div class="card-icon">⚙️</div>
+        <div class="card-body">
+          <div class="card-title">Pedagogisk Promptkompilator</div>
+          <div class="card-desc">Bygg strukturerade prompts för interaktiva webbsidor och PowerPoint-presentationer</div>
+        </div>
+        <div class="card-meta">
+          <span class="tag tag-verktyg">Verktyg</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+
+      <a class="card" href="effective_teacher_app.html">
+        <div class="card-icon">🎓</div>
+        <div class="card-body">
+          <div class="card-title">Effective Teacher</div>
+          <div class="card-desc">Professionell utveckling för lärare med spaced repetition</div>
+        </div>
+        <div class="card-meta">
+          <span class="tag tag-verktyg">Verktyg</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+
+      <a class="card" href="pao_memory_trainer.html">
+        <div class="card-icon">🧠</div>
+        <div class="card-body">
+          <div class="card-title">PAO Memory Trainer</div>
+          <div class="card-desc">Träna minnet med Person–Action–Object-systemet</div>
+        </div>
+        <div class="card-meta">
+          <span class="tag tag-verktyg">Verktyg</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- SEKTION: FORSKNING & MEDIA -->
+  <div class="section">
+    <div class="section-title">Forskning &amp; Media</div>
+    <div class="card-list">
+
+      <a class="card" href="friskolor_forskning_svangdorrar.html">
+        <div class="card-icon">📊</div>
+        <div class="card-body">
+          <div class="card-title">Friskolor — Forskning &amp; Svängdörrar</div>
+          <div class="card-desc">Interaktiv visualisering av lobbynätverk och forskning kring friskolor</div>
+        </div>
+        <div class="card-meta">
+          <span class="tag tag-media">Media</span>
+        </div>
+        <span class="card-arrow">→</span>
+      </a>
+
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-text">Uppdateras kontinuerligt · Sundsgymnasiet</span>
+    <a class="footer-link" href="https://github.com/Hamsterwithamachinegun/visual-graphs" target="_blank">
+      GitHub ↗
+    </a>
+  </footer>
+
+</div>
+
+</body>
+</html>
