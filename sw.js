@@ -1,4 +1,4 @@
-const CACHE = 'et-v1';
+const CACHE = 'et-v2';
 
 // Cache the app shell and fonts on install
 self.addEventListener('install', e => {
