@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -178,22 +178,33 @@ body.offline #views{padding-top:36px}
 // ═══════════════════════════════════════════════
 //  DATA LAYER
 // ═══════════════════════════════════════════════
+// Safe write: returns true on success, false if storage rejected the write
+// (quota exceeded, private-mode restrictions, etc). Never throws to the caller.
+function safeSet(key, value){
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch(e){
+    return false;
+  }
+}
+
 const DB = {
   getProfiles(){ return JSON.parse(localStorage.getItem('et_profiles') || '[]') },
-  saveProfiles(p){ localStorage.setItem('et_profiles', JSON.stringify(p)) },
+  saveProfiles(p){ return safeSet('et_profiles', JSON.stringify(p)) },
   getActive(){ return localStorage.getItem('et_active') || null },
-  setActive(id){ localStorage.setItem('et_active', id) },
+  setActive(id){ return safeSet('et_active', id) },
   getWeek0(pid){ return JSON.parse(localStorage.getItem('et_'+pid+'_w0') || 'null') },
-  saveWeek0(pid,d){ localStorage.setItem('et_'+pid+'_w0', JSON.stringify(d)) },
+  saveWeek0(pid,d){ return safeSet('et_'+pid+'_w0', JSON.stringify(d)) },
   getLogs(pid,b){ return JSON.parse(localStorage.getItem('et_'+pid+'_b'+b) || '[]') },
   addLog(pid,b,entry){
     const logs = this.getLogs(pid,b);
     logs.push({...entry, id: Date.now(), date: new Date().toISOString()});
-    localStorage.setItem('et_'+pid+'_b'+b, JSON.stringify(logs));
+    return safeSet('et_'+pid+'_b'+b, JSON.stringify(logs));
   },
   deleteLog(pid,b,id){
     const logs = this.getLogs(pid,b).filter(l => l.id !== id);
-    localStorage.setItem('et_'+pid+'_b'+b, JSON.stringify(logs));
+    return safeSet('et_'+pid+'_b'+b, JSON.stringify(logs));
   }
 };
 
@@ -271,7 +282,7 @@ const BLOCKS = [
       { headline: "The culture shift", body: "The first week feels uncomfortable for everyone. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes." }
     ],
     summary: "Pose a question to the whole class, pause 3 seconds in silence, then name a specific student. Write 2-3 cold-call questions with student names into your lesson notes before the lesson.",
-    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. <strong>Cold Calling dissolves that contract.</strong> When any student may be called at any moment, the whole class cannot afford to switch off, not because they fear embarrassment, but because the question is live for everyone until a name is called. The 3-second wait matters: it ensures the whole class attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.\n\n<strong>The sequence</strong><br>Pose the question to the whole class first, name nobody. Wait 3 full seconds in silence. Make eye contact around the room. Then, and only then, name a student calmly and matter-of-factly. The tone should feel as routine as asking what page you're on. Once it becomes normal, students stop bracing for it and start just thinking.\n\n<strong>When a student says \"I don't know\"</strong><br>This is the most common failure point. Left unaddressed, <em>I don\'t know</em> becomes the exit strategy that reinstates the old contract. It is usually a reflex, not a genuine statement of ignorance. Never accept it as the end of the interaction.\n\n> <strong>What to say instead:</strong>\n> • <em>\"Take a guess.\"</em> — removes the social cost of being wrong. Most students will answer.\n> • <em>\"What would you say if you did know?\"</em> — sounds strange, but works more often than it should.\n> • <em>\"Tell me one thing you do know about this.\"</em> — partial retrieval is still retrieval.\n> • <em>\"I\'ll come back to you.\"</em> — ask someone else, then return. Signals that I don\'t know does not close the loop.\n> • Reduce the question — \"OK, simpler: what does [key term] mean?\" Keep them in the game.\n\n<strong>The culture shift</strong><br>The first week feels uncomfortable, for you and for students. Some will look down, some will repeat <em>I don\'t know</em>, some will be visibly surprised you came back to them. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes.",
+    why: "Most classroom questioning relies on volunteers. The same 4-5 students answer most questions. The rest sit behind an unspoken contract: stay quiet and nothing happens. <strong>Cold Calling dissolves that contract.</strong> When any student may be called at any moment, the whole class cannot afford to switch off, not because they fear embarrassment, but because the question is live for everyone until a name is called. The 3-second wait matters: it ensures the whole class attempts retrieval before the answer arrives, which strengthens memory more than re-listening would.\n\n<strong>The sequence</strong><br>Pose the question to the whole class first, name nobody. Wait 3 full seconds in silence. Make eye contact around the room. Then, and only then, name a student calmly and matter-of-factly. The tone should feel as routine as asking what page you're on. Once it becomes normal, students stop bracing for it and start just thinking.\n\n<strong>When a student says \"I don't know\"</strong><br>This is the most common failure point. Left unaddressed, <em>I don\'t know</em> becomes the exit strategy that reinstates the old contract. It is usually a reflex, not a genuine statement of ignorance. Never accept it as the end of the interaction.\n\n> <strong>What to say instead:</strong>\n> • <em>\"Take a guess.\"</em> — removes the social cost of being wrong. Most students will answer.\n> • <em>\"What would you say if you did know?\"</em> — sounds strange, but works more often than it should.\n> • <em>\"Tell me one thing you do know about this.\"</em> — partial retrieval is still retrieval.\n> • <em>\"I\'ll come back to you.\"</em> — ask someone else, then return. Signals that I don\'t know does not close the loop.\n> • Reduce the question — \"OK, simpler: what does [key term] mean?\" Keep them in the game.\n\n<strong>The culture shift</strong><br>The first week feels uncomfortable, for you and for students. Some will look down, some will repeat <em>I don\'t know</em>, some will be visibly surprised you came back to them. Stay consistent and calm. Once students understand that every Cold Call is followed through, the reflex disappears and the room changes.\n\n<strong>One important caveat</strong><br>The evidence is clear that cold calling only helps when the tone stays warm and low-stakes. Used as a catch-out, to expose students who were not listening, it raises anxiety and produces only surface compliance. The whole approach above depends on it never feeling like a trap: routine, calm, and always followed by support rather than judgement when an answer does not come.",
     target: "At least 3 cold calls per lesson. Wait time every time by Week 6.",
     scoreMax: null,
     fields: [
@@ -314,13 +325,13 @@ const BLOCKS = [
     cards: [
       { headline: "Why this comes last", body: "Voice and physical presence are the hardest to self-monitor in real time. By now, earlier techniques are becoming automatic, freeing up the mental capacity to notice what your body is actually doing." },
       { headline: "The habituation problem", body: "A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise, not through laziness but through neurology. The brain filters constant stimuli. Variation keeps the signal alive." },
-      { headline: "The three levers", body: "Pace: slowing down signals that something matters. Volume: dropping it creates more attention than raising it, and students lean in. Pitch: a falling pitch sounds authoritative; a rising pitch sounds uncertain, even when you're not." },
+      { headline: "The three levers", body: "Pace: slowing down signals that something matters. Volume: many teachers find that dropping it draws students in more reliably than raising it, since a quieter voice makes them lean in to listen. Pitch: a falling pitch at the end of a statement tends to be heard as more assured than a rising one. Use these as practical levers, not laws." },
       { headline: "The pause", body: "A 2–3 second silence before a key idea creates genuine anticipation. It is the most powerful vocal tool and the most underused. Silence is not awkward for students; it signals that something important is coming." },
       { headline: "Drop and slow", body: "Mark one moment in your lesson plan (the central claim, the key idea) and label it ‘drop and slow’. Drop your volume slightly, halve your pace, and pause briefly before you say it. That is the whole technique." },
       { headline: "The self-monitoring gap", body: "What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. The Week 10 recording is calibration, not performance review." }
     ],
     summary: "Move among students using a slide remote so you are not fixed to the front. For vocal variety, mark one moment in each lesson (the key idea, the central claim) and label it ‘drop and slow’: drop your volume slightly, halve your pace, and pause briefly before you say it. Record a lesson in Week 10 and compare it honestly to your Week 0 recording.",
-    why: "Voice and physical presence are the hardest to self-monitor in real time, which is why this block comes last, when earlier habits are becoming automatic and you have spare capacity to notice what your body is doing.\n\n<strong>Why vocal variety matters</strong><br>The brain stops processing constant stimuli. A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise, not through laziness but through neurology. Students working hard to extract meaning from a signal their brain is trying to filter out will find the lesson exhausting without knowing why. Vocal variation is the mechanism that keeps the signal alive.\n\n<strong>The three levers</strong><br>\n• <strong>Pace</strong> — slowing down signals that something matters. Speeding up signals transition or background detail. Most teachers speak at roughly the same pace throughout regardless of content weight.\n• <strong>Volume</strong> — the counterintuitive one: <em>dropping</em> volume creates more attention than raising it. When you get quieter, students lean in. Raising volume works but is overused and loses its effect.\n• <strong>Pitch</strong> — a falling pitch at the end of a statement sounds authoritative. A rising pitch sounds uncertain even when you are not. Monotone means pitch barely moves, stripping out all of these signals.\n\n<strong>The pause</strong><br>A 2-3 second silence before a key idea creates genuine anticipation and is probably the single most powerful vocal tool available. It is also the most underused, because silence feels unbearable to most teachers. It is . It signals that something important is coming.\n\n<strong>The self-monitoring problem</strong><br>What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Teachers consistently underestimate how much variation is needed because the self-consciousness of doing it distorts perception. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. This is why the Week 10 , not as a performance review, but as calibration.",
+    why: "Voice and physical presence are the hardest to self-monitor in real time, which is why this block comes last, when earlier habits are becoming automatic and you have spare capacity to notice what your body is doing.\n\n<strong>Why vocal variety matters</strong><br>The brain stops processing constant stimuli. A voice that stays at the same pace, volume and pitch for twenty minutes becomes background noise, not through laziness but through neurology. Students working hard to extract meaning from a signal their brain is trying to filter out will find the lesson exhausting without knowing why. Vocal variation is the mechanism that keeps the signal alive.\n\n<strong>The three levers</strong><br>The general finding that vocal variety helps hold attention is well supported. The specific levers below are widely-used practitioner heuristics rather than settled findings, so treat them as things to try and test, not rules.\n• <strong>Pace</strong> — slowing down signals that something matters. Speeding up signals transition or background detail. Most teachers speak at roughly the same pace throughout regardless of content weight.\n• <strong>Volume</strong> — the counterintuitive one: many teachers find that <em>dropping</em> volume draws students in more reliably than raising it. When you get quieter, students lean in to hear. Raising volume works too but is easy to overuse.\n• <strong>Pitch</strong> — a falling pitch at the end of a statement tends to be heard as more assured; a rising pitch can read as uncertain even when you are not. Monotone flattens all of this out.\n\n<strong>The pause</strong><br>A 2-3 second silence before a key idea creates genuine anticipation and is probably the single most powerful vocal tool available. It is also the most underused, because silence feels unbearable to most teachers. It is not, for students. It signals that something important is coming.\n\n<strong>The self-monitoring problem</strong><br>What feels like a dramatic change to you is perceived by students as a normal, appropriate shift. Teachers consistently underestimate how much variation is needed because the self-consciousness of doing it distorts perception. Recording yourself almost always reveals a gap between what you felt you did and what actually happened. This is why the Week 10 recording matters, not as a performance review, but as calibration.",
     target: "Mobility and eye contact: 3 or above out of 5 each. Vocal variety: deliberately use at least two of the three levers (pace, volume, pause) in every lesson by Week 10.",
     scoreMax: 16,
     fields: [
@@ -351,7 +362,7 @@ const PROMPTS = {
     high: [
       "The pause worked well: what did students do during it that told you that?",
       "You stopped when the timer went off: how did the room feel different in the second half?",
-      ". Could you try a different active task next time to vary it?"
+      "The pause worked: could you try a different active task next time to vary it?"
     ]
   },
   2: {
@@ -363,7 +374,7 @@ const PROMPTS = {
     high: [
       "It clicked for most students: what specifically did you say that seemed to do the work?",
       "The definition stuck: did students use the language back at you later in the lesson?",
-      ". Could the same analogy carry a different concept in a future lesson?"
+      "The explanation landed: could the same analogy carry a different concept in a future lesson?"
     ]
   },
   3: {
@@ -393,13 +404,13 @@ const PROMPTS = {
   5: {
     low: [
       "You stayed near the front: was it habit, or was something pulling you back there?",
-      "The voice ; pick one moment in the next lesson where you will deliberately drop your volume and slow down before saying it.",
-      "Low mobility . Which part of the room did you never reach? Plan one reason to go there next lesson."
+      "Vocal variety was flat: pick one moment in the next lesson where you will deliberately drop your volume and slow down before saying it.",
+      "Low mobility this lesson. Which part of the room did you never reach? Plan one reason to go there next lesson."
     ],
     high: [
-      ". Did moving to a different part of the room change how specific students responded?",
+      "You moved with intention: did moving to a different part of the room change how specific students responded?",
       "You used the pause: what happened in the room during the silence? Did students lean in or look away?",
-      ". Which of the three levers (pace, volume, pause) felt most natural? Which still feels forced?"
+      "A strong session: which of the three levers (pace, volume, pause) felt most natural? Which still feels forced?"
     ]
   }
 };
@@ -423,7 +434,7 @@ const S = {
 // ═══════════════════════════════════════════════
 function uid(){ return Math.random().toString(36).slice(2,9) }
 function fmtDate(iso){
-  return new Date(iso).toLocaleDateString('sv-SE',{month:'short',day:'numeric'});
+  return new Date(iso).toLocaleDateString('en-GB',{month:'short',day:'numeric'});
 }
 
 // Renders why text — handles paragraphs, • bullets, and > callout/example blocks
@@ -483,8 +494,8 @@ function getPrompt(blockId, logCount, formVals){
   } else if(blockId === 4){
     isHigh = formVals.readSlide === 'No';
   } else if(blockId === 5){
-    const total = (parseInt(formVals.mobility)||0)+(parseInt(formVals.vocal)||0)+(parseInt(formVals.eye)||0);
-    isHigh = total >= 9;
+    const total = calcScore(BLOCKS.find(b=>b.id===5), formVals);
+    isHigh = total >= 10;
   }
   return (isHigh ? bank.high : bank.low)[index];
 }
@@ -581,6 +592,9 @@ window.stepVal = function(key, min, max, delta){
   const next = Math.min(max, Math.max(min, cur + delta));
   el.textContent = next;
   S.form[key] = next;
+  // Mark mobility/eye steppers as deliberately touched so a genuine 3/3 still saves
+  if(key === 'mobility') S.form._mobilityTouched = true;
+  if(key === 'eye')      S.form._eyeTouched = true;
   refreshPrompt();
   const msg = document.getElementById('log-validation-msg');
   if(msg) msg.style.display='none';
@@ -1110,7 +1124,17 @@ window.saveLog = function(blockId){
   // Soft nudge: save but remind if no note written
   const hasNote = (S.form.notes||'').trim().length > 0;
 
-  DB.addLog(pid,blockId,{...S.form});
+  const ok = DB.addLog(pid,blockId,(()=>{ const {_mobilityTouched,_eyeTouched,...clean}=S.form; return clean; })());
+  if(!ok){
+    const msgEl = document.getElementById('log-validation-msg');
+    if(msgEl){
+      msgEl.textContent = 'Could not save: your device storage may be full or restricted. Try exporting a backup and clearing space.';
+      msgEl.style.display = 'block';
+    } else {
+      alert('Could not save: your device storage may be full or restricted.');
+    }
+    return;
+  }
   toast(hasNote ? 'Lesson logged' : 'Logged. Add a reflection note next time');
   S.blockTab='history';
   renderBlockDetail();
@@ -1137,13 +1161,13 @@ function validateLog(b, vals){
       return 'Fill in at least one field before saving.';
   }
   if(b.id === 5){
-    // Steppers start at midpoint — check if anything was deliberately changed
-    const midMobility = 3, midEye = 3;
-    const mobilityMoved = (parseInt(vals.mobility)||3) !== midMobility;
-    const eyeMoved      = (parseInt(vals.eye)||3)      !== midEye;
+    // Sliders always carry a real value once the form is open, so a genuine 3/3
+    // is valid input. Only block a completely untouched form: require either a
+    // radio answered, or a slider the user actually interacted with.
     const hasRadio = vals.pace !== undefined || vals.volume !== undefined || vals.pause !== undefined;
-    if(!mobilityMoved && !eyeMoved && !hasRadio)
-      return 'Adjust at least one field before saving.';
+    const sliderTouched = vals._mobilityTouched === true || vals._eyeTouched === true;
+    if(!hasRadio && !sliderTouched)
+      return 'Answer at least one of the pace, volume or pause questions before saving.';
   }
   return null;
 }
@@ -1330,7 +1354,7 @@ function renderProfiles(){
     <div style="height:1px;background:var(--border);margin:24px 0"></div>
     <div class="section-label">Data backup</div>
     <div class="info-card" style="margin-bottom:14px">
-      <p>Export saves all profiles and lesson logs as a JSON file on your device. Import restores from a previous export; you can choose to add the backup profiles alongside your existing ones, or replace everything.</p>
+      <p>Export saves all profiles and lesson logs as a JSON file on your device. Import restores from a previous export: by default it adds the backup profiles alongside your existing ones. Replacing everything is a separate, clearly-confirmed step.</p>
     </div>
     <button class="btn btn-ghost" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="exportData()">
       <svg style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1360,7 +1384,15 @@ window.delProfile = function(){
   if(!confirm('Delete this profile and all its data? This cannot be undone.')) return;
   const pid = DB.getActive();
   DB.saveProfiles(DB.getProfiles().filter(p=>p.id!==pid));
-  ['w0','b1','b2','b3','b4','b5'].forEach(k=>localStorage.removeItem('et_'+pid+'_'+k));
+  // Remove every key belonging to this profile (et_{pid}_*), so nothing is orphaned
+  // if new per-profile keys are added later.
+  const prefix = 'et_' + pid + '_';
+  const toRemove = [];
+  for(let i=0; i<localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith(prefix)) toRemove.push(k);
+  }
+  toRemove.forEach(k => localStorage.removeItem(k));
   DB.setActive(DB.getProfiles()[0]?.id || null);
   go('profiles');
 };
@@ -1398,24 +1430,46 @@ window.handleImport = function(e){
   reader.onload = function(ev){
     try {
       const backup = JSON.parse(ev.target.result);
-      if(!backup.version || !backup.data) throw new Error('Invalid file');
+      if(!backup.version || !backup.data || typeof backup.data !== 'object')
+        throw new Error('Invalid file');
 
-      // Count profiles in backup
-      const backupProfiles = JSON.parse(backup.data['et_profiles'] || '[]');
-      if(!backupProfiles.length){ toast('No profiles found in backup'); return; }
+      // Validate the profiles payload before trusting it
+      let backupProfiles;
+      try {
+        backupProfiles = JSON.parse(backup.data['et_profiles'] || '[]');
+      } catch(_){
+        throw new Error('Corrupt profiles');
+      }
+      const validProfiles = Array.isArray(backupProfiles)
+        && backupProfiles.every(p => p && typeof p === 'object' && typeof p.id === 'string' && typeof p.name === 'string');
+      if(!validProfiles) throw new Error('Corrupt profiles');
+      if(!backupProfiles.length){ toast('No profiles found in backup'); e.target.value=''; return; }
 
       const names = backupProfiles.map(p=>p.name).join(', ');
-      const choice = confirm(
+
+      // Default action is the SAFE one (add). Replace is a separate, explicit step.
+      const addThem = confirm(
         'Found ' + backupProfiles.length + ' profile(s): ' + names + '\n\n' +
-        'Tap OK to ADD these to your existing data.\n' +
-        'Tap Cancel to REPLACE everything with the backup.'
+        'Tap OK to ADD these alongside your existing data.\n' +
+        'Tap Cancel to leave your data unchanged.'
       );
 
-      if(choice) mergeImport(backup.data, backupProfiles);
-      else       replaceImport(backup.data);
+      if(addThem){
+        mergeImport(backup.data, backupProfiles);
+      } else {
+        // Only after declining the safe path do we offer the destructive one,
+        // with its own explicit, clearly-worded confirmation.
+        const replaceAll = confirm(
+          'Nothing added.\n\n' +
+          'If instead you want to REPLACE everything currently in the app with this backup, tap OK.\n' +
+          'This permanently deletes all current profiles and logs and cannot be undone.\n\n' +
+          'Tap Cancel to do nothing.'
+        );
+        if(replaceAll) replaceImport(backup.data);
+      }
 
     } catch(err){
-      alert('Could not read the backup file. Make sure it was exported from this app.');
+      alert('Could not read the backup file. Make sure it was exported from this app and has not been edited.');
     }
     e.target.value = '';
   };
@@ -1511,7 +1565,8 @@ window.saveWeek0 = function(){
   const pid = DB.getActive(); if(!pid) return;
   const scores = {};
   W0_AREAS.forEach((_,i)=>{ scores[i] = parseInt(document.getElementById('w0v-'+i).textContent) || 1; });
-  DB.saveWeek0(pid,{scores,savedAt:new Date().toISOString()});
+  const ok = DB.saveWeek0(pid,{scores,savedAt:new Date().toISOString()});
+  if(!ok){ alert('Could not save the audit: your device storage may be full or restricted.'); return; }
   toast('Audit saved');
   go('home');
 };
@@ -1538,7 +1593,14 @@ document.head.appendChild(mlink);
 //  OFFLINE DETECTION + SERVICE WORKER
 // ═══════════════════════════════════════════════
 function setOfflineBanner(offline){
-  document.getElementById('offline-banner').classList.toggle('show', offline);
+  const banner = document.getElementById('offline-banner');
+  // Only claim we're "running from cache" if a service worker actually controls
+  // the page. Otherwise be honest: there's no connection and the app may not work.
+  const cached = 'serviceWorker' in navigator && !!navigator.serviceWorker.controller;
+  banner.textContent = cached
+    ? 'No internet connection: running from cache'
+    : 'No internet connection';
+  banner.classList.toggle('show', offline);
   document.body.classList.toggle('offline', offline);
 }
 window.addEventListener('online',  () => setOfflineBanner(false));
