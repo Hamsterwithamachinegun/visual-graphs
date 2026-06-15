@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atelier — Anime Prompt Builder</title>
+<style>
+  :root{
+    /* light grey base */
+    --ink:#ffffff;            /* input / deepest surface (now lightest) */
+    --ink-2:#f4f5f9;          /* section gradient bottom */
+    --panel:#eceef4;          /* section surface */
+    --panel-2:#e2e5ee;        /* chips / raised */
+    --line:#c4c9da;           /* borders */
+    /* blue / purple accents (kept var names: gold/parchment/etc.) */
+    --gold:#6a5acd;           /* primary accent — slate blue/purple */
+    --gold-soft:#8b7ee0;      /* lighter accent */
+    --parchment:#23263a;      /* primary text (dark on light) */
+    --parchment-dim:#6b7088;  /* muted text */
+    --rust:#7c5cc4;           /* secondary purple */
+    --sage:#4a6fa5;           /* blue (settings line) */
+    --bad:#c0506a;            /* remove / error */
+    --radius:5px;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:"Inter","Segoe UI",system-ui,sans-serif;
+    --mono:"SF Mono","Cascadia Mono","Roboto Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:
+      radial-gradient(120% 80% at 50% -10%, #d9d6f0 0%, transparent 55%),
+      linear-gradient(180deg,#eef0f6,#e6e8f1) fixed,
+      #e9ebf2;
+    color:var(--parchment);font-family:var(--sans);
+    font-size:15px;line-height:1.55;letter-spacing:.1px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--gold);color:var(--ink);}
+
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px 120px;}
+
+  /* ---- masthead ---- */
+  header.masthead{
+    text-align:center;padding:54px 0 30px;border-bottom:1px solid var(--line);
+    margin-bottom:34px;position:relative;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.42em;
+    text-transform:uppercase;color:var(--gold);opacity:.85;margin:0 0 14px;
+  }
+  h1{
+    font-family:var(--serif);font-weight:500;font-style:italic;
+    font-size:clamp(40px,7vw,68px);line-height:.95;margin:0;
+    color:var(--parchment);letter-spacing:.5px;
+  }
+  h1 .amp{color:var(--gold);font-style:normal;}
+  .sub{
+    margin:16px auto 0;max-width:560px;color:var(--parchment-dim);
+    font-size:14.5px;
+  }
+
+  /* ---- model selector ---- */
+  .models{display:flex;gap:10px;justify-content:center;margin:26px 0 0;flex-wrap:wrap;}
+  .model-tab{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--line);color:var(--parchment-dim);
+    padding:9px 18px;border-radius:var(--radius);cursor:pointer;transition:.18s;
+  }
+  .model-tab:hover{border-color:var(--gold);color:var(--parchment);}
+  .model-tab[aria-selected="true"]{
+    background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600;
+  }
+  .model-tab.soon{opacity:.5;cursor:not-allowed;}
+  .model-tab.soon:hover{border-color:var(--line);color:var(--parchment-dim);}
+  /* Illustrious tab tinted pink */
+  .model-tab[data-model="illustrious"]:hover{border-color:#d6649e;color:#b03d78;}
+  .model-tab[data-model="illustrious"][aria-selected="true"]{
+    background:#d6649e;color:#fff;border-color:#d6649e;
+  }
+  .model-note{
+    text-align:center;font-size:12.5px;color:var(--parchment-dim);
+    margin:14px 0 0;font-style:italic;font-family:var(--serif);min-height:18px;
+  }
+
+  /* ---- sections ---- */
+  section{
+    background:linear-gradient(180deg,var(--panel),var(--ink-2));
+    border:1px solid var(--line);border-radius:var(--radius);
+    margin:18px 0;overflow:hidden;
+  }
+  .sec-head{
+    display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;
+    user-select:none;background:#6a5acd0d;
+  }
+  .sec-num{
+    font-family:var(--mono);font-size:11px;color:var(--gold);
+    border:1px solid var(--gold);border-radius:50%;width:24px;height:24px;
+    display:grid;place-items:center;flex:none;letter-spacing:0;
+  }
+  .sec-title{font-family:var(--serif);font-size:20px;font-weight:500;margin:0;flex:1;}
+  .sec-hint{font-size:12px;color:var(--parchment-dim);font-family:var(--mono);letter-spacing:.04em;}
+  .chev{transition:transform .2s;color:var(--gold);font-size:13px;}
+  section.collapsed .chev{transform:rotate(-90deg);}
+  section.collapsed .sec-body{display:none;}
+  .sec-body{padding:8px 20px 22px;}
+
+  label.fld{display:block;margin:16px 0 6px;font-size:12px;font-family:var(--mono);
+    letter-spacing:.1em;text-transform:uppercase;color:var(--gold-soft);}
+  .fld-hint{font-size:12px;color:var(--parchment-dim);margin:-2px 0 8px;font-style:italic;font-family:var(--serif);}
+  input[type=text],textarea,select{
+    width:100%;background:var(--ink);border:1px solid var(--line);
+    color:var(--parchment);border-radius:var(--radius);padding:11px 13px;
+    font-family:var(--sans);font-size:14.5px;transition:.16s;
+  }
+  textarea{resize:vertical;min-height:62px;line-height:1.5;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold);background:#f3f1fc;}
+  select{appearance:none;cursor:pointer;
+    background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);
+    background-position:calc(100% - 18px) center,calc(100% - 13px) center;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px;}
+
+  .row{display:flex;gap:14px;flex-wrap:wrap;}
+  .row>div{flex:1;min-width:160px;}
+
+  /* chips */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;}
+  .chip{
+    font-size:12.5px;background:var(--panel-2);border:1px solid var(--line);
+    color:var(--parchment-dim);border-radius:20px;padding:5px 12px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{border-color:var(--gold);color:var(--parchment);}
+  .chip[aria-pressed="true"]{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:600;}
+
+  /* artist builder */
+  .artist-add{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .artist-add>div:first-child{flex:2;min-width:200px;}
+  .artist-add>div:nth-child(2){flex:0 0 96px;}
+  .btn{
+    font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border-radius:var(--radius);padding:11px 16px;cursor:pointer;border:1px solid var(--gold);
+    background:var(--gold);color:var(--ink);font-weight:600;transition:.16s;white-space:nowrap;
+  }
+  .btn:hover{background:var(--gold-soft);}
+  .btn.ghost{background:transparent;color:var(--gold);}
+  .btn.ghost:hover{background:#6a5acd1a;}
+
+  .stack{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .stack-row{
+    display:flex;align-items:center;gap:12px;background:var(--ink);
+    border:1px solid var(--line);border-radius:var(--radius);padding:9px 12px;
+  }
+  .stack-row .nm{flex:1;font-family:var(--mono);font-size:13px;color:var(--parchment);}
+  .stack-row .nm small{color:var(--parchment-dim);font-family:var(--serif);font-style:italic;font-size:12px;margin-left:8px;}
+  .stack-row input[type=range]{flex:0 0 120px;accent-color:var(--gold);}
+  .stack-row .wv{font-family:var(--mono);font-size:12px;color:var(--gold);width:30px;text-align:right;}
+  .stack-row .rm{background:none;border:none;color:var(--bad);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;}
+  .stack-empty{font-style:italic;font-family:var(--serif);color:var(--parchment-dim);font-size:13.5px;padding:6px 2px;}
+
+  /* artist reference table */
+  .ref-toggle{margin-top:18px;}
+  .ref{margin-top:14px;border-top:1px solid var(--line);padding-top:14px;display:none;}
+  .ref.open{display:block;}
+  .ref-grp{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold);margin:16px 0 8px;}
+  .ref-grp:first-child{margin-top:0;}
+  .ref-item{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid #c4c9da55;align-items:baseline;}
+  .ref-item .tag{font-family:var(--mono);font-size:13px;color:var(--parchment);cursor:pointer;}
+  .ref-item .tag:hover{color:var(--gold);}
+  .ref-item .tag::before{content:"@";color:var(--gold);opacity:.6;}
+  .ref-item .works{font-size:12.5px;color:var(--parchment-dim);font-style:italic;font-family:var(--serif);text-align:right;flex:1;}
+  .ref-item .ref-add{background:none;border:1px solid var(--line);color:var(--gold);border-radius:20px;
+    font-size:11px;padding:2px 9px;cursor:pointer;font-family:var(--mono);flex:none;}
+  .ref-item .ref-add:hover{border-color:var(--gold);}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block;margin-right:2px;}
+  .dot.hi{background:#3fae6b;}                 /* solid */
+  .dot.med{background:#d6a52b;}                /* verify */
+  .dot.lo{background:#c0506a;}                 /* uncertain */
+  .ref-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--parchment-dim);
+    font-family:var(--mono);margin:2px 0 12px;align-items:center;}
+  .ref-legend span{display:flex;align-items:center;gap:6px;}
+  .stack-row .dot{margin-right:6px;}
+
+  /* mode switch */
+  .mode-switch{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;width:fit-content;margin-top:6px;}
+  .mode-switch button{
+    font-family:var(--mono);font-size:12px;letter-spacing:.08em;background:transparent;
+    border:none;color:var(--parchment-dim);padding:9px 18px;cursor:pointer;transition:.15s;
+  }
+  .mode-switch button[aria-selected="true"]{background:var(--gold);color:var(--ink);font-weight:600;}
+
+  /* output */
+  .output{position:sticky;bottom:0;}
+  .out-card{
+    background:linear-gradient(180deg,#f0eefb,#e7e9f4);
+    border:1px solid var(--gold);border-radius:var(--radius);margin-top:26px;
+    box-shadow:0 -8px 40px #6a5acd22;
+  }
+  .out-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;}
+  .out-head h2{font-family:var(--serif);font-style:italic;font-size:22px;margin:0;}
+  .out-actions{display:flex;gap:8px;}
+  .out-block{padding:0 20px 14px;}
+  .out-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-soft);margin:12px 0 5px;display:flex;justify-content:space-between;}
+  .out-lbl .mini{background:none;border:none;color:var(--gold);font-family:var(--mono);font-size:10.5px;cursor:pointer;letter-spacing:.1em;}
+  pre.out{
+    margin:0;background:var(--ink);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 15px;font-family:var(--mono);font-size:12.5px;line-height:1.65;
+    color:var(--parchment);white-space:pre-wrap;word-break:break-word;max-height:none;
+  }
+  pre.out.neg{color:var(--parchment-dim);}
+  .settings-line{font-family:var(--mono);font-size:12px;color:var(--sage);padding:2px 20px 18px;letter-spacing:.02em;}
+  .settings-line b{color:var(--gold);font-weight:600;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--gold);color:var(--ink);font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+    padding:10px 20px;border-radius:var(--radius);opacity:0;pointer-events:none;transition:.25s;font-weight:600;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  footer{text-align:center;color:var(--parchment-dim);font-size:12px;margin-top:50px;font-family:var(--serif);font-style:italic;}
+  footer a{color:var(--gold);text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+
+  @media (max-width:560px){
+    .sec-hint{display:none;}
+    h1{font-size:clamp(34px,11vw,48px);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Anime Diffusion · Prompt Atelier</p>
+    <h1>The Atelier <span class="amp">&</span> Forge</h1>
+    <p class="sub">A composing desk for painterly, grounded anime art. Pick a subject, set a scene, blend your artists — it assembles a layered prompt in the order the model was trained to read.</p>
+
+    <div class="models" role="tablist" aria-label="Model">
+      <button class="model-tab" role="tab" aria-selected="true" data-model="anima">Anima</button>
+      <button class="model-tab" role="tab" aria-selected="false" data-model="illustrious">Illustrious</button>
+    </div>
+    <p class="model-note" id="modelNote">2B flow-matching model · understands tags <em>and</em> natural language · knows Danbooru/Gelbooru artists to ~Sept 2025</p>
+  </header>
+
+  <!-- 1 · SUBJECT -->
+  <section data-sec>
+    <div class="sec-head"><span class="sec-num">1</span><h3 class="sec-title">Subject</h3><span class="sec-hint">who / what is in frame</span><span class="chev">▾</span></div>
+    <div class="sec-body">
+      <label class="fld">Count & type</label>
+      <div class="row">
+        <div><select id="count">
+          <option value="1girl">1girl</option>
+          <option value="1boy">1boy</option>
+          <option value="1other">1other</option>
+          <option value="2girls">2girls</option>
+          <option value="2boys">2boys</option>
+          <option value="1girl, 1boy">1girl, 1boy</option>
+          <option value="">— none / scene only —</option>
+        </select></div>
+        <div><input type="text" id="solo" placeholder="solo, group, crowd… (optional)"></div>
+      </div>
+
+      <label class="fld">Character / name <span style="text-transform:none;color:var(--parchment-dim)">(optional)</span></label>
+      <input type="text" id="char" placeholder="e.g. original character, or a danbooru character tag">
+
+      <label class="fld">Appearance</label>
+      <p class="fld-hint">Hair, eyes, build, clothing, expression. Name the character first, then describe — matters most with multiple characters.</p>
+      <textarea id="appearance" placeholder="tall woman, lean build, long black hair, sharp narrow eyes, weathered face, dark plate armor, grim expression"></textarea>
+
+      <label class="fld">Hair <span style="text-transform:none;color:var(--parchment-dim)">(verified Danbooru tags — combine freely)</span></label>
+      <p class="fld-hint">These append after your appearance text. Leave any on "—" to skip it.</p>
+      <div class="row">
+        <div><select id="hairLength" class="hairsel">
+          <option value="">— length —</option>
+          <option value="very short hair">very short hair</option>
+          <option value="short hair">short hair</option>
+          <option value="medium hair">medium hair</option>
+          <option value="long hair">long hair</option>
+          <option value="very long hair">very long hair</option>
+          <option value="absurdly long hair">absurdly long hair</option>
+        </select></div>
+        <div><select id="hairStyle" class="hairsel">
+          <option value="">— style / tie —</option>
+          <optgroup label="Down / loose">
+            <option value="straight hair">straight hair</option>
+            <option value="wavy hair">wavy hair</option>
+            <option value="curly hair">curly hair</option>
+            <option value="messy hair">messy hair</option>
+            <option value="spiked hair">spiked hair</option>
+            <option value="hair down">hair down</option>
+          </optgroup>
+          <optgroup label="Cuts">
+            <option value="bob cut">bob cut</option>
+            <option value="bob cut, inverted bob">inverted bob</option>
+            <option value="pixie cut">pixie cut</option>
+            <option value="hime cut">hime cut</option>
+            <option value="undercut">undercut</option>
+            <option value="bowl cut">bowl cut</option>
+          </optgroup>
+          <optgroup label="Ponytail">
+            <option value="ponytail">ponytail</option>
+            <option value="high ponytail">high ponytail</option>
+            <option value="low ponytail">low ponytail</option>
+            <option value="side ponytail">side ponytail</option>
+            <option value="folded ponytail">folded ponytail</option>
+          </optgroup>
+          <optgroup label="Twin / pigtails">
+            <option value="twintails">twintails</option>
+            <option value="low twintails">low twintails</option>
+            <option value="short twintails">short twintails</option>
+            <option value="twin drills">twin drills</option>
+            <option value="two side up">two side up</option>
+          </optgroup>
+          <optgroup label="Braids">
+            <option value="braid">braid</option>
+            <option value="single braid">single braid</option>
+            <option value="twin braids">twin braids</option>
+            <option value="french braid">french braid</option>
+            <option value="crown braid">crown braid</option>
+            <option value="side braid">side braid</option>
+            <option value="braided bun">braided bun</option>
+          </optgroup>
+          <optgroup label="Buns / up">
+            <option value="hair bun">hair bun</option>
+            <option value="double bun">double bun</option>
+            <option value="single hair bun">single hair bun</option>
+            <option value="cone hair bun">cone hair bun</option>
+            <option value="hair up">hair up</option>
+          </optgroup>
+        </select></div>
+        <div><select id="hairBangs" class="hairsel">
+          <option value="">— bangs —</option>
+          <option value="blunt bangs">blunt bangs</option>
+          <option value="swept bangs">swept bangs</option>
+          <option value="side-swept bangs">side-swept bangs</option>
+          <option value="asymmetrical bangs">asymmetrical bangs</option>
+          <option value="curtained hair">curtained hair</option>
+          <option value="hair between eyes">hair between eyes</option>
+          <option value="parted bangs">parted bangs</option>
+          <option value="long bangs">long bangs</option>
+          <option value="hair over one eye">hair over one eye</option>
+        </select></div>
+      </div>
+
+      <label class="fld">Pose & framing</label>
+      <div class="chips" data-chips="framing">
+        <span class="chip">close-up portrait</span><span class="chip">upper body</span>
+        <span class="chip">cowboy shot</span><span class="chip">full body</span>
+        <span class="chip">from below</span><span class="chip">from above</span>
+        <span class="chip">from behind</span><span class="chip">from side</span>
+        <span class="chip">looking at viewer</span><span class="chip">looking back</span>
+        <span class="chip">looking over shoulder</span><span class="chip">looking away</span>
+        <span class="chip">looking to the side</span><span class="chip">profile</span>
+        <span class="chip">dynamic pose</span><span class="chip">action shot</span>
+        <span class="chip">sitting</span><span class="chip">leaning forward</span>
+        <span class="chip">arms crossed</span><span class="chip">hand on hip</span>
+        <span class="chip">hands behind back</span><span class="chip">walking</span><span class="chip">standing</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · SETTING -->
+  <section data-sec>
+    <div class="sec-head"><span class="sec-num">2</span><h3 class="sec-title">Setting</h3><span class="sec-hint">where it happens</span><span class="chev">▾</span></div>
+    <div class="sec-body">
+      <label class="fld">Scene description</label>
+      <p class="fld-hint">A line or two of natural language reads best — Anima's text encoder rewards real sentences.</p>
+      <textarea id="scene" placeholder="a candlelit stone dungeon, damp walls and broken pillars, treasure scattered across the floor, shafts of dusty light from above"></textarea>
+
+      <label class="fld">Time & atmosphere</label>
+      <div class="chips" data-chips="atmos">
+        <span class="chip">golden hour</span><span class="chip">sunset</span>
+        <span class="chip">sunrise</span><span class="chip">night</span>
+        <span class="chip">twilight</span><span class="chip">blue hour</span>
+        <span class="chip">candlelight</span><span class="chip">moonlight</span>
+        <span class="chip">overcast</span><span class="chip">stormy</span>
+        <span class="chip">misty</span><span class="chip">foggy</span>
+        <span class="chip">rain</span><span class="chip">snow</span>
+        <span class="chip">dramatic shadows</span><span class="chip">chiaroscuro</span>
+        <span class="chip">cinematic lighting</span><span class="chip">rim light</span>
+        <span class="chip">backlighting</span><span class="chip">god rays</span>
+        <span class="chip">atmospheric perspective</span><span class="chip">depth of field</span>
+        <span class="chip">volumetric lighting</span><span class="chip">ethereal</span>
+        <span class="chip">ominous</span><span class="chip">serene</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · STYLE / ARTISTS -->
+  <section data-sec>
+    <div class="sec-head"><span class="sec-num">3</span><h3 class="sec-title">Style &amp; Artists</h3><span class="sec-hint">the look — blend &amp; weight</span><span class="chev">▾</span></div>
+    <div class="sec-body">
+      <label class="fld">Render style</label>
+      <div class="chips" data-chips="render">
+        <span class="chip">painterly</span><span class="chip">lineless</span>
+        <span class="chip">thick lineart</span><span class="chip">sketch</span>
+        <span class="chip">ink wash</span><span class="chip">watercolor (texture)</span>
+        <span class="chip">gouache</span><span class="chip">oil painting (texture)</span>
+        <span class="chip">soft painting</span><span class="chip">cel shading</span>
+        <span class="chip">flat color</span><span class="chip">muted color palette</span>
+        <span class="chip">limited palette</span><span class="chip">high contrast</span>
+        <span class="chip">detailed background</span><span class="chip">scenery porn</span>
+        <span class="chip">european comic</span><span class="chip">art nouveau</span>
+        <span class="chip">fantasy illustration</span><span class="chip">concept art</span>
+        <span class="chip">gothic</span><span class="chip">grimdark</span>
+        <span class="chip">retro anime</span><span class="chip">1980s (style)</span>
+        <span class="chip">anime coloring</span>
+      </div>
+
+      <label class="fld">Add an artist</label>
+      <p class="fld-hint">Pick from the curated list below, or type any Danbooru tag. Verify exact spellings on the explorer — a wrong tag fails silently.</p>
+      <div class="artist-add">
+        <div>
+          <select id="artistPick">
+            <option value="">— choose from list —</option>
+          </select>
+        </div>
+        <div>
+          <input type="text" id="artistFree" placeholder="or type tag">
+        </div>
+        <button class="btn" id="addArtist">Add</button>
+      </div>
+
+      <div class="stack" id="artistStack">
+        <p class="stack-empty">No artists yet. Add one or two leads, keep the rest light.</p>
+      </div>
+
+      <button class="btn ghost ref-toggle" id="refToggle">Browse the 20-artist reference ▾</button>
+      <div class="ref" id="ref"></div>
+    </div>
+  </section>
+
+  <!-- 4 · QUALITY & MODE -->
+  <section data-sec>
+    <div class="sec-head"><span class="sec-num">4</span><h3 class="sec-title">Quality &amp; Mode</h3><span class="sec-hint">turbo vs base</span><span class="chev">▾</span></div>
+    <div class="sec-body">
+      <label class="fld">Generation mode</label>
+      <p class="fld-hint">Turbo LoRA strips quality tags (a negative is baked in via distillation), drops to CFG 1 and ~10 steps on plain Euler.</p>
+      <div class="mode-switch" role="tablist">
+        <button role="tab" aria-selected="true" data-mode="base">Base model</button>
+        <button role="tab" aria-selected="false" data-mode="turbo">Turbo LoRA</button>
+      </div>
+
+      <div id="qualityWrap">
+        <label class="fld">Quality prefix</label>
+        <div class="chips" data-chips="quality">
+          <span class="chip" aria-pressed="true">masterpiece</span><span class="chip" aria-pressed="true">best quality</span>
+          <span class="chip">amazing quality</span><span class="chip">very aesthetic</span>
+          <span class="chip">absurdres</span><span class="chip">score_9</span>
+          <span class="chip">score_8</span><span class="chip" aria-pressed="true">newest</span>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <div>
+          <label class="fld">Safety</label>
+          <select id="safety">
+            <option value="safe">safe</option>
+            <option value="sensitive">sensitive</option>
+            <option value="">— none —</option>
+          </select>
+        </div>
+        <div>
+          <label class="fld">Anti-cute controls</label>
+          <div class="chips" data-chips="anticute">
+            <span class="chip" aria-pressed="true">realistic proportions</span>
+            <span class="chip" aria-pressed="true">small eyes</span>
+            <span class="chip">mature face</span>
+            <span class="chip">defined jaw</span>
+          </div>
+        </div>
+      </div>
+
+      <label class="fld">Extra negative tags <span style="text-transform:none;color:var(--parchment-dim)">(added to the built defaults)</span></label>
+      <input type="text" id="negExtra" placeholder="e.g. moe, chibi, big eyes, round face">
+    </div>
+  </section>
+
+  <!-- OUTPUT -->
+  <div class="output">
+    <div class="out-card">
+      <div class="out-head">
+        <h2>The Forged Prompt</h2>
+        <div class="out-actions">
+          <button class="btn ghost" id="copyAll">Copy all</button>
+        </div>
+      </div>
+      <div class="out-block">
+        <div class="out-lbl">Positive <button class="mini" data-copy="pos">copy</button></div>
+        <pre class="out" id="outPos"></pre>
+        <div class="out-lbl">Negative <button class="mini" data-copy="neg">copy</button></div>
+        <pre class="out neg" id="outNeg"></pre>
+      </div>
+      <div class="settings-line" id="outSettings"></div>
+    </div>
+  </div>
+
+  <footer>
+    Tag spellings are best verified at
+    <a href="https://anima.mooshieblob.com/" target="_blank" rel="noopener">anima.mooshieblob.com</a> ·
+    <a href="https://animadex.net/" target="_blank" rel="noopener">animadex.net</a>.
+    Illustrious support is scaffolded and coming.
+  </footer>
+
+</div>
+<div class="toast" id="toast">Copied</div>
+
+<script>
+/* ---------------- curated artist reference (grounded / painterly / non-cutesy) ----------------
+   fields: [group, danbooru tag, famous works, confidence]
+   confidence: "hi" solid / "med" plausible, verify / "lo" uncertain, check before trusting   */
+const ARTISTS = [
+  // Painterly fantasy
+  ["Painterly fantasy",      "kamitani george",  "Dragon's Crown, Odin Sphere, Muramasa",      "hi"],
+  ["Painterly fantasy",      "shigatake",        "Dragon's Crown (animation), 13 Sentinels",   "hi"],
+  ["Painterly fantasy",      "akiman",           "Street Fighter II, Capcom D&D arcade art",   "hi"],
+  ["Painterly fantasy",      "yoshida akihiko",  "Final Fantasy Tactics, Vagrant Story, FFXII","hi"],
+  ["Painterly fantasy",      "kawaku",           "lush painterly fantasy illustration",        "lo"],
+
+  // Gothic / dark
+  ["Gothic / dark",          "kojima ayami",     "Castlevania: Symphony of the Night",         "hi"],
+  ["Gothic / dark",          "amano yoshitaka",  "Final Fantasy I–VI, Vampire Hunter D",       "hi"],
+  ["Gothic / dark",          "miura kentarou",   "Berserk",                                    "med"],
+  ["Gothic / dark",          "nixeu",            "detailed semi-realist fantasy",              "med"],
+  ["Gothic / dark",          "wlop",             "Ghostblade, painterly portraits",            "med"],
+
+  // Grounded / illustrative
+  ["Grounded / illustrative","kui ryouko",       "Delicious in Dungeon",                       "med"],
+  ["Grounded / illustrative","hidari",           "Atelier Ryza, painterly fantasy",            "med"],
+  ["Grounded / illustrative","ekita kuro",       "moody illustrative character art",           "lo"],
+  ["Grounded / illustrative","loundraw",         "atmospheric youth illustration",             "med"],
+  ["Grounded / illustrative","redum4",           "soft realist anime portraits",               "lo"],
+
+  // Linework / ink
+  ["Linework / ink",         "kim jung gi",      "encyclopedic ink draftsmanship",             "lo"],
+  ["Linework / ink",         "murata renji",     "Last Exile, refined retro-futurism",         "med"],
+  ["Linework / ink",         "abe yoshitoshi",   "Serial Experiments Lain, Haibane Renmei",    "hi"],
+  ["Linework / ink",         "terada katsuya",   "loose powerful ink fantasy",                 "med"],
+  ["Linework / ink",         "alphonse mucha",   "Art Nouveau ornamental panels",              "med"],
+];
+
+/* ---------------- model config (per-model assembly) ---------------- */
+const MODELS = {
+  anima: {
+    note: "2B flow-matching model · understands tags <em>and</em> natural language · knows Danbooru/Gelbooru artists to ~Sept 2025",
+    hasTurbo: true,
+    artistPrefix: "@",                       // for ref-table copy + display
+    artistMix: (list)=> list.map(a=>`(@${a.tag}:${a.w.toFixed(1)})`).join(", "),
+    metaTail: "",                             // Anima has no end meta-tail
+    baseNeg: "worst quality, low quality, score_1, score_2, score_3, artist name",
+    turboNeg: "",
+    settings: {
+      base:  "ER SDE · CFG 4–5 · 30–40 steps · 1024×1024 / 896×1152",
+      turbo: "Euler · CFG 1 · 8–12 steps · LoRA ~1.0 (→0.7 for variety)"
+    }
+  },
+  illustrious: {
+    note: "SDXL-based · Danbooru-native (tags first, NL as support) · artists via <em>by name</em> · wants quality at front <em>and</em> a meta-tail at the end",
+    hasTurbo: false,
+    artistPrefix: "by ",
+    // Illustrious uses "by name", weighting via (by name:w)
+    artistMix: (list)=> list.map(a=> a.w!==1 ? `(by ${a.tag}:${a.w.toFixed(1)})` : `by ${a.tag}`).join(", "),
+    metaTail: "highres, absurdres, newest",   // appended at the very end
+    baseNeg: "worst quality, low quality, bad quality, lowres, jpeg artifacts, signature, watermark, username, bad anatomy, bad hands, extra digits, fewer digits, missing fingers, deformed, bad proportions, bad perspective, text, error, child, loli, shota",
+    turboNeg: "",
+    settings: {
+      base:  "Euler A · CFG 4.5–5.5 · 28–35 steps · 832×1216 / 1152×896",
+      turbo: ""
+    }
+  }
+};
+
+/* ---------------- state ---------------- */
+let model = "anima";
+let mode  = "base";
+const stack = []; // {tag, works, w}
+
+/* ---------------- helpers ---------------- */
+const $ = s=>document.querySelector(s);
+const $$ = s=>[...document.querySelectorAll(s)];
+function chipVals(group){return $$(`[data-chips="${group}"] .chip[aria-pressed="true"]`).map(c=>c.textContent.trim());}
+
+/* collapsible sections */
+$$('[data-sec] .sec-head').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+
+/* chips toggle */
+$$('.chip').forEach(c=>{
+  if(!c.hasAttribute('aria-pressed')) c.setAttribute('aria-pressed','false');
+  c.addEventListener('click',()=>{
+    c.setAttribute('aria-pressed', c.getAttribute('aria-pressed')==='true'?'false':'true');
+    build();
+  });
+});
+
+/* populate artist dropdown + reference */
+const CONF_SYM={hi:"●",med:"◐",lo:"○"};
+const CONF_LABEL={hi:"solid",med:"verify",lo:"uncertain"};
+(function initArtists(){
+  const pick = $('#artistPick');
+  ARTISTS.forEach(([grp,tag,works,conf])=>{
+    const o=document.createElement('option');
+    o.value=tag; o.textContent=`${CONF_SYM[conf]} ${tag}  —  ${works}`;
+    pick.appendChild(o);
+  });
+  // reference grouped
+  const ref=$('#ref');
+  const legend=document.createElement('div'); legend.className='ref-legend';
+  legend.innerHTML=`<span><i class="dot hi"></i> solid — safe to use</span>
+    <span><i class="dot med"></i> verify on explorer</span>
+    <span><i class="dot lo"></i> uncertain — check first</span>`;
+  ref.appendChild(legend);
+  const groups=[...new Set(ARTISTS.map(a=>a[0]))];
+  groups.forEach(g=>{
+    const h=document.createElement('div'); h.className='ref-grp'; h.textContent=g; ref.appendChild(h);
+    ARTISTS.filter(a=>a[0]===g).forEach(([_,tag,works,conf])=>{
+      const row=document.createElement('div'); row.className='ref-item';
+      row.innerHTML=`<i class="dot ${conf}" title="${CONF_LABEL[conf]}"></i><span class="tag" title="copy tag">${tag}</span><span class="works">${works}</span><button class="ref-add">add</button>`;
+      row.querySelector('.tag').onclick=()=>{const p=MODELS[model].artistPrefix;navigator.clipboard.writeText(p+tag);toast(p+tag+' copied');};
+      row.querySelector('.ref-add').onclick=()=>addArtist(tag,works,conf);
+      ref.appendChild(row);
+    });
+  });
+})();
+
+$('#refToggle').addEventListener('click',()=>{
+  const r=$('#ref'); const open=r.classList.toggle('open');
+  $('#refToggle').textContent = (open?'Hide':'Browse')+' the 20-artist reference '+(open?'▴':'▾');
+});
+
+/* add artist */
+function addArtist(tag,works,conf){
+  tag=(tag||'').trim().replace(/^@/,'').replace(/^by\s+/i,'');
+  if(!tag) return;
+  if(stack.some(s=>s.tag===tag)){toast('already added');return;}
+  stack.push({tag,works:works||'',w: stack.length===0?1.2:0.9, conf: conf||'lo'});
+  renderStack(); build();
+}
+$('#addArtist').addEventListener('click',()=>{
+  const free=$('#artistFree').value.trim();
+  const pick=$('#artistPick').value;
+  const tag = free || pick;
+  const rec = ARTISTS.find(a=>a[1]===pick);
+  const works = free ? '' : (rec?rec[2]:'');
+  const conf  = free ? 'lo' : (rec?rec[3]:'lo');   // typed tags are unverified
+  addArtist(tag,works,conf);
+  $('#artistFree').value=''; $('#artistPick').value='';
+});
+$('#artistFree').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#addArtist').click();}});
+
+function renderStack(){
+  const box=$('#artistStack');
+  if(!stack.length){box.innerHTML='<p class="stack-empty">No artists yet. Add one or two leads, keep the rest light.</p>';return;}
+  box.innerHTML='';
+  stack.forEach((a,i)=>{
+    const p=MODELS[model].artistPrefix;
+    const row=document.createElement('div'); row.className='stack-row';
+    row.innerHTML=`<i class="dot ${a.conf||'lo'}" title="${CONF_LABEL[a.conf||'lo']}"></i><span class="nm">${p}${a.tag}${a.works?`<small>${a.works}</small>`:''}</span>
+      <input type="range" min="0.6" max="1.4" step="0.1" value="${a.w}">
+      <span class="wv">${a.w.toFixed(1)}</span>
+      <button class="rm" title="remove">×</button>`;
+    const rng=row.querySelector('input'), wv=row.querySelector('.wv');
+    rng.oninput=()=>{a.w=parseFloat(rng.value);wv.textContent=a.w.toFixed(1);build();};
+    row.querySelector('.rm').onclick=()=>{stack.splice(i,1);renderStack();build();};
+    box.appendChild(row);
+  });
+}
+
+/* model tabs */
+$$('.model-tab').forEach(t=>t.addEventListener('click',()=>{
+  if(t.classList.contains('soon')) return;
+  $$('.model-tab').forEach(x=>x.setAttribute('aria-selected','false'));
+  t.setAttribute('aria-selected','true'); model=t.dataset.model;
+  $('#modelNote').innerHTML=MODELS[model].note;
+  applyModelMode();
+  renderStack();           // re-render so @ / by prefix updates
+  build();
+}));
+
+/* show/hide Turbo controls depending on model support */
+function applyModelMode(){
+  const supportsTurbo = MODELS[model].hasTurbo;
+  const turboBtn = $('.mode-switch button[data-mode="turbo"]');
+  turboBtn.style.display = supportsTurbo ? '' : 'none';
+  if(!supportsTurbo && mode==='turbo'){       // force back to base
+    mode='base';
+    $$('.mode-switch button').forEach(x=>x.setAttribute('aria-selected', x.dataset.mode==='base'?'true':'false'));
+    $('#qualityWrap').style.opacity=1; $('#qualityWrap').style.pointerEvents='auto';
+  }
+}
+
+/* mode switch */
+$$('.mode-switch button').forEach(b=>b.addEventListener('click',()=>{
+  $$('.mode-switch button').forEach(x=>x.setAttribute('aria-selected','false'));
+  b.setAttribute('aria-selected','true'); mode=b.dataset.mode;
+  $('#qualityWrap').style.opacity = mode==='turbo'?.4:1;
+  $('#qualityWrap').style.pointerEvents = mode==='turbo'?'none':'auto';
+  build();
+}));
+
+/* ---------------- build ---------------- */
+function build(){
+  const M=MODELS[model];
+  const blocks=[];
+
+  // quality / meta (base only)
+  if(mode==='base'){
+    const q=chipVals('quality');
+    const safety=$('#safety').value;
+    const meta=[...q]; if(safety) meta.push(safety);
+    if(meta.length) blocks.push(meta.join(', '));
+  } else {
+    const safety=$('#safety').value;
+    if(safety) blocks.push(safety);
+  }
+
+  // subject
+  const subj=[];
+  const count=$('#count').value; if(count) subj.push(count);
+  const solo=$('#solo').value.trim(); if(solo) subj.push(solo);
+  const char=$('#char').value.trim(); if(char) subj.push(char);
+  const framing=chipVals('framing');
+  if(subj.length||framing.length) blocks.push([...subj,...framing].join(', '));
+
+  // appearance
+  const app=$('#appearance').value.trim(); if(app) blocks.push(app);
+
+  // hair (verified danbooru tags)
+  const hair=[$('#hairLength').value,$('#hairStyle').value,$('#hairBangs').value].filter(Boolean);
+  if(hair.length) blocks.push(hair.join(', '));
+
+  // render style
+  const render=chipVals('render');
+  if(mode==='turbo' && !render.includes('anime coloring')) render.push('anime coloring');
+  if(render.length) blocks.push(render.join(', '));
+
+  // artists
+  if(stack.length) blocks.push(M.artistMix(stack));
+
+  // scene
+  const scene=$('#scene').value.trim(); if(scene) blocks.push(scene);
+
+  // atmosphere
+  const atmos=chipVals('atmos'); if(atmos.length) blocks.push(atmos.join(', '));
+
+  // anti-cute (end cluster reinforcement)
+  const anti=chipVals('anticute'); if(anti.length) blocks.push(anti.join(', '));
+
+  // model meta-tail (Illustrious wants highres, absurdres, newest at the very end)
+  if(M.metaTail) blocks.push(M.metaTail);
+
+  const pos = blocks.filter(Boolean).join(',\n');
+  $('#outPos').textContent = pos || '…start filling in the desk above.';
+
+  // negative
+  let neg = mode==='base' ? M.baseNeg : M.turboNeg;
+  const negExtra=$('#negExtra').value.trim();
+  const negParts=[neg,negExtra].filter(Boolean);
+  $('#outNeg').textContent = negParts.join(', ') || (mode==='turbo' ? '(built into the Turbo LoRA — leave empty)' : '(no negative set)');
+
+  // settings
+  $('#outSettings').innerHTML = '<b>Suggested:</b> '+M.settings[mode];
+}
+
+/* ---------------- copy ---------------- */
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400);}
+$$('.mini').forEach(b=>b.addEventListener('click',()=>{
+  const which=b.dataset.copy;
+  const txt = which==='pos'?$('#outPos').textContent:$('#outNeg').textContent;
+  navigator.clipboard.writeText(txt);toast((which==='pos'?'Positive':'Negative')+' copied');
+}));
+$('#copyAll').addEventListener('click',()=>{
+  const txt=`POSITIVE:\n${$('#outPos').textContent}\n\nNEGATIVE:\n${$('#outNeg').textContent}\n\nSETTINGS: ${$('#outSettings').textContent.replace('Suggested: ','')}`;
+  navigator.clipboard.writeText(txt);toast('Full prompt copied');
+});
+
+/* live update on any input */
+$$('input,textarea,select').forEach(el=>el.addEventListener('input',build));
+
+applyModelMode();
+build();
+</script>
+</body>
+</html>
