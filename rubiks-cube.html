@@ -57,6 +57,7 @@
   /* ---- Stage ---- */
   .stage{display:flex; flex-direction:column; min-height:0}
   #scene{flex:1 1 auto; min-height:0; position:relative; cursor:grab}
+  #scene canvas{position:absolute; inset:0; width:100%!important; height:100%!important; display:block}
   #scene:active{cursor:grabbing}
   .hint{
     position:absolute; top:1rem; left:50%; transform:translateX(-50%);
@@ -637,10 +638,15 @@ function tweenCam(tx,ty,dur=600){
 }
 
 function resize(){
-  const w=sceneEl.clientWidth,h=sceneEl.clientHeight;
+  const w=sceneEl.clientWidth, h=sceneEl.clientHeight;
+  if(w<2||h<2) return;            // skip degenerate sizes (pre-layout on mobile)
   renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(sceneEl);
+addEventListener('load', resize);
+addEventListener('orientationchange', ()=>setTimeout(resize,200));
+// a few delayed passes to catch mobile layout settling after fonts/flex
+[60,200,500].forEach(t=>setTimeout(resize,t));
 
 (function loop(){requestAnimationFrame(loop); renderer.render(scene,camera);})();
 applyCam(); resize();
