@@ -18,7 +18,7 @@
   html,body{height:100%}
   body{
     font-family:'Inter',system-ui,sans-serif; background:var(--paper); color:var(--ink);
-    display:flex; flex-direction:column; min-height:100vh; overflow:hidden;
+    display:flex; flex-direction:column; min-height:100vh; min-height:100dvh; height:100dvh; overflow:hidden;
   }
   header{
     display:flex; align-items:baseline; gap:.7rem; padding:1rem 1.4rem .8rem;
@@ -183,11 +183,37 @@
   .chip i{width:.85rem; height:.85rem; border-radius:4px; display:inline-block; border:1px solid rgba(0,0,0,.15)}
 
   @media (max-width:820px){
-    main{grid-template-columns:1fr; grid-template-rows:auto 1fr}
-    .rail{display:flex; gap:.5rem; overflow-x:auto; border-right:none; border-bottom:1px solid var(--line); padding:.7rem}
+    main{grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr)}
+    .rail{display:flex; gap:.5rem; overflow-x:auto; border-right:none; border-bottom:1px solid var(--line); padding:.7rem; -webkit-overflow-scrolling:touch}
     .rail .eyebrow{display:none}
     .step{flex:0 0 auto; margin-bottom:0; flex-direction:column; width:140px}
-    .panel{max-height:48vh}
+    .stage{min-height:0}
+    #scene{flex:0 0 auto; height:42vh; min-height:240px}
+    .panel{flex:1 1 auto; max-height:none; min-height:0}
+  }
+  @media (max-width:480px){
+    header{padding:.7rem 1rem .6rem; flex-wrap:wrap; gap:.3rem}
+    header h1{font-size:1.3rem}
+    header .tag{font-size:.72rem; flex-basis:100%}
+    .step{width:118px; padding:.55rem .6rem}
+    .step .label{font-size:.82rem}
+    .step .sub{display:none}
+    #scene{height:38vh; min-height:220px}
+    .panel{padding:.9rem 1rem}
+    .panel h2{font-size:1.12rem}
+    .bar{gap:.4rem}
+    button.ctl{font-size:.82rem; padding:.45rem .7rem}
+    /* manual turn buttons: compact grid so 9 buttons don't form a tall stack */
+    .turns{width:100%; display:grid; grid-template-columns:repeat(6,1fr); gap:.3rem}
+    .turns .lab{grid-column:1 / -1; margin:0 0 .1rem}
+    button.turn{width:100%; height:2.3rem}
+    .speed{width:100%; justify-content:flex-start}
+    .sep{display:none}
+    .okey{width:148px; top:.5rem; right:.5rem}
+    .okey-title{font-size:.76rem}
+    .okey-grip{font-size:.62rem}
+    .diag{grid-template-columns:repeat(2,1fr)}
+    .hint{font-size:.7rem; top:.5rem}
   }
   @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
 </style>
@@ -203,7 +229,7 @@
 
   <section class="stage">
     <div id="scene">
-      <div class="hint" id="hint">Drag to rotate the cube · scroll to zoom</div>
+      <div class="hint" id="hint">Drag to rotate · pinch or scroll to zoom</div>
       <div class="caption" id="caption" hidden></div>
       <div class="okey" id="okey">
         <button class="okey-toggle" id="okeyToggle" aria-expanded="false">
@@ -552,17 +578,44 @@ function applyCam(){
   );
   camera.lookAt(0,0,0);
 }
-sceneEl.addEventListener('pointerdown',e=>{dragging=true;px=e.clientX;py=e.clientY;});
-addEventListener('pointerup',()=>dragging=false);
+// --- multi-touch orbit + pinch zoom ---
+const ptrs=new Map(); // pointerId -> {x,y}
+let pinchStartDist=0, pinchStartCamDist=0;
+function pinchGap(){
+  const p=[...ptrs.values()];
+  return Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+}
+sceneEl.addEventListener('pointerdown',e=>{
+  sceneEl.setPointerCapture&&sceneEl.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1){dragging=true; px=e.clientX; py=e.clientY;}
+  else if(ptrs.size===2){dragging=false; pinchStartDist=pinchGap(); pinchStartCamDist=dist;}
+});
+function endPtr(e){
+  ptrs.delete(e.pointerId);
+  if(ptrs.size===1){const p=[...ptrs.values()][0]; px=p.x; py=p.y; dragging=true;}
+  if(ptrs.size===0){dragging=false;}
+}
+addEventListener('pointerup',endPtr);
+addEventListener('pointercancel',endPtr);
 addEventListener('pointermove',e=>{
-  if(!dragging)return;
+  if(!ptrs.has(e.pointerId)) return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2 && pinchStartDist>0){
+    const ratio=pinchStartDist/pinchGap();
+    dist=Math.max(6,Math.min(16, pinchStartCamDist*ratio));
+    applyCam();
+    return;
+  }
+  if(!dragging) return;
   rotY-=(e.clientX-px)*0.01; rotX+=(e.clientY-py)*0.01;
   rotX=Math.max(-1.4,Math.min(1.4,rotX));
-  px=e.clientX;py=e.clientY; applyCam();
+  px=e.clientX; py=e.clientY; applyCam();
 });
 sceneEl.addEventListener('wheel',e=>{
-  e.preventDefault(); dist=Math.max(6,Math.min(14,dist+e.deltaY*0.01)); applyCam();
+  e.preventDefault(); dist=Math.max(6,Math.min(16,dist+e.deltaY*0.01)); applyCam();
 },{passive:false});
+sceneEl.style.touchAction='none';
 
 // viewing angles (pitch rotX, yaw rotY) that bring each face toward the camera
 const FACE_VIEW={
