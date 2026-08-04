@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handpalatset – 10 minnesregler för föreläsaren</title>
+<style>
+  :root{
+    --ink:#20304a;
+    --ink-soft:#4a5a72;
+    --paper:#f4efd8;      /* post-it gult */
+    --paper-line:#e6dfba;
+    --line:#2c3e63;        /* bläckblått */
+    --accent:#c85a3c;      /* tegel/varm accent för aktiv */
+    --accent-2:#3f7d6e;    /* grön för höger hand */
+    --glow:rgba(200,90,60,.28);
+    --card:#fbf9ee;
+    --shadow:0 18px 40px -20px rgba(30,40,60,.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #6f4a2a 0%, #5a3a20 45%, #3e2814 100%);
+    color:var(--ink);
+    min-height:100vh;
+    padding:clamp(14px,3vw,40px);
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{
+    max-width:1180px;
+    margin:0 auto;
+    background:var(--paper);
+    background-image:repeating-linear-gradient(0deg,transparent 0 33px,rgba(44,62,99,.05) 33px 34px);
+    border-radius:6px;
+    box-shadow:var(--shadow), 0 2px 0 rgba(0,0,0,.15);
+    padding:clamp(20px,4vw,52px);
+    position:relative;
+    transform:rotate(-.4deg);
+  }
+  header{text-align:center;margin-bottom:clamp(14px,3vw,30px);}
+  .eyebrow{
+    font-family:"Courier New",monospace;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    font-size:.7rem;
+    color:var(--ink-soft);
+    margin:0 0 .5em;
+  }
+  h1{
+    font-size:clamp(1.7rem,4.5vw,3rem);
+    line-height:1.02;
+    margin:0;
+    font-weight:700;
+    letter-spacing:-.01em;
+  }
+  h1 span{color:var(--accent);font-style:italic;}
+  .lede{
+    max-width:52ch;margin:.7em auto 0;
+    color:var(--ink-soft);font-size:clamp(.92rem,1.6vw,1.06rem);
+  }
+  .hands{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:clamp(8px,3vw,40px);
+    margin:clamp(10px,3vw,28px) 0 8px;
+    align-items:end;
+  }
+  .hand-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .hand-label{
+    font-family:"Courier New",monospace;
+    font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  svg.hand{width:100%;height:auto;max-width:440px;overflow:visible;display:block;}
+
+  /* Finger hit areas */
+  .finger{cursor:pointer;transition:transform .18s ease;transform-origin:center bottom;}
+  .finger .pad{
+    fill:rgba(200,90,60,.07);stroke:var(--line);stroke-width:2.4;
+    stroke-linejoin:round;stroke-linecap:round;
+    transition:fill .2s ease, stroke .2s ease;
+  }
+  .hand-right .finger .pad{fill:rgba(63,125,110,.08);}
+  /* one-time hint pulse so touch users see fingers are tappable */
+  @keyframes hintpulse{
+    0%,100%{fill:rgba(200,90,60,.07);}
+    50%{fill:rgba(200,90,60,.22);}
+  }
+  @keyframes hintpulse-r{
+    0%,100%{fill:rgba(63,125,110,.08);}
+    50%{fill:rgba(63,125,110,.24);}
+  }
+  .hint .hand-left .finger .pad{animation:hintpulse 1.6s ease-in-out 2;}
+  .hint .hand-right .finger .pad{animation:hintpulse-r 1.6s ease-in-out 2;}
+  .finger .lead{stroke:var(--line);stroke-width:1.6;fill:none;}
+  .finger .num{
+    font-family:"Courier New",monospace;font-weight:700;
+    font-size:26px;fill:var(--line);
+    transition:fill .2s ease;
+  }
+  .finger:hover .pad{fill:rgba(200,90,60,.20);}
+  .hand-right .finger:hover .pad{fill:rgba(63,125,110,.22);}
+  .finger:hover{transform:translateY(-4px);}
+  .finger:focus-visible{outline:none;}
+  .finger:focus-visible .pad{stroke:var(--accent);stroke-width:3.4;}
+  .hand-right .finger:focus-visible .pad{stroke:var(--accent-2);}
+  .finger.active .pad{fill:var(--accent);stroke:var(--accent);}
+  .hand-right .finger.active .pad{fill:var(--accent-2);stroke:var(--accent-2);}
+  .finger.active .num{fill:#fff;}
+  .palm{fill:transparent;stroke:var(--line);stroke-width:2.4;stroke-linejoin:round;}
+
+  /* Detail card */
+  .stage{
+    margin-top:clamp(12px,2.5vw,22px);
+    min-height:150px;
+  }
+  .card{
+    background:var(--card);
+    border:1.5px solid var(--paper-line);
+    border-left:7px solid var(--accent);
+    border-radius:5px;
+    padding:clamp(18px,3vw,30px);
+    box-shadow:0 10px 26px -18px rgba(30,40,60,.6);
+    animation:pop .32s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .card.right{border-left-color:var(--accent-2);}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.99);}to{opacity:1;transform:none;}}
+  .card-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:.5em;}
+  .badge{
+    font-family:"Courier New",monospace;font-weight:700;
+    background:var(--accent);color:#fff;
+    width:42px;height:42px;flex:0 0 42px;
+    border-radius:50%;display:grid;place-items:center;font-size:1.15rem;
+  }
+  .card.right .badge{background:var(--accent-2);}
+  .rule{font-size:clamp(1.25rem,3vw,1.7rem);margin:0;font-weight:700;line-height:1.1;}
+  .who{
+    font-style:italic;color:var(--accent);font-size:clamp(.95rem,1.8vw,1.1rem);
+    margin:.15em 0 0;
+  }
+  .card.right .who{color:var(--accent-2);}
+  .card-body{margin-top:.9em;display:grid;gap:.7em;}
+  .card-body p{margin:0;line-height:1.5;color:var(--ink);}
+  .card-body u{
+    text-decoration:underline;
+    text-decoration-thickness:2px;
+    text-underline-offset:2px;
+    font-weight:700;
+  }
+  .pic{color:var(--ink-soft);}
+  .pic b{color:var(--ink);}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:.4em;}
+  .tag{
+    font-family:"Courier New",monospace;font-size:.68rem;letter-spacing:.06em;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px;
+    background:rgba(200,90,60,.12);color:var(--accent);
+  }
+  .card.right .tag{background:rgba(63,125,110,.14);color:var(--accent-2);}
+
+  .empty{
+    text-align:center;color:var(--ink-soft);font-style:italic;
+    padding:clamp(20px,4vw,40px);border:1.5px dashed var(--paper-line);border-radius:5px;
+  }
+
+  .caveat{
+    margin-top:clamp(16px,3vw,26px);
+    padding:clamp(14px,2.5vw,20px);
+    background:rgba(200,90,60,.07);
+    border:1px solid var(--paper-line);
+    border-radius:5px;
+    font-size:clamp(.85rem,1.5vw,.96rem);
+    line-height:1.55;color:var(--ink-soft);
+  }
+  .caveat b{color:var(--ink);}
+
+  footer{
+    margin-top:22px;text-align:center;
+    font-family:"Courier New",monospace;font-size:.7rem;letter-spacing:.14em;
+    color:var(--ink-soft);text-transform:uppercase;
+  }
+
+  @media (max-width:640px){
+    .hands{gap:4px;}
+    .finger .num{font-size:30px;}
+    .lede{font-size:.9rem;}
+  }
+  .card-head{position:relative;}
+  .close{
+    margin-left:auto;background:none;border:1.5px solid var(--paper-line);
+    color:var(--ink-soft);width:34px;height:34px;border-radius:50%;
+    font-size:1.1rem;line-height:1;cursor:pointer;flex:0 0 34px;
+    display:grid;place-items:center;transition:background .15s ease,color .15s ease;
+  }
+  .close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .card.right .close:hover{background:var(--accent-2);border-color:var(--accent-2);}
+  .close:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <p class="eyebrow">Handpalatset · 10 minnesregler</p>
+    <h1>Tio fingrar, tio sätt att <span>fastna</span> i huvudet</h1>
+    <p class="lede">Vänster hand 1–5, höger hand 6–10. Tryck på ett finger eller en siffra så vaknar karaktären och regeln.</p>
+  </header>
+
+  <div class="hands">
+    <div class="hand-wrap">
+      <!-- LEFT HAND : thumb on the right side, fingers 1-5 -->
+      <svg class="hand hand-left" viewBox="0 0 440 460" role="group" aria-label="Vänster hand, regel 1 till 5">
+        <!-- palm -->
+        <path class="palm" d="M70,300 Q60,410 150,440 Q250,462 330,420 Q380,392 372,320 L360,250 Q300,270 210,268 Q120,266 82,250 Z"/>
+        <!-- Finger 1 (pinky, far left) -->
+        <g class="finger" data-id="1" tabindex="0" role="button" aria-label="Regel 1">
+          <path class="pad" d="M92,300 Q80,215 96,150 Q104,132 116,150 Q126,215 122,300 Z"/>
+          <path class="lead" d="M105,150 L98,70"/>
+          <text class="num" x="86" y="62">1</text>
+        </g>
+        <!-- Finger 2 (ring) -->
+        <g class="finger" data-id="2" tabindex="0" role="button" aria-label="Regel 2">
+          <path class="pad" d="M140,296 Q132,190 150,110 Q158,90 170,110 Q184,190 176,296 Z"/>
+          <path class="lead" d="M160,108 L158,44"/>
+          <text class="num" x="148" y="38">2</text>
+        </g>
+        <!-- Finger 3 (middle) -->
+        <g class="finger" data-id="3" tabindex="0" role="button" aria-label="Regel 3">
+          <path class="pad" d="M196,296 Q190,180 208,92 Q216,72 228,92 Q244,180 236,296 Z"/>
+          <path class="lead" d="M218,90 L224,30"/>
+          <text class="num" x="214" y="24">3</text>
+        </g>
+        <!-- Finger 4 (index) -->
+        <g class="finger" data-id="4" tabindex="0" role="button" aria-label="Regel 4">
+          <path class="pad" d="M252,300 Q250,200 272,128 Q282,108 294,128 Q308,200 300,304 Z"/>
+          <path class="lead" d="M282,126 L296,58"/>
+          <text class="num" x="288" y="52">4</text>
+        </g>
+        <!-- Finger 5 (thumb, right side) -->
+        <g class="finger" data-id="5" tabindex="0" role="button" aria-label="Regel 5">
+          <path class="pad" d="M330,330 Q356,270 384,236 Q402,222 406,244 Q392,300 356,350 Z"/>
+          <path class="lead" d="M392,240 L410,176"/>
+          <text class="num" x="404" y="170">5</text>
+        </g>
+      </svg>
+      <span class="hand-label">Vänster · 1–5</span>
+    </div>
+
+    <div class="hand-wrap">
+      <!-- RIGHT HAND : mirror, thumb on the left, fingers 6-10 -->
+      <svg class="hand hand-right" viewBox="0 0 440 460" role="group" aria-label="Höger hand, regel 6 till 10">
+        <path class="palm" d="M370,300 Q380,410 290,440 Q190,462 110,420 Q60,392 68,320 L80,250 Q140,270 230,268 Q320,266 358,250 Z"/>
+        <!-- Finger 6 (thumb, left side) -->
+        <g class="finger" data-id="6" tabindex="0" role="button" aria-label="Regel 6">
+          <path class="pad" d="M110,330 Q84,270 56,236 Q38,222 34,244 Q48,300 84,350 Z"/>
+          <path class="lead" d="M48,240 L30,300"/>
+          <text class="num" x="18" y="322">6</text>
+        </g>
+        <!-- Finger 7 (index) -->
+        <g class="finger" data-id="7" tabindex="0" role="button" aria-label="Regel 7">
+          <path class="pad" d="M188,300 Q186,200 168,128 Q158,108 146,128 Q132,200 140,304 Z"/>
+          <path class="lead" d="M158,126 L144,58"/>
+          <text class="num" x="136" y="52">7</text>
+        </g>
+        <!-- Finger 8 (middle) -->
+        <g class="finger" data-id="8" tabindex="0" role="button" aria-label="Regel 8">
+          <path class="pad" d="M244,296 Q250,180 232,92 Q224,72 212,92 Q196,180 204,296 Z"/>
+          <path class="lead" d="M222,90 L216,30"/>
+          <text class="num" x="210" y="24">8</text>
+        </g>
+        <!-- Finger 9 (ring) -->
+        <g class="finger" data-id="9" tabindex="0" role="button" aria-label="Regel 9">
+          <path class="pad" d="M300,296 Q308,190 290,110 Q282,90 270,110 Q256,190 264,296 Z"/>
+          <path class="lead" d="M280,108 L282,44"/>
+          <text class="num" x="276" y="38">9</text>
+        </g>
+        <!-- Finger 10 (pinky, far right) -->
+        <g class="finger" data-id="10" tabindex="0" role="button" aria-label="Regel 10">
+          <path class="pad" d="M348,300 Q360,215 344,150 Q336,132 324,150 Q314,215 318,300 Z"/>
+          <path class="lead" d="M335,150 L360,120"/>
+          <text class="num" x="360" y="118">10</text>
+        </g>
+      </svg>
+      <span class="hand-label">Höger · 6–10</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage" aria-live="polite">
+    <div class="empty">Tryck på ett finger eller en siffra för att öppna regeln.</div>
+  </div>
+
+  <div class="caveat">
+    <b>Att hålla i minnet:</b> forskarna är oense om roliga men irrelevanta detaljer som kryddar en föreläsning (så kallade ”seductive details”). Vissa menar att de väcker intresse, andra att de belastar arbetsminnet i onödan och försämrar lärandet. Använd dem sparsamt, och bara när de faktiskt bär huvudpoängen – aldrig som utfyllnad.
+  </div>
+
+  <footer>Person · Handling · Objekt — häng varje regel på ett finger</footer>
+</div>
+
+<script>
+const RULES = {
+  1:{side:"left",rule:"Fråga före fakta",who:"RDJ:s Sherlock Holmes",
+     what:"<u>Nyfikenhetsluckan</u>: när hjärnan blir medveten om ett glapp i sin kunskap uppstår en \u201ekognitiv klåda\u201c som den vill klia. Det frisätter dopamin, som skärper uppmärksamheten och gör minnesbildningen starkare. Rama därför in stoffet som en gåta att lösa \u2013 inte som färdiga svar att ta emot.",
+     pic:"Sherlock <b>hukar och kikar under en jättelik frågeteckenformad lucka</b> i gatan, ögonen smala. Han löser mysteriet innan någon hinner ge svaret.",
+     how:"Inled inte med \u201eIdag ska vi prata om blodomloppet\u201c utan med en fokusfråga: \u201eHur läker ett sår på tån om hjärtat sitter i bröstet?\u201c",
+     tags:["Uppmärksamhet","Deltagande"]},
+  2:{side:"left",rule:"Prata till bilden",who:"Ben Stiller (Larry, Night at the Museum)",
+     what:"<u>Modalitetsprincipen</u>: ögat och örat är två separata kanaler i arbetsminnet. Visa en bild och förklara den med rösten \u2013 då jobbar båda kanalerna parallellt. Sätter du förklaringen som text på skärmen tvingas ögat göra allt jobbet ensamt, och kapaciteten halveras.",
+     pic:"Larry står framför en <b>helt textlös tavla</b> och pratar ivrigt mot den medan den vaknar till liv. Munnen berättar, bilden visar \u2013 ingen text konkurrerar.",
+     how:"Visa en komplex bild eller karta, var tyst 15 sek så ögat hinner titta, och lägg sedan förklaringen i rösten \u2013 inte i en textruta bredvid.",
+     tags:["Minne","Uppmärksamhet"]},
+  3:{side:"left",rule:"Läs aldrig dina slides",who:"Edward James Olmos (Jaime Escalante)",
+     what:"<u>Redundanseffekten</u>: när eleven hör och läser exakt samma ord samtidigt krockar de två informationsflödena i språkcentrum. Hjärnan tvingas hålla ihop två identiska strömmar, vilket skapar onödig belastning och stjäl kapacitet från själva förståelsen. Text på skärmen ska alltså komplettera det du säger \u2013 inte upprepa det.",
+     pic:"Escalante <b>tejpar för sin egen mun</b> och pekar på den textfyllda duken. Skärmen får läsa \u2013 inte han. \u201eGanas.\u201c",
+     how:"Har du ett viktigt citat på skärmen: låt dem läsa det i tystnad, eller ta bort texten och berätta innehållet. Låt aldrig din röst och skärmen säga samma sak samtidigt.",
+     tags:["Uppmärksamhet","Minne"]},
+  4:{side:"left",rule:"Fem minuter, sen stopp",who:"Mickey (Burgess Meredith, Rocky)",
+     what:"<u>Segmentering</u>: arbetsminnet rymmer bara ett fåtal nya enheter åt gången. Bryt föreläsningen i block på max 5\u201310 min följt av en aktiv paus \u2013 då hinner hjärnan flytta över det den nyss hört till mer varaktig lagring innan nästa svall kommer. Pausen sänker dessutom pressen: en stund att prata med en granne ger andrum och gör rummet tryggare.",
+     pic:"Mickey <b>skränar och slår i gonggongen</b> och håller upp ett <b>jättelikt stoppur med en gigantisk 5:a</b> på urtavlan. \u201eTime! Vänd er till grannen!\u201c",
+     how:"Föreläs 5 min, säg sedan: \u201eFörklara för din granne vad jag just sa, med egna ord.\u201c",
+     tags:["Uppmärksamhet","Deltagande","Välmående"]},
+  5:{side:"left",rule:"Låt dem gräva",who:"Indiana Jones",
+     what:"<u>Aktiv hämtning</u>: att med stängd bok anstränga sig för att plocka fram ett svar ur minnet stärker minnet mer än att läsa eller höra det igen. Det är själva letandet som bygger spåret \u2013 inte återupprepningen. Passiv repetition känns lättare men fastnar sämre.",
+     pic:"Indy <b>gräver själv fram guldskatten ur gropen</b> med piska och spade. Ingen räcker honom den \u2013 han sliter fram den ur minnesgropen med egen hand.",
+     how:"\u201eTwo Things\u201c: böckerna stängda, be dem skriva ner två saker de minns från förra lektionen innan du börjar dagens \u2013 sedan stämmer ni av tillsammans.",
+     tags:["Minne","Deltagande"]},
+  6:{side:"right",rule:"Hur säker är du?",who:"Charlton Heston (Moses)",
+     what:"<u>Metakognition</u>: låt eleven skatta hur säker den är samtidigt som den svarar. Det motverkar illusionen av kunskap \u2013 att något känns bekant tolkas lätt som att man kan det, fast man bara känner igen det. När eleven tvingas sätta en säkerhetsnivå upptäcker den glappet mellan \u201ekänns bekant\u201c och \u201ekan faktiskt\u201c, och lär sig plugga på rätt saker istället för att invaggas i falsk trygghet.",
+     pic:"Moses står med <b>stavarna höjda och pekar tveksamt mot en väldig säkerhetsmätare</b> i himlen som pendlar mellan \u201esäker\u201c och \u201egissar\u201c. Ska havet delas eller inte \u2013 hur säker är han?",
+     how:"Vid mini-quiz: låt dem ringa in \u201eSäker\u201c, \u201eGanska säker\u201c eller \u201eGissar\u201c för varje svar \u2013 och jämför sedan skattningen med facit.",
+     tags:["Minne","Välmående"]},
+  7:{side:"right",rule:"Fel är bränsle",who:"Matt Damon (Mark Watney, The Martian)",
+     what:"<u>Psykologisk trygghet</u>: i en miljö där det är okej att göra fel vågar eleven ta risker, svara och prova utan att skämmas. Rädsla för att göra bort sig äter annars upp arbetsminnet – kraften går åt till oro i stället för lärande. När felet normaliseras och ansvaret delas i grupp sjunker pressen, och hjärnan vågar ge sig på svårare saker.",
+     pic:"Watney <b>häller sitt trasiga, sotiga kugghjul rakt in i motorn</b> på Mars \u2013 och den tänder. Felet driver honom framåt.",
+     how:"Skylt på väggen: \u201eDet är okej att göra fel \u2013 det är så vi lär oss.\u201c Och lägg känsliga eller svåra frågor som <b>gruppuppgift</b> \u2013 att svara \u201efel\u201c i en grupp känns tryggt, att svara fel ensam inför klassen gör det inte. Gruppen blir buffert.",
+     tags:["Välmående","Deltagande"]},
+  8:{side:"right",rule:"Blanda korten",who:"Dustin Hoffman (Raymond, Rain Man)",
+     what:"<u>Interfoliering</u>: blanda olika ämnen och problemtyper i samma pass i stället för att nöta en sak i taget. Det tränar hjärnans förmåga till diskriminering \u2013 att inte bara veta <i>hur</i> man löser något, utan <i>när</i> en viss strategi ska användas. Blockträning känns effektivare i stunden, men blandningen ger kunskap som faktiskt håller när frågorna kommer i oordning \u2013 som på provet och i livet.",
+     pic:"Raymond <b>riffle-shufflar en kortlek med alla färger</b> huller om buller, mumlande. Aldrig en färg i taget \u2013 allt blandat.",
+     how:"Kasta in en fråga som tvingar eleverna att koppla dagens ämne till något från förra veckan eller månaden \u2013 så de får öva på att välja rätt verktyg, inte bara använda dagens.",
+     tags:["Minne","Deltagande"]},
+  9:{side:"right",rule:"Rita det",who:"Stan Lee",
+     what:"<u>Dubbel kodning</u>: bilder minns betydligt bättre än ord ensamma. Kombinerar du ett begrepp med en enkel bild lagras det på två sätt \u2013 som ord och som visuell form \u2013 och får därmed fler \u201ekrokar\u201c att hämtas med i långtidsminnet. Att eleven själv ritar, i stället för att titta på en färdig bild, gör kroken ännu starkare.",
+     pic:"Stan Lee <b>klottrar blixtsnabbt en superhjälteskiss på ett Post-it</b> som lyser upp och klistras på väggen. \u201eExcelsior!\u201c",
+     how:"Pausa efter ett nyckelbegrepp och be om en \u201eJot Sketch\u201c: 30 sekunder, böckerna stängda, rita en enkel bild som fångar idén \u2013 en pil, en gubbe, en symbol. Det behöver inte bli snyggt; poängen är att hjärnan tvingas översätta ordet till en bild, vilket skapar en extra minneskrok.",
+     tags:["Minne","Uppmärksamhet"]},
+  10:{side:"right",rule:"Säg vart ni ska",who:"Russell (Up)",
+     what:"<u>Signalering</u>: med språkliga markörer pekar du ut lektionens struktur och vad som är viktigt, utan att lägga till nytt innehåll. Det fungerar som en yttre ställning som avlastar arbetsminnet \u2013 eleven slipper gissa vad som ska hända och kan lägga kraften på innehållet. Att veta vart lektionen är på väg minskar också osäkerheten, och en elev som känner sig orienterad vågar mer.",
+     pic:"Russell <b>pekar entusiastiskt framåt längs en skylt med tre pilar</b> \u2013 \u201eförsta, andra, tredje!\u201c \u2013 scoutmärkena blänker medan han visar vägen.",
+     how:"Rama in: \u201eVi ska titta på tre punkter, den första är\u2026\u201c och markera vikt: \u201eDet här är det absolut viktigaste du behöver ta med dig idag.\u201c",
+     tags:["Uppmärksamhet","Välmående"]}
+};
+
+const stage = document.getElementById('stage');
+const fingers = Array.from(document.querySelectorAll('.finger'));
+const EMPTY = '<div class="empty">Tryck på ett finger eller en siffra för att öppna regeln.</div>';
+let current = null;
+
+// Give every finger a descriptive label: "Regel 3: Läs aldrig dina slides"
+fingers.forEach(f=>{
+  const r = RULES[f.dataset.id];
+  if(r) f.setAttribute('aria-label', `Regel ${f.dataset.id}: ${r.rule}`);
+});
+
+function reset(){
+  fingers.forEach(f=>f.classList.remove('active'));
+  current = null;
+  stage.innerHTML = EMPTY;
+}
+
+function show(id){
+  const r = RULES[id];
+  if(!r) return;
+  fingers.forEach(f=>f.classList.toggle('active', f.dataset.id===String(id)));
+  current = id;
+  const tags = r.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  stage.innerHTML = `
+    <div class="card ${r.side==='right'?'right':''}">
+      <div class="card-head">
+        <span class="badge">${id}</span>
+        <div>
+          <p class="rule">${r.rule}</p>
+          <p class="who">${r.who}</p>
+        </div>
+        <button class="close" aria-label="Stäng regeln" title="Stäng">&times;</button>
+      </div>
+      <div class="card-body">
+        <p>${r.what}</p>
+        <p class="pic">${r.pic}</p>
+        <p><b>I klassrummet:</b> ${r.how}</p>
+        <div class="tags">${tags}</div>
+      </div>
+    </div>`;
+  stage.querySelector('.close').addEventListener('click', ()=>{
+    reset();
+    // return focus to the finger that was open
+    const f = fingers.find(x=>x.dataset.id===String(id));
+    if(f) f.focus();
+  });
+}
+
+fingers.forEach((f,i)=>{
+  f.addEventListener('click', ()=>show(f.dataset.id));
+  f.addEventListener('keydown', e=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();show(f.dataset.id);return;}
+    // arrow navigation across all ten fingers, 1->10 in DOM order
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'){
+      e.preventDefault();
+      const n = fingers[(i+1)%fingers.length]; n.focus(); show(n.dataset.id);
+    }
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp'){
+      e.preventDefault();
+      const n = fingers[(i-1+fingers.length)%fingers.length]; n.focus(); show(n.dataset.id);
+    }
+    if(e.key==='Escape'){ reset(); f.focus(); }
+  });
+});
+
+// Click on empty background of the hands area clears the selection
+document.querySelector('.hands').addEventListener('click', e=>{
+  if(!e.target.closest('.finger') && current!==null) reset();
+});
+// Escape anywhere closes the open card
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && current!==null) reset(); });
+
+// One-time hint pulse on load so touch users notice the fingers are tappable
+const sheet = document.querySelector('.sheet');
+if(!window.matchMedia('(prefers-reduced-motion:reduce)').matches){
+  sheet.classList.add('hint');
+  setTimeout(()=>sheet.classList.remove('hint'), 3600);
+}
+</script>
+</body>
+</html>
