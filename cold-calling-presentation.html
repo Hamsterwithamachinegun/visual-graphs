@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Varför jag frågar dig: cold calling</title>
+<style>
+  :root {
+    --paper: #f4f1ea;
+    --paper-deep: #ebe5d9;
+    --ink: #26251f;
+    --ink-soft: #565349;
+    --ink-faint: #9c9789;
+    --sage: #6f8b6e;
+    --sage-deep: #47603f;
+    --sage-mist: #e2e8dc;
+    --line: #d9d2c4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation: none !important; transition: none !important; }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Each slide fills the screen, one idea at a time */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8vh 8vw;
+    position: relative;
+    scroll-snap-align: start;
+  }
+  html { scroll-snap-type: y proximity; }
+
+  .slide + .slide { border-top: 1px solid var(--line); }
+
+  .inner { max-width: 900px; margin: 0 auto; width: 100%; }
+
+  .eyebrow {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--sage-deep);
+    margin-bottom: 2.2rem;
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 7vw, 5.2rem);
+    line-height: 1.04;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.6rem;
+  }
+
+  .lead {
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    color: var(--ink-soft);
+    line-height: 1.5;
+    max-width: 30ch;
+  }
+  .body-text {
+    font-size: clamp(1.15rem, 1.9vw, 1.4rem);
+    color: var(--ink-soft);
+    line-height: 1.6;
+    max-width: 34ch;
+  }
+  em { font-style: italic; color: var(--ink); }
+
+  /* The signature element: one enormous statistic per relevant slide */
+  .stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15em;
+    color: var(--sage-deep);
+    line-height: 0.9;
+    margin-bottom: 1.4rem;
+  }
+  .stat .num {
+    font-size: clamp(5rem, 18vw, 12rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .stat .sym {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 500;
+  }
+  .stat-label {
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    color: var(--ink);
+    line-height: 1.4;
+    max-width: 24ch;
+    margin-bottom: 0.8rem;
+  }
+  .stat-sub {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+    max-width: 40ch;
+  }
+
+  /* Title slide */
+  .title-slide {
+    background:
+      radial-gradient(130% 90% at 15% 10%, rgba(111,139,110,0.12), transparent 55%),
+      var(--paper);
+  }
+  .title-slide .lead { margin-top: 2rem; max-width: 34ch; }
+
+  /* Quiet reassurance slide */
+  .calm { background: var(--sage-mist); text-align: center; }
+  .calm .inner { max-width: 24ch; }
+  .calm .big-quote {
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    font-style: italic;
+    color: var(--sage-deep);
+    line-height: 1.25;
+  }
+
+  /* The comparison: two static bars */
+  .compare { display: grid; gap: 2rem; margin-top: 2.5rem; max-width: 620px; }
+  .bar-row { }
+  .bar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.6rem;
+  }
+  .bar-name {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .bar-val {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--sage-deep);
+  }
+  .bar-track {
+    height: 20px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--sage);
+  }
+  .bar-fill.faint { background: var(--ink-faint); opacity: 0.5; }
+
+  .footnote {
+    position: absolute;
+    bottom: 4vh;
+    left: 8vw;
+    right: 8vw;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .pager {
+    position: absolute;
+    top: 5vh;
+    right: 8vw;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-faint);
+  }
+
+  /* source asterisk on stat slides, points to the closing source slide */
+  .src-mark {
+    position: absolute;
+    bottom: 5vh;
+    left: 8vw;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+  .src-mark .star { color: var(--sage); font-weight: 600; }
+
+  /* closing sources slide */
+  .sources { background: var(--paper-deep); }
+  .sources h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: 2rem; }
+  .source-item {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    max-width: 640px;
+  }
+  .source-item:last-child { border-bottom: none; }
+  .source-item .star {
+    color: var(--sage);
+    font-weight: 600;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    min-width: 1.4em;
+  }
+  .source-item p {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin: 0;
+  }
+  .source-item .claim { color: var(--ink); font-weight: 500; }
+
+  /* language switch, fixed top-left */
+  .lang-switch {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .lang-switch button {
+    border: none;
+    background: none;
+    padding: 7px 14px;
+    cursor: pointer;
+    color: var(--ink-faint);
+    font: inherit;
+    letter-spacing: inherit;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .lang-switch button.active {
+    background: var(--sage-deep);
+    color: #fff;
+  }
+  .lang-switch button:not(.active):hover { color: var(--ink); }
+
+  /* The promise slide: quiet numbered lines */
+  .promise-list { margin-top: 2rem; max-width: 640px; }
+  .promise-line {
+    display: flex;
+    gap: 1.4rem;
+    align-items: baseline;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .promise-line:last-child { border-bottom: none; }
+  .promise-line .n {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sage);
+    min-width: 1.6em;
+  }
+  .promise-line p {
+    font-size: clamp(1.1rem, 1.9vw, 1.4rem);
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 640px) {
+    .slide { padding: 7vh 7vw; }
+    .footnote { left: 7vw; right: 7vw; }
+    .pager { right: 7vw; }
+  }
+
+  /* Classroom scene on slide 2 */
+  .scene { width: 100%; max-width: 640px; margin: 2.4rem 0 0; }
+  .scene svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .fig { fill: var(--ink-faint); opacity: 0.55; transition: none; }
+  .teacher { fill: var(--sage-deep); opacity: 1; }
+
+  /* thought dots above a student while "thinking" */
+  .think-dots circle { fill: var(--sage); opacity: 0; }
+
+  /* the speech bubble from the teacher */
+  .bubble { opacity: 0; }
+  .bubble-tail { opacity: 0; }
+
+  /* the chosen student's name label */
+  .namecard { opacity: 0; }
+  .namecard rect { fill: var(--sage-deep); }
+  .namecard text {
+    fill: #fff;
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* one student lights up when picked */
+  .fig.picked { fill: var(--sage); opacity: 1; }
+
+  /* Timeline: loops continuously while the slide is visible (.play added by JS).
+     One full cycle is 10s. The teacher asks, then three names land in turn
+     on three different students, each after a thinking pause, then it repeats.
+     Every element shares the same 10s cycle so the loop stays in sync;
+     each one's timing is baked into its keyframes as percentages of 10s.
+       ~0.4s  bubble appears        (4%)
+       ~1.0s  bubble floats out     (10%)
+       ~1.9s  class thinks (pulse 1)(19%)
+       ~3.2s  Alex lights up        (32%)
+       ~4.6s  class thinks (pulse 2)(46%)
+       ~5.9s  Lisa lights up        (59%)
+       ~7.3s  class thinks (pulse 3)(73%)
+       ~8.6s  Adam lights up        (86%)
+       ~9.6s  all reset             (96-100%) */
+  .scene.play .bubble     { animation: bubbleLoop 10s ease infinite; }
+  .scene.play .bubble-tail{ animation: bubbleTailLoop 10s ease infinite; }
+
+  .scene.play .think-dots circle    { animation: thinkLoop 10s ease-in-out infinite; }
+  /* tiny per-column offsets via slightly shifted tracks would desync the loop,
+     so instead all columns share one track but start a hair apart in the DOM;
+     the visual stagger comes from the three separate pulses being brief. */
+
+  .scene.play .pick-alex  { animation: pickAlexLoop 10s ease infinite; }
+  .scene.play .name-alex  { animation: nameAlexLoop 10s ease infinite; }
+  .scene.play .pick-lisa  { animation: pickLisaLoop 10s ease infinite; }
+  .scene.play .name-lisa  { animation: nameLisaLoop 10s ease infinite; }
+  .scene.play .pick-adam  { animation: pickAdamLoop 10s ease infinite; }
+  .scene.play .name-adam  { animation: nameAdamLoop 10s ease infinite; }
+
+  @keyframes bubbleLoop {
+    0%   { opacity: 0; transform: translateY(6px) scale(0.9); }
+    4%   { opacity: 1; transform: translateY(0) scale(1); }
+    10%  { opacity: 1; transform: translate(0,0); }
+    20%  { opacity: 0; transform: translate(0,-14px); }
+    99%  { opacity: 0; transform: translate(0,-14px); }
+    100% { opacity: 0; transform: translateY(6px) scale(0.9); }
+  }
+  @keyframes bubbleTailLoop {
+    0%   { opacity: 0; }
+    4%   { opacity: 1; }
+    18%  { opacity: 1; }
+    22%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  @keyframes thinkLoop {
+    0%,14%   { opacity: 0; transform: translateY(3px); }
+    19%      { opacity: 0.9; transform: translateY(0); }
+    24%      { opacity: 0; }
+    41%      { opacity: 0; transform: translateY(3px); }
+    46%      { opacity: 0.9; transform: translateY(0); }
+    51%      { opacity: 0; }
+    68%      { opacity: 0; transform: translateY(3px); }
+    73%      { opacity: 0.9; transform: translateY(0); }
+    78%,100% { opacity: 0; }
+  }
+  /* Alex: pick 1 around 32% */
+  @keyframes pickAlexLoop {
+    0%,26%   { fill: var(--ink-faint); opacity: 0.55; }
+    32%      { fill: var(--sage); opacity: 1; }
+    42%      { fill: var(--sage); opacity: 1; }
+    48%,100% { fill: var(--ink-faint); opacity: 0.55; }
+  }
+  @keyframes nameAlexLoop {
+    0%,26%   { opacity: 0; transform: translateY(6px); }
+    32%      { opacity: 1; transform: translateY(0); }
+    42%      { opacity: 1; transform: translateY(0); }
+    48%,100% { opacity: 0; transform: translateY(0); }
+  }
+  /* Lisa: pick 2 around 59% */
+  @keyframes pickLisaLoop {
+    0%,53%   { fill: var(--ink-faint); opacity: 0.55; }
+    59%      { fill: var(--sage); opacity: 1; }
+    69%      { fill: var(--sage); opacity: 1; }
+    75%,100% { fill: var(--ink-faint); opacity: 0.55; }
+  }
+  @keyframes nameLisaLoop {
+    0%,53%   { opacity: 0; transform: translateY(6px); }
+    59%      { opacity: 1; transform: translateY(0); }
+    69%      { opacity: 1; transform: translateY(0); }
+    75%,100% { opacity: 0; transform: translateY(0); }
+  }
+  /* Adam: pick 3 around 86%, resets before the loop restarts */
+  @keyframes pickAdamLoop {
+    0%,80%   { fill: var(--ink-faint); opacity: 0.55; }
+    86%      { fill: var(--sage); opacity: 1; }
+    94%      { fill: var(--sage); opacity: 1; }
+    98%,100% { fill: var(--ink-faint); opacity: 0.55; }
+  }
+  @keyframes nameAdamLoop {
+    0%,80%   { opacity: 0; transform: translateY(6px); }
+    86%      { opacity: 1; transform: translateY(0); }
+    94%      { opacity: 1; transform: translateY(0); }
+    98%,100% { opacity: 0; transform: translateY(0); }
+  }
+
+  .scene svg [class*="think-dots"],
+  .scene svg .bubble,
+  .scene svg .bubble-tail,
+  .scene svg [class*="namecard"] { transform-box: fill-box; transform-origin: center; }
+
+  /* --- Slide 3: the same few, taking turns, round after round --- */
+  .grid { width: 100%; max-width: 560px; margin: 1.8rem 0 0; }
+  .grid svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .seat .head, .seat .body { fill: var(--ink-faint); }
+  .seat .arm { stroke-width: 5; opacity: 0; }
+
+  /* active students: they take turns raising a hand; their colour deepens
+     over the lesson (rising attention + learning). One 12s loop = 3 rounds. */
+  .grid.play .active .head, .grid.play .active .body {
+    fill: var(--sage);
+    animation: brighten 12s ease-in-out infinite;
+  }
+  .grid.play .active .arm { stroke: var(--sage-deep); }
+
+  /* the three take turns: a1 early, a2 middle, a3 late, with slight overlap
+     so sometimes one hand is up, sometimes two, but always from these three */
+  .grid.play .a1 .arm { animation: hand 12s ease-in-out infinite; animation-delay: 0s; }
+  .grid.play .a2 .arm { animation: hand 12s ease-in-out infinite; animation-delay: -8s; }
+  .grid.play .a3 .arm { animation: hand 12s ease-in-out infinite; animation-delay: -4s; }
+
+  /* quiet students: never a hand, and their attention fades over the lesson */
+  .grid.play .quiet { animation: dwindle 12s ease-in-out infinite; }
+
+  /* time bar filling along the bottom, one sweep per 12s loop */
+  .timebar-fill { animation: none; }
+  .grid.play .timebar-fill { animation: fillTime 12s linear infinite; }
+
+  @keyframes hand {
+    /* a single raise-and-lower occupying the first third of the loop,
+       then the hand stays down for the rest (the other two take over) */
+    0%    { opacity: 0; transform: translateY(4px) rotate(8deg); }
+    4%    { opacity: 1; transform: translateY(0) rotate(0deg); }
+    24%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+    30%   { opacity: 0; transform: translateY(4px) rotate(8deg); }
+    100%  { opacity: 0; transform: translateY(4px) rotate(8deg); }
+  }
+  @keyframes brighten {
+    /* deepen from mid-sage toward full sage-deep across the lesson, then reset */
+    0%   { fill: var(--sage); }
+    85%  { fill: var(--sage-deep); }
+    97%  { fill: var(--sage-deep); }
+    100% { fill: var(--sage); }
+  }
+  @keyframes dwindle {
+    0%   { opacity: 0.85; }
+    85%  { opacity: 0.2; }
+    97%  { opacity: 0.2; }
+    100% { opacity: 0.85; }
+  }
+  @keyframes fillTime {
+    0%   { transform: scaleX(0); }
+    97%  { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+  }
+
+  .grid svg .arm { transform-box: fill-box; transform-origin: bottom left; }
+  .grid svg .timebar-fill { transform-box: fill-box; transform-origin: left center; }
+
+  /* --- Slide 4: two memories fading at different rates over a week --- */
+  .recall { width: 100%; max-width: 520px; margin: 1.8rem 0 0; }
+  .recall svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .brain-outline { fill: none; stroke: var(--sage-deep); stroke-width: 2.5; stroke-linejoin: round; }
+  .brain-glow { fill: var(--sage); }
+  .brain-fold { fill: none; stroke: var(--sage-deep); stroke-width: 1.5; stroke-linecap: round; opacity: 0.55; }
+  .brain-label {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px; font-weight: 500; fill: var(--ink);
+  }
+  .brain-pct {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 22px; font-weight: 600; fill: var(--sage-deep); opacity: 0;
+  }
+  .week-label {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase;
+    fill: var(--ink-faint);
+  }
+  .week-line { stroke: var(--line); stroke-width: 2; }
+  .week-dot { fill: var(--sage-deep); }
+
+  /* one 9s loop: both start bright, a week sweeps past, they settle at 61 vs 40 */
+  .recall.play .glow-active  { animation: fadeActive 9s ease-in-out infinite; }
+  .recall.play .glow-passive { animation: fadePassive 9s ease-in-out infinite; }
+  .recall.play .pct-active   { animation: pctIn 9s ease-in-out infinite; }
+  .recall.play .pct-passive  { animation: pctIn 9s ease-in-out infinite; }
+  .recall.play .week-dot     { animation: weekSweep 9s ease-in-out infinite; }
+  .recall.play .week-label   { animation: weekFade 9s ease-in-out infinite; }
+
+  @keyframes fadeActive {
+    0%,10%  { opacity: 1; }
+    55%     { opacity: 0.78; }   /* settles high: ~61% retained */
+    88%     { opacity: 0.78; }
+    100%    { opacity: 1; }
+  }
+  @keyframes fadePassive {
+    0%,10%  { opacity: 1; }
+    55%     { opacity: 0.32; }   /* fades far more: ~40% retained */
+    88%     { opacity: 0.32; }
+    100%    { opacity: 1; }
+  }
+  @keyframes pctIn {
+    0%,20%  { opacity: 0; }
+    55%,88% { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+  @keyframes weekSweep {
+    0%,10%  { transform: translateX(0); opacity: 0; }
+    12%     { opacity: 1; }
+    55%     { transform: translateX(210px); opacity: 1; }
+    88%     { transform: translateX(210px); opacity: 1; }
+    100%    { transform: translateX(0); opacity: 0; }
+  }
+  @keyframes weekFade {
+    0%,10%  { opacity: 0; }
+    20%,88% { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+
+  .recall svg .week-dot { transform-box: fill-box; transform-origin: left center; }
+
+  /* --- Slide 6: the class lighting up together, links growing between them --- */
+  .s6 { width: 100%; max-width: 560px; margin: 1.6rem 0 0; }
+  .s6 svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .s6 .seat .head, .s6 .seat .body { fill: var(--ink-faint); opacity: 0.5; }
+  .s6 .seat .arm { stroke: var(--sage-deep); stroke-width: 5; opacity: 0; }
+  .s6 .link { stroke: var(--sage); stroke-width: 2; opacity: 0; stroke-linecap: round; }
+
+  /* each student lights up (sage + raises hand); negative delays keep the loop in sync */
+  @keyframes liteUp {
+    0%       { fill: var(--ink-faint); opacity: 0.5; }
+    8%       { fill: var(--sage); opacity: 1; }
+    82%      { fill: var(--sage); opacity: 1; }
+    92%,100% { fill: var(--ink-faint); opacity: 0.5; }
+  }
+  @keyframes liteArm {
+    0%       { opacity: 0; transform: translateY(4px) rotate(8deg); }
+    8%       { opacity: 1; transform: translateY(0) rotate(0deg); }
+    82%      { opacity: 1; transform: translateY(0) rotate(0deg); }
+    92%,100% { opacity: 0; transform: translateY(4px) rotate(8deg); }
+  }
+  @keyframes drawLink {
+    0%       { opacity: 0; stroke-dashoffset: var(--len); }
+    10%      { opacity: 0.5; stroke-dashoffset: 0; }
+    82%      { opacity: 0.5; stroke-dashoffset: 0; }
+    92%,100% { opacity: 0; stroke-dashoffset: 0; }
+  }
+
+  .s6 svg .arm { transform-box: fill-box; transform-origin: bottom left; }
+
+  .s6.play .e0 { animation: drawLink 14.0s ease-in-out -12.37s infinite; }
+  .s6.play .e1 { animation: drawLink 14.0s ease-in-out -12.01s infinite; }
+  .s6.play .e2 { animation: drawLink 14.0s ease-in-out -11.64s infinite; }
+  .s6.play .e3 { animation: drawLink 14.0s ease-in-out -11.28s infinite; }
+  .s6.play .e4 { animation: drawLink 14.0s ease-in-out -10.91s infinite; }
+  .s6.play .e5 { animation: drawLink 14.0s ease-in-out -10.55s infinite; }
+  .s6.play .e6 { animation: drawLink 14.0s ease-in-out -10.18s infinite; }
+  .s6.play .e7 { animation: drawLink 14.0s ease-in-out -9.82s infinite; }
+  .s6.play .e8 { animation: drawLink 14.0s ease-in-out -9.45s infinite; }
+  .s6.play .e9 { animation: drawLink 14.0s ease-in-out -9.09s infinite; }
+  .s6.play .e10 { animation: drawLink 14.0s ease-in-out -8.72s infinite; }
+  .s6.play .e11 { animation: drawLink 14.0s ease-in-out -8.36s infinite; }
+  .s6.play .e12 { animation: drawLink 14.0s ease-in-out -7.99s infinite; }
+  .s6.play .e13 { animation: drawLink 14.0s ease-in-out -7.63s infinite; }
+  .s6.play .e14 { animation: drawLink 14.0s ease-in-out -7.26s infinite; }
+  .s6.play .e15 { animation: drawLink 14.0s ease-in-out -6.90s infinite; }
+  .s6.play .e16 { animation: drawLink 14.0s ease-in-out -6.53s infinite; }
+  .s6.play .e17 { animation: drawLink 14.0s ease-in-out -6.17s infinite; }
+  .s6.play .e18 { animation: drawLink 14.0s ease-in-out -5.80s infinite; }
+  .s6.play .e19 { animation: drawLink 14.0s ease-in-out -5.44s infinite; }
+  .s6.play .e20 { animation: drawLink 14.0s ease-in-out -5.07s infinite; }
+  .s6.play .e21 { animation: drawLink 14.0s ease-in-out -4.71s infinite; }
+  .s6.play .e22 { animation: drawLink 14.0s ease-in-out -4.34s infinite; }
+  .s6.play .m8 .head, .s6.play .m8 .body { animation: liteUp 14.0s ease-in-out -13.16s infinite; }
+  .s6.play .m8 .arm { animation: liteArm 14.0s ease-in-out -13.16s infinite; }
+  .s6.play .m9 .head, .s6.play .m9 .body { animation: liteUp 14.0s ease-in-out -12.79s infinite; }
+  .s6.play .m9 .arm { animation: liteArm 14.0s ease-in-out -12.79s infinite; }
+  .s6.play .m14 .head, .s6.play .m14 .body { animation: liteUp 14.0s ease-in-out -12.43s infinite; }
+  .s6.play .m14 .arm { animation: liteArm 14.0s ease-in-out -12.43s infinite; }
+  .s6.play .m15 .head, .s6.play .m15 .body { animation: liteUp 14.0s ease-in-out -12.06s infinite; }
+  .s6.play .m15 .arm { animation: liteArm 14.0s ease-in-out -12.06s infinite; }
+  .s6.play .m2 .head, .s6.play .m2 .body { animation: liteUp 14.0s ease-in-out -11.70s infinite; }
+  .s6.play .m2 .arm { animation: liteArm 14.0s ease-in-out -11.70s infinite; }
+  .s6.play .m3 .head, .s6.play .m3 .body { animation: liteUp 14.0s ease-in-out -11.33s infinite; }
+  .s6.play .m3 .arm { animation: liteArm 14.0s ease-in-out -11.33s infinite; }
+  .s6.play .m20 .head, .s6.play .m20 .body { animation: liteUp 14.0s ease-in-out -10.97s infinite; }
+  .s6.play .m20 .arm { animation: liteArm 14.0s ease-in-out -10.97s infinite; }
+  .s6.play .m21 .head, .s6.play .m21 .body { animation: liteUp 14.0s ease-in-out -10.60s infinite; }
+  .s6.play .m21 .arm { animation: liteArm 14.0s ease-in-out -10.60s infinite; }
+  .s6.play .m7 .head, .s6.play .m7 .body { animation: liteUp 14.0s ease-in-out -10.24s infinite; }
+  .s6.play .m7 .arm { animation: liteArm 14.0s ease-in-out -10.24s infinite; }
+  .s6.play .m10 .head, .s6.play .m10 .body { animation: liteUp 14.0s ease-in-out -9.87s infinite; }
+  .s6.play .m10 .arm { animation: liteArm 14.0s ease-in-out -9.87s infinite; }
+  .s6.play .m13 .head, .s6.play .m13 .body { animation: liteUp 14.0s ease-in-out -9.51s infinite; }
+  .s6.play .m13 .arm { animation: liteArm 14.0s ease-in-out -9.51s infinite; }
+  .s6.play .m16 .head, .s6.play .m16 .body { animation: liteUp 14.0s ease-in-out -9.14s infinite; }
+  .s6.play .m16 .arm { animation: liteArm 14.0s ease-in-out -9.14s infinite; }
+  .s6.play .m1 .head, .s6.play .m1 .body { animation: liteUp 14.0s ease-in-out -8.78s infinite; }
+  .s6.play .m1 .arm { animation: liteArm 14.0s ease-in-out -8.78s infinite; }
+  .s6.play .m4 .head, .s6.play .m4 .body { animation: liteUp 14.0s ease-in-out -8.41s infinite; }
+  .s6.play .m4 .arm { animation: liteArm 14.0s ease-in-out -8.41s infinite; }
+  .s6.play .m19 .head, .s6.play .m19 .body { animation: liteUp 14.0s ease-in-out -8.05s infinite; }
+  .s6.play .m19 .arm { animation: liteArm 14.0s ease-in-out -8.05s infinite; }
+  .s6.play .m22 .head, .s6.play .m22 .body { animation: liteUp 14.0s ease-in-out -7.68s infinite; }
+  .s6.play .m22 .arm { animation: liteArm 14.0s ease-in-out -7.68s infinite; }
+  .s6.play .m6 .head, .s6.play .m6 .body { animation: liteUp 14.0s ease-in-out -7.32s infinite; }
+  .s6.play .m6 .arm { animation: liteArm 14.0s ease-in-out -7.32s infinite; }
+  .s6.play .m11 .head, .s6.play .m11 .body { animation: liteUp 14.0s ease-in-out -6.95s infinite; }
+  .s6.play .m11 .arm { animation: liteArm 14.0s ease-in-out -6.95s infinite; }
+  .s6.play .m12 .head, .s6.play .m12 .body { animation: liteUp 14.0s ease-in-out -6.59s infinite; }
+  .s6.play .m12 .arm { animation: liteArm 14.0s ease-in-out -6.59s infinite; }
+  .s6.play .m17 .head, .s6.play .m17 .body { animation: liteUp 14.0s ease-in-out -6.22s infinite; }
+  .s6.play .m17 .arm { animation: liteArm 14.0s ease-in-out -6.22s infinite; }
+  .s6.play .m0 .head, .s6.play .m0 .body { animation: liteUp 14.0s ease-in-out -5.86s infinite; }
+  .s6.play .m0 .arm { animation: liteArm 14.0s ease-in-out -5.86s infinite; }
+  .s6.play .m5 .head, .s6.play .m5 .body { animation: liteUp 14.0s ease-in-out -5.49s infinite; }
+  .s6.play .m5 .arm { animation: liteArm 14.0s ease-in-out -5.49s infinite; }
+  .s6.play .m18 .head, .s6.play .m18 .body { animation: liteUp 14.0s ease-in-out -5.13s infinite; }
+  .s6.play .m18 .arm { animation: liteArm 14.0s ease-in-out -5.13s infinite; }
+  .s6.play .m23 .head, .s6.play .m23 .body { animation: liteUp 14.0s ease-in-out -4.76s infinite; }
+  .s6.play .m23 .arm { animation: liteArm 14.0s ease-in-out -4.76s infinite; }
+
+  /* --- Slide 7: a triangle of support, teacher + peers hold up the student --- */
+  .tri { width: 100%; max-width: 480px; margin: 2rem auto 0; }
+  .tri svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .tri .node-fig { fill: var(--sage-deep); }
+  .tri .node-label {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .tri .side-label {
+    font-family: 'Söhne', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    fill: var(--sage-deep); }
+  .tri .tri-side { stroke: var(--line); stroke-width: 2; }
+
+  /* the three nodes all give and receive: everyone stays warm together */
+  .tri .student-fig { fill: var(--sage-deep); }
+  .tri .node-ring, .tri .student-ring { fill: none; stroke: var(--sage); stroke-width: 2.5; opacity: 0; }
+  .tri.play .student-ring { animation: ringPulse 9s ease-in-out infinite; }
+
+  /* flowing dots along every side, in BOTH directions */
+  .tri .flow { fill: var(--sage); opacity: 0; }
+  .tri.play .ts_fwd { animation: ts_fwd 9.0s linear infinite; }
+  .tri.play .ts_bwd { animation: ts_bwd 9.0s linear infinite; }
+  .tri.play .ps_fwd { animation: ps_fwd 9.0s linear infinite; }
+  .tri.play .ps_bwd { animation: ps_bwd 9.0s linear infinite; }
+  .tri.play .tp_fwd { animation: tp_fwd 9.0s linear infinite; }
+  .tri.play .tp_bwd { animation: tp_bwd 9.0s linear infinite; }
+
+  @keyframes ringPulse {
+    0%,20%   { opacity: 0; transform: scale(0.7); }
+    35%      { opacity: 0.6; transform: scale(1); }
+    55%      { opacity: 0; transform: scale(1.25); }
+    100%     { opacity: 0; }
+  }
+  @keyframes ts_fwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(160px,180px); }
+    100% { opacity: 0; transform: translate(160px,180px); }
+  }
+  @keyframes ts_bwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(-160px,-180px); }
+    100% { opacity: 0; transform: translate(-160px,-180px); }
+  }
+  @keyframes ps_fwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(-160px,180px); }
+    100% { opacity: 0; transform: translate(-160px,180px); }
+  }
+  @keyframes ps_bwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(160px,-180px); }
+    100% { opacity: 0; transform: translate(160px,-180px); }
+  }
+  @keyframes tp_fwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(320px,0px); }
+    100% { opacity: 0; transform: translate(320px,0px); }
+  }
+  @keyframes tp_bwd {
+    0%   { opacity: 0; transform: translate(0px,0px); }
+    10%  { opacity: 0.9; }
+    85%  { opacity: 0.9; transform: translate(-320px,0px); }
+    100% { opacity: 0; transform: translate(-320px,0px); }
+  }
+
+  .tri svg .student-ring, .tri svg .flow { transform-box: fill-box; transform-origin: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* no motion: show the teacher's question, class at rest, no name flashing */
+    .scene .bubble, .scene .bubble-tail { opacity: 1 !important; animation: none !important; transform: none !important; }
+    .scene .name-alex, .scene .name-lisa, .scene .name-adam { opacity: 0 !important; animation: none !important; }
+    .scene .pick-alex, .scene .pick-lisa, .scene .pick-adam { animation: none !important; }
+    .scene .think-dots circle { opacity: 0 !important; animation: none !important; }
+    /* slide 3: one hand up on an active student, quiet dimmed, no motion */
+    .grid .active .head, .grid .active .body { fill: var(--sage-deep) !important; animation: none !important; }
+    .grid .a1 .arm { opacity: 1 !important; animation: none !important; transform: none !important; }
+    .grid .a2 .arm, .grid .a3 .arm { opacity: 0 !important; animation: none !important; }
+    .grid .quiet { opacity: 0.2 !important; animation: none !important; }
+    .grid .timebar-fill { animation: none !important; transform: scaleX(0.6) !important; }
+    /* slide 4: settled end state, one brighter one dimmer, percentages shown */
+    .recall .glow-active { opacity: 0.78 !important; animation: none !important; }
+    .recall .glow-passive { opacity: 0.32 !important; animation: none !important; }
+    .recall .brain-pct { opacity: 1 !important; animation: none !important; }
+    .recall .week-dot { animation: none !important; transform: translateX(210px) !important; opacity: 1 !important; }
+    .recall .week-label { opacity: 1 !important; animation: none !important; }
+    /* slide 6: class lit and linked, no motion */
+    .s6 .seat .head, .s6 .seat .body { fill: var(--sage) !important; opacity: 1 !important; animation: none !important; }
+    .s6 .seat .arm { opacity: 1 !important; animation: none !important; transform: none !important; }
+    .s6 .link { opacity: 0.5 !important; stroke-dashoffset: 0 !important; animation: none !important; }
+    /* slide 7: all three nodes warm, mutual, no motion */
+    .tri .student-fig { fill: var(--sage-deep) !important; animation: none !important; }
+    .tri .flow { opacity: 0 !important; animation: none !important; }
+    .tri .student-ring { opacity: 0 !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-switch" role="group" aria-label="Språk / Language">
+  <button id="lang-sv" class="active" onclick="setLang('sv')">SV</button>
+  <button id="lang-en" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- 1 · TITLE -->
+<section class="slide title-slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Frågan du undrat över" data-en="Something worth explaining">Frågan du undrat över</div>
+    <h1 data-sv="Varför frågar jag<br>ibland dig som inte<br>räckt upp handen?" data-en="Why do I sometimes<br>call on you when<br>your hand isn't up?">Varför frågar jag<br>ibland dig som inte<br>räckt upp handen?</h1>
+    <p class="lead" data-sv="Det finns forskning bakom. Och den handlar om att göra klassrummet tryggare." data-en="There's research behind it. And it's about making the classroom safer.">Det finns forskning bakom. Och den handlar om att göra klassrummet tryggare.</p>
+  </div>
+  <div class="pager">01 / 09</div>
+</section>
+
+<!-- 2 · WHAT IT IS -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Vad det heter" data-en="What it's called">Vad det heter</div>
+    <h2 data-sv="Metoden kallas<br>cold calling." data-en="The method is called<br>cold calling.">Metoden kallas<br>cold calling.</h2>
+    <p class="body-text" data-sv="Jag frågar hela klassen, väntar, och säger sedan ett namn." data-en="I ask the whole class, pause, then say a name.">Jag frågar hela klassen, väntar, och säger sedan ett namn.</p>
+
+    <div class="scene" id="scene2">
+      <svg viewBox="0 0 640 220" role="img" aria-label="En lärare ställer en fråga till hela klassen, klassen tänker, och ett namn landar på en elev.">
+        <!-- Teacher, set apart on the left, with a whiteboard behind -->
+        <g class="teacher-group">
+          <!-- whiteboard (drawn first so it sits behind the teacher; low opacity = background) -->
+          <g class="whiteboard" opacity="0.4">
+            <rect x="4" y="70" width="150" height="92" rx="4" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+            <!-- marker tray -->
+            <rect x="2" y="162" width="154" height="6" rx="3" fill="var(--line)"/>
+            <!-- faint scribbled lines, like notes on the board -->
+            <line x1="20" y1="90" x2="138" y2="90" stroke="var(--ink-faint)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+            <line x1="20" y1="108" x2="112" y2="108" stroke="var(--ink-faint)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+            <line x1="20" y1="126" x2="126" y2="126" stroke="var(--ink-faint)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+            <line x1="20" y1="144" x2="96" y2="144" stroke="var(--ink-faint)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+          </g>
+          <g class="fig teacher" transform="translate(70,120)">
+            <circle cx="0" cy="0" r="17"/>
+            <path d="M -22 62 Q -22 20 0 20 Q 22 20 22 62 Z"/>
+          </g>
+          <!-- speech bubble -->
+          <g class="bubble" transform="translate(96,74)">
+            <rect x="0" y="0" width="52" height="36" rx="10"/>
+            <text x="26" y="24" text-anchor="middle" fill="#fff" font-family="Söhne, Arial, sans-serif" font-size="20" font-weight="500">?</text>
+          </g>
+          <path class="bubble-tail" d="M 98 108 L 92 120 L 106 110 Z" fill="var(--sage-deep)"/>
+        </g>
+
+        <!-- The class: a row of student silhouettes.
+             Three of them get called in turn: Lisa, then Alex, then Adam. -->
+        <!-- student 1: Lisa (picked 2nd) -->
+        <g class="fig pick-lisa" transform="translate(240,130)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -20 56 Q -20 18 0 18 Q 20 18 20 56 Z"/>
+        </g>
+        <g class="think-dots d1" transform="translate(240,96)">
+          <circle cx="-8" cy="0" r="3"/><circle cx="0" cy="0" r="3"/><circle cx="8" cy="0" r="3"/>
+        </g>
+        <g class="namecard name-lisa" transform="translate(207,58)">
+          <rect x="0" y="0" width="66" height="30" rx="8"/>
+          <text x="33" y="20" text-anchor="middle">Lisa?</text>
+        </g>
+
+        <!-- student 2 -->
+        <g class="fig" transform="translate(310,130)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -20 56 Q -20 18 0 18 Q 20 18 20 56 Z"/>
+        </g>
+        <g class="think-dots d2" transform="translate(310,96)">
+          <circle cx="-8" cy="0" r="3"/><circle cx="0" cy="0" r="3"/><circle cx="8" cy="0" r="3"/>
+        </g>
+
+        <!-- student 3: Alex (picked 1st) -->
+        <g class="fig pick-alex" transform="translate(380,130)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -20 56 Q -20 18 0 18 Q 20 18 20 56 Z"/>
+        </g>
+        <g class="think-dots d3" transform="translate(380,96)">
+          <circle cx="-8" cy="0" r="3"/><circle cx="0" cy="0" r="3"/><circle cx="8" cy="0" r="3"/>
+        </g>
+        <g class="namecard name-alex" transform="translate(347,58)">
+          <rect x="0" y="0" width="66" height="30" rx="8"/>
+          <text x="33" y="20" text-anchor="middle">Alex?</text>
+        </g>
+
+        <!-- student 4 -->
+        <g class="fig" transform="translate(450,130)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -20 56 Q -20 18 0 18 Q 20 18 20 56 Z"/>
+        </g>
+        <g class="think-dots d4" transform="translate(450,96)">
+          <circle cx="-8" cy="0" r="3"/><circle cx="0" cy="0" r="3"/><circle cx="8" cy="0" r="3"/>
+        </g>
+
+        <!-- student 5: Adam (picked 3rd, stays lit) -->
+        <g class="fig pick-adam" transform="translate(520,130)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -20 56 Q -20 18 0 18 Q 20 18 20 56 Z"/>
+        </g>
+        <g class="think-dots d5" transform="translate(520,96)">
+          <circle cx="-8" cy="0" r="3"/><circle cx="0" cy="0" r="3"/><circle cx="8" cy="0" r="3"/>
+        </g>
+        <g class="namecard name-adam" transform="translate(487,58)">
+          <rect x="0" y="0" width="66" height="30" rx="8"/>
+          <text x="33" y="20" text-anchor="middle">Adam?</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="pager">02 / 09</div>
+</section>
+
+<!-- 3 · THE PARTICIPATION PROBLEM (stat) -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Problemet det löser" data-en="The problem">Problemet det löser</div>
+    <div class="stat"><span class="num">3</span></div>
+    <p class="stat-label" data-sv="Med bara handuppräckning är det ofta <em>samma få</em> som svarar." data-en="When it's hands-up only, it's usually <em>the same few</em> who answer.">Med bara handuppräckning är det ofta <em>samma få</em> som svarar.</p>
+
+    <div class="grid" id="grid3">
+      <svg viewBox="0 0 540 360" role="img" aria-label="En stor klass där bara tre elever räcker upp handen, samma tre turas om att svara runda efter runda, medan resten sitter tysta och tonar bort allt eftersom lektionen fortskrider.">
+        <!-- time bar along the bottom: the lesson progressing -->
+        <rect class="timebar-track" x="40" y="340" width="460" height="4" rx="2" fill="var(--line)"/>
+        <rect class="timebar-fill" x="40" y="340" width="460" height="4" rx="2" fill="var(--sage)"/>
+        <g class="seat quiet q0" transform="translate(40,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q1" transform="translate(132,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q2" transform="translate(224,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat active a1" transform="translate(316,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat quiet q4" transform="translate(408,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q5" transform="translate(500,40)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q6" transform="translate(40,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q7" transform="translate(132,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q8" transform="translate(224,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat active a2" transform="translate(316,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat quiet q10" transform="translate(408,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q11" transform="translate(500,118)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q12" transform="translate(40,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q13" transform="translate(132,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q14" transform="translate(224,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q15" transform="translate(316,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat active a3" transform="translate(408,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat quiet q17" transform="translate(500,196)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q18" transform="translate(40,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q19" transform="translate(132,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q20" transform="translate(224,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q21" transform="translate(316,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q22" transform="translate(408,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+        <g class="seat quiet q23" transform="translate(500,274)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="src-mark"><span class="star">*</span> Kelly (2007)</div>
+  <div class="pager">03 / 09</div>
+</section>
+
+<!-- 4 · RETRIEVAL STAT -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Varför det fastnar bättre" data-en="Why it sticks">Varför det fastnar bättre</div>
+    <div class="stat"><span class="num">61</span><span class="sym">%</span></div>
+    <p class="stat-label" data-sv="Att svara högt fäster kunskapen bättre än att bara lyssna." data-en="Answering out loud locks in learning better than just listening.">Att svara högt fäster kunskapen bättre än att bara lyssna.</p>
+
+    <div class="recall" id="recall4">
+      <svg viewBox="0 0 520 250" role="img" aria-label="Två hjärnor sida vid sida. Efter en vecka har den som bara läste om tonat ner till ungefär 40 procent, medan den som deltog och svarade behåller ungefär 61 procent.">
+        <g transform="translate(130,150)">
+          <path class="brain-glow glow-passive" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z"/>
+          <path class="brain-glow glow-passive" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z" transform="scale(-1,1)"/>
+          <path class="brain-outline" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z"/>
+          <path class="brain-outline" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 9 -33 C 18 -34 19 -25 11 -24 C 5 -23 6 -30 12 -30"/>
+          <path class="brain-fold" d="M 9 -33 C 18 -34 19 -25 11 -24 C 5 -23 6 -30 12 -30" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 25 -26 C 34 -27 35 -17 26 -16"/>
+          <path class="brain-fold" d="M 25 -26 C 34 -27 35 -17 26 -16" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 37 -14 C 43 -14 43 -6 37 -6"/>
+          <path class="brain-fold" d="M 37 -14 C 43 -14 43 -6 37 -6" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 13 -19 C 24 -20 25 -8 13 -9 C 6 -9 7 -16 14 -15"/>
+          <path class="brain-fold" d="M 13 -19 C 24 -20 25 -8 13 -9 C 6 -9 7 -16 14 -15" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 31 -4 C 40 -5 40 5 31 4"/>
+          <path class="brain-fold" d="M 31 -4 C 40 -5 40 5 31 4" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 11 -3 C 21 -4 22 7 11 6 C 5 5 6 -1 12 0"/>
+          <path class="brain-fold" d="M 11 -3 C 21 -4 22 7 11 6 C 5 5 6 -1 12 0" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 27 9 C 36 9 36 19 27 18"/>
+          <path class="brain-fold" d="M 27 9 C 36 9 36 19 27 18" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 13 13 C 23 13 23 23 13 22"/>
+          <path class="brain-fold" d="M 13 13 C 23 13 23 23 13 22" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 30 20 C 38 22 36 30 29 28"/>
+          <path class="brain-fold" d="M 30 20 C 38 22 36 30 29 28" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 17 27 C 25 28 24 35 17 33"/>
+          <path class="brain-fold" d="M 17 27 C 25 28 24 35 17 33" transform="scale(-1,1)"/>
+        </g>
+        <text class="brain-label" x="130" y="214" text-anchor="middle" data-sv="Lyssnade" data-en="Listened">Lyssnade</text>
+        <text class="brain-pct pct-passive" x="130" y="92" text-anchor="middle">40%</text>
+        <g transform="translate(390,150)">
+          <path class="brain-glow glow-active" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z"/>
+          <path class="brain-glow glow-active" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z" transform="scale(-1,1)"/>
+          <path class="brain-outline" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z"/>
+          <path class="brain-outline" d="M 5 -40 C 22 -46 37 -37 34 -24 C 45 -28 52 -16 44 -8 C 53 -3 52 8 44 11 C 50 22 42 30 33 27 C 36 38 24 43 16 37 C 12 42 6 41 5 34 C 5 20 5 -22 5 -40 Z" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 9 -33 C 18 -34 19 -25 11 -24 C 5 -23 6 -30 12 -30"/>
+          <path class="brain-fold" d="M 9 -33 C 18 -34 19 -25 11 -24 C 5 -23 6 -30 12 -30" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 25 -26 C 34 -27 35 -17 26 -16"/>
+          <path class="brain-fold" d="M 25 -26 C 34 -27 35 -17 26 -16" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 37 -14 C 43 -14 43 -6 37 -6"/>
+          <path class="brain-fold" d="M 37 -14 C 43 -14 43 -6 37 -6" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 13 -19 C 24 -20 25 -8 13 -9 C 6 -9 7 -16 14 -15"/>
+          <path class="brain-fold" d="M 13 -19 C 24 -20 25 -8 13 -9 C 6 -9 7 -16 14 -15" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 31 -4 C 40 -5 40 5 31 4"/>
+          <path class="brain-fold" d="M 31 -4 C 40 -5 40 5 31 4" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 11 -3 C 21 -4 22 7 11 6 C 5 5 6 -1 12 0"/>
+          <path class="brain-fold" d="M 11 -3 C 21 -4 22 7 11 6 C 5 5 6 -1 12 0" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 27 9 C 36 9 36 19 27 18"/>
+          <path class="brain-fold" d="M 27 9 C 36 9 36 19 27 18" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 13 13 C 23 13 23 23 13 22"/>
+          <path class="brain-fold" d="M 13 13 C 23 13 23 23 13 22" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 30 20 C 38 22 36 30 29 28"/>
+          <path class="brain-fold" d="M 30 20 C 38 22 36 30 29 28" transform="scale(-1,1)"/>
+          <path class="brain-fold" d="M 17 27 C 25 28 24 35 17 33"/>
+          <path class="brain-fold" d="M 17 27 C 25 28 24 35 17 33" transform="scale(-1,1)"/>
+        </g>
+        <text class="brain-label" x="390" y="214" text-anchor="middle" data-sv="Svarade högt" data-en="Answered out loud">Svarade högt</text>
+        <text class="brain-pct pct-active" x="390" y="92" text-anchor="middle">61%</text>
+        <!-- a week sweeping past, under the brains -->
+        <line class="week-line" x1="140" y1="228" x2="380" y2="228"/>
+        <circle class="week-dot" cx="140" cy="228" r="5"/>
+        <text class="week-label" x="260" y="248" text-anchor="middle" data-sv="en vecka senare" data-en="one week later">en vecka senare</text>
+      </svg>
+    </div>
+  </div>
+  <div class="src-mark"><span class="star">**</span> Roediger &amp; Karpicke (2006)</div>
+  <div class="pager">04 / 09</div>
+</section>
+
+<!-- 5 · ILLUSION OF KNOWING -->
+<section class="slide calm">
+  <div class="inner">
+    <p class="big-quote" data-sv="Det känns självklart, tills du ska förklara det." data-en="It feels obvious, until you have to explain it.">Det känns självklart, tills du ska förklara det.</p>
+  </div>
+  <div class="pager">05 / 09</div>
+</section>
+
+<!-- 6 · COMFORT GROWS (the reassurance stat) -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Oron många har" data-en="A common worry">Oron många har</div>
+    <div class="stat"><span class="num">60</span><span class="sym">%</span></div>
+    <p class="stat-label" data-sv="fler började svara <em>frivilligt</em> i klassrum med cold calling." data-en="more students spoke up on their own in classrooms with cold calling.">fler började svara <em>frivilligt</em> i klassrum med cold calling.</p>
+
+    <div class="s6" id="s6">
+      <svg viewBox="0 0 540 333" role="img" aria-label="En klass som gradvis tänds upp, en elev efter en annan räcker upp handen, medan tunna linjer växer fram och knyter ihop dem till ett tryggt klassrum.">
+        <line class="link e0" x1="224" y1="122" x2="316" y2="122" style="stroke-dasharray:92.0;--len:92.0"/>
+        <line class="link e1" x1="224" y1="122" x2="224" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e2" x1="316" y1="122" x2="316" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e3" x1="224" y1="122" x2="224" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e4" x1="316" y1="122" x2="316" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e5" x1="224" y1="200" x2="224" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e6" x1="316" y1="200" x2="316" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e7" x1="224" y1="122" x2="132" y2="122" style="stroke-dasharray:92.0;--len:92.0"/>
+        <line class="link e8" x1="316" y1="122" x2="408" y2="122" style="stroke-dasharray:92.0;--len:92.0"/>
+        <line class="link e9" x1="132" y1="122" x2="132" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e10" x1="408" y1="122" x2="408" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e11" x1="132" y1="122" x2="132" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e12" x1="408" y1="122" x2="408" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e13" x1="132" y1="200" x2="132" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e14" x1="408" y1="200" x2="408" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e15" x1="132" y1="122" x2="40" y2="122" style="stroke-dasharray:92.0;--len:92.0"/>
+        <line class="link e16" x1="408" y1="122" x2="500" y2="122" style="stroke-dasharray:92.0;--len:92.0"/>
+        <line class="link e17" x1="40" y1="122" x2="40" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e18" x1="500" y1="122" x2="500" y2="200" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e19" x1="40" y1="122" x2="40" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e20" x1="500" y1="122" x2="500" y2="44" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e21" x1="40" y1="200" x2="40" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <line class="link e22" x1="500" y1="200" x2="500" y2="278" style="stroke-dasharray:78.0;--len:78.0"/>
+        <g class="seat m8" transform="translate(224,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m9" transform="translate(316,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m14" transform="translate(224,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m15" transform="translate(316,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m2" transform="translate(224,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m3" transform="translate(316,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m20" transform="translate(224,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m21" transform="translate(316,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m7" transform="translate(132,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m10" transform="translate(408,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m13" transform="translate(132,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m16" transform="translate(408,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m1" transform="translate(132,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m4" transform="translate(408,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m19" transform="translate(132,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m22" transform="translate(408,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m6" transform="translate(40,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m11" transform="translate(500,122)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m12" transform="translate(40,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m17" transform="translate(500,200)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m0" transform="translate(40,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m5" transform="translate(500,44)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m18" transform="translate(40,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+        <g class="seat m23" transform="translate(500,278)">
+          <circle class="head" cx="0" cy="0" r="11"/>
+          <path class="body" d="M -15 42 Q -15 13 0 13 Q 15 13 15 42 Z"/>
+          <line class="arm" x1="9" y1="16" x2="20" y2="-6" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="src-mark"><span class="star">***</span> Dallimore m.fl. (2013)</div>
+  <div class="pager">06 / 09</div>
+</section>
+
+<!-- 7 · THE KEY CONDITION -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Det viktigaste villkoret" data-en="The one condition">Det viktigaste villkoret</div>
+    <h2 data-sv="Det fungerar bara<br>när det är tryggt." data-en="It only works<br>if it's safe.">Det fungerar bara<br>när det är tryggt.</h2>
+    <p class="body-text" data-sv="Trygghet kräver två källor: att jag är uppmuntrande, och att du och dina klasskamrater är det mot varandra." data-en="Feeling safe takes two things: me being encouraging, and you and your classmates being kind to each other.">Trygghet kräver två källor: att jag är uppmuntrande, och att du och dina klasskamrater är det mot varandra.</p>
+
+    <div class="tri" id="tri7">
+      <svg viewBox="0 0 540 340" role="img" aria-label="En triangel där läraren och kamraterna båda skickar stöd och uppmuntran ner till eleven, som lyser upp tryggt först när båda källorna når fram.">
+        <line class="tri-side" x1="110" y1="70" x2="270" y2="250"/>
+        <line class="tri-side" x1="430" y1="70" x2="270" y2="250"/>
+        <line class="tri-side" x1="110" y1="70" x2="430" y2="70" style="opacity:0.5"/>
+        <text class="side-label" x="186" y="150" text-anchor="middle" transform="rotate(48.4 190 160)" data-sv="stöd" data-en="support">stöd</text>
+        <text class="side-label" x="354" y="150" text-anchor="middle" transform="rotate(131.6 350 160)" data-sv="uppmuntran" data-en="encouragement">uppmuntran</text>
+        <circle class="flow ts_fwd" cx="110" cy="70" r="4" style="animation-delay:-0.00s"/>
+        <circle class="flow ts_fwd" cx="110" cy="70" r="4" style="animation-delay:-2.25s"/>
+        <circle class="flow ts_fwd" cx="110" cy="70" r="4" style="animation-delay:-4.50s"/>
+        <circle class="flow ts_fwd" cx="110" cy="70" r="4" style="animation-delay:-6.75s"/>
+        <circle class="flow ts_bwd" cx="270" cy="250" r="4" style="animation-delay:-1.12s"/>
+        <circle class="flow ts_bwd" cx="270" cy="250" r="4" style="animation-delay:-3.38s"/>
+        <circle class="flow ts_bwd" cx="270" cy="250" r="4" style="animation-delay:-5.62s"/>
+        <circle class="flow ts_bwd" cx="270" cy="250" r="4" style="animation-delay:-7.88s"/>
+        <circle class="flow ps_fwd" cx="430" cy="70" r="4" style="animation-delay:-0.00s"/>
+        <circle class="flow ps_fwd" cx="430" cy="70" r="4" style="animation-delay:-2.25s"/>
+        <circle class="flow ps_fwd" cx="430" cy="70" r="4" style="animation-delay:-4.50s"/>
+        <circle class="flow ps_fwd" cx="430" cy="70" r="4" style="animation-delay:-6.75s"/>
+        <circle class="flow ps_bwd" cx="270" cy="250" r="4" style="animation-delay:-1.12s"/>
+        <circle class="flow ps_bwd" cx="270" cy="250" r="4" style="animation-delay:-3.38s"/>
+        <circle class="flow ps_bwd" cx="270" cy="250" r="4" style="animation-delay:-5.62s"/>
+        <circle class="flow ps_bwd" cx="270" cy="250" r="4" style="animation-delay:-7.88s"/>
+        <circle class="flow tp_fwd" cx="110" cy="70" r="4" style="animation-delay:-0.00s"/>
+        <circle class="flow tp_fwd" cx="110" cy="70" r="4" style="animation-delay:-2.25s"/>
+        <circle class="flow tp_fwd" cx="110" cy="70" r="4" style="animation-delay:-4.50s"/>
+        <circle class="flow tp_fwd" cx="110" cy="70" r="4" style="animation-delay:-6.75s"/>
+        <circle class="flow tp_bwd" cx="430" cy="70" r="4" style="animation-delay:-1.12s"/>
+        <circle class="flow tp_bwd" cx="430" cy="70" r="4" style="animation-delay:-3.38s"/>
+        <circle class="flow tp_bwd" cx="430" cy="70" r="4" style="animation-delay:-5.62s"/>
+        <circle class="flow tp_bwd" cx="430" cy="70" r="4" style="animation-delay:-7.88s"/>
+        <g class="node-fig" transform="translate(110,70)">
+          <circle cx="0" cy="0" r="13"/>
+          <path d="M -17 39 Q -17 13 0 13 Q 17 13 17 39 Z"/>
+        </g>
+        <text class="node-label" x="110" y="48" text-anchor="middle" data-sv="Läraren" data-en="The teacher">Läraren</text>
+        <g class="node-fig" transform="translate(410,70)">
+          <circle cx="0" cy="0" r="10"/>
+          <path d="M -14 30 Q -14 10 0 10 Q 14 10 14 30 Z"/>
+        </g>
+        <g class="node-fig" transform="translate(430,76)">
+          <circle cx="0" cy="0" r="10"/>
+          <path d="M -14 30 Q -14 10 0 10 Q 14 10 14 30 Z"/>
+        </g>
+        <g class="node-fig" transform="translate(450,70)">
+          <circle cx="0" cy="0" r="10"/>
+          <path d="M -14 30 Q -14 10 0 10 Q 14 10 14 30 Z"/>
+        </g>
+        <text class="node-label" x="430" y="48" text-anchor="middle" data-sv="Kamraterna" data-en="Classmates">Kamraterna</text>
+        <g class="student-fig" transform="translate(270,250)">
+          <circle cx="0" cy="0" r="15"/>
+          <path d="M -19 45 Q -19 15 0 15 Q 19 15 19 45 Z"/>
+        </g>
+        <circle class="student-ring" cx="270" cy="250" r="30"/>
+        <text class="node-label" x="270" y="316" text-anchor="middle" data-sv="Du" data-en="You">Du</text>
+      </svg>
+    </div>
+  </div>
+  <div class="pager">07 / 09</div>
+</section>
+
+<!-- 8 · MY PROMISE -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Det du kan vänta dig" data-en="What to expect from me">Det du kan vänta dig</div>
+    <h2 data-sv="Det här kan du<br>räkna med." data-en="Here's what you<br>can count on.">Det här kan du<br>räkna med.</h2>
+    <div class="promise-list">
+      <div class="promise-line"><span class="n">01</span><p data-sv="Ibland frågar jag ut i klassen, ibland dig direkt." data-en="Sometimes I ask the class, sometimes I call on you.">Ibland frågar jag ut i klassen, ibland dig direkt.</p></div>
+      <div class="promise-line"><span class="n">02</span><p data-sv="Du får alltid tid att tänka först." data-en="You always get time to think first.">Du får alltid tid att tänka först.</p></div>
+      <div class="promise-line"><span class="n">03</span><p data-sv="Kör du fast hjälper jag dig vidare, men du måste visa mig att du tänker." data-en="If you get stuck I'll help you along, but you have to show me you're trying.">Kör du fast hjälper jag dig vidare, men du måste visa mig att du tänker.</p></div>
+      <div class="promise-line"><span class="n">04</span><p data-sv="Tonen är alltid schysst." data-en="I'll always keep it kind.">Tonen är alltid schysst.</p></div>
+    </div>
+  </div>
+  <div class="pager">08 / 09</div>
+</section>
+
+<!-- 9 · SOURCES -->
+<section class="slide sources">
+  <div class="inner">
+    <div class="eyebrow" data-sv="Forskningen bakom" data-en="The research">Forskningen bakom</div>
+    <h2 data-sv="Källor" data-en="Sources">Källor</h2>
+    <div class="source-item">
+      <span class="star">*</span>
+      <p><span class="claim" data-sv="Att samma få svarar." data-en="The same few do the answering.">Att samma få svarar.</span> <span data-sv="Kelly (2007), analys av 117 klassrum: skev fördelning av muntligt deltagande i 75 % av klassrummen." data-en="Kelly (2007), analysis of 117 classrooms: skewed distribution of oral participation in 75% of classrooms.">Kelly (2007), analys av 117 klassrum: skev fördelning av muntligt deltagande i 75 % av klassrummen.</span></p>
+    </div>
+    <div class="source-item">
+      <span class="star">**</span>
+      <p><span class="claim" data-sv="61 % mot 40 % efter en vecka." data-en="61% vs 40% after a week.">61 % mot 40 % efter en vecka.</span> <span data-sv="Roediger &amp; Karpicke (2006), Washington University: att öva på att minnas jämfört med omläsning." data-en="Roediger &amp; Karpicke (2006), Washington University: practising recall compared with rereading.">Roediger &amp; Karpicke (2006), Washington University: att öva på att minnas jämfört med omläsning.</span></p>
+    </div>
+    <div class="source-item">
+      <span class="star">***</span>
+      <p><span class="claim" data-sv="60 % fler svarar frivilligt." data-en="60% more speak up voluntarily.">60 % fler svarar frivilligt.</span> <span data-sv="Dallimore, Hertenstein &amp; Platt (2013), Northeastern University: deltagande följt i 16 klassrum under en hel kurs." data-en="Dallimore, Hertenstein &amp; Platt (2013), Northeastern University: participation tracked across 16 classrooms over a full course.">Dallimore, Hertenstein &amp; Platt (2013), Northeastern University: deltagande följt i 16 klassrum under en hel kurs.</span></p>
+    </div>
+  </div>
+  <div class="pager">09 / 09</div>
+</section>
+
+<script>
+  function setLang(lang) {
+    document.querySelectorAll('[data-en]').forEach(function (el) {
+      var val = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-sv');
+      if (val !== null) el.innerHTML = val;
+    });
+    var sv = document.getElementById('lang-sv');
+    var en = document.getElementById('lang-en');
+    if (sv && en) {
+      sv.classList.toggle('active', lang === 'sv');
+      en.classList.toggle('active', lang === 'en');
+    }
+    document.documentElement.setAttribute('lang', lang);
+  }
+
+  (function () {
+    function playOnView(el, threshold) {
+      if (!el) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            el.classList.remove('play');
+            void el.offsetWidth;      // reflow so the animation can restart
+            el.classList.add('play');
+          } else {
+            el.classList.remove('play');
+          }
+        });
+      }, { threshold: threshold });
+      io.observe(el);
+    }
+    playOnView(document.getElementById('scene2'), 0.55);
+    playOnView(document.getElementById('grid3'), 0.4);
+    playOnView(document.getElementById('recall4'), 0.4);
+    playOnView(document.getElementById('s6'), 0.4);
+    playOnView(document.getElementById('tri7'), 0.4);
+
+    // keyboard navigation: arrows / space / page keys move between slides
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    function currentIndex() {
+      var mid = window.innerHeight / 2;
+      var best = 0, bestDist = Infinity;
+      slides.forEach(function (s, i) {
+        var r = s.getBoundingClientRect();
+        var c = r.top + r.height / 2;
+        var dist = Math.abs(c - mid);
+        if (dist < bestDist) { bestDist = dist; best = i; }
+      });
+      return best;
+    }
+    function go(dir) {
+      var i = currentIndex() + dir;
+      if (i < 0) i = 0;
+      if (i >= slides.length) i = slides.length - 1;
+      slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    window.addEventListener('keydown', function (e) {
+      var k = e.key;
+      if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') {
+        e.preventDefault(); go(1);
+      } else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') {
+        e.preventDefault(); go(-1);
+      } else if (k === 'Home') {
+        e.preventDefault(); slides[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (k === 'End') {
+        e.preventDefault(); slides[slides.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
