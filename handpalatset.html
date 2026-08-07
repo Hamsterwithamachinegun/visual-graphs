@@ -149,6 +149,20 @@
     text-underline-offset:2px;
     font-weight:700;
   }
+  .battery{
+    margin-top:.2em;padding:14px 16px;
+    background:rgba(44,62,99,.04);
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+  }
+  .battery-title{
+    font-family:"Courier New",monospace;
+    font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 .5em;
+  }
+  .battery ul{margin:0;padding-left:1.1em;display:grid;gap:.4em;}
+  .battery li{line-height:1.45;color:var(--ink);}
+  .card.right .battery{background:rgba(63,125,110,.05);}
   .pic{color:var(--ink-soft);}
   .pic b{color:var(--ink);}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:.4em;}
@@ -318,14 +332,24 @@ const RULES = {
      how:"Har du ett viktigt citat på skärmen: låt dem läsa det i tystnad, eller ta bort texten och berätta innehållet. Låt aldrig din röst och skärmen säga samma sak samtidigt.",
      tags:["Uppmärksamhet","Minne"]},
   4:{side:"left",rule:"Fem minuter, sen stopp",who:"Mickey (Burgess Meredith, Rocky)",
-     what:"<u>Segmentering</u>: arbetsminnet rymmer bara ett fåtal nya enheter åt gången. Bryt föreläsningen i block på max 5\u201310 min följt av en aktiv paus \u2013 då hinner hjärnan flytta över det den nyss hört till mer varaktig lagring innan nästa svall kommer. Pausen sänker dessutom pressen: en stund att prata med en granne ger andrum och gör rummet tryggare.",
-     pic:"Mickey <b>skränar och slår i gonggongen</b> och håller upp ett <b>jättelikt stoppur med en gigantisk 5:a</b> på urtavlan. \u201eTime! Vänd er till grannen!\u201c",
-     how:"Föreläs 5 min, säg sedan: \u201eFörklara för din granne vad jag just sa, med egna ord.\u201c",
+     what:"<u>Segmentering</u>: arbetsminnet rymmer bara ett fåtal nya enheter åt gången. Bryt föreläsningen i block på max 5\u201310 min följt av en aktiv paus \u2013 då hinner hjärnan flytta över det den nyss hört till mer varaktig lagring innan nästa svall kommer. Pausen sänker dessutom pressen: en stund att prata med en granne ger andrum och gör rummet tryggare. Viktigt: pausen ska vara en <b>aktiv</b> hämtningspaus, inte bara en bensträckare \u2013 en passiv paus segmenterar men bygger inget minne.",
+     pic:"Mickey <b>skränar och slår i gonggongen</b> och håller upp ett <b>jättelikt stoppur med en gigantisk 5:a</b>. Runt om i <b>boxningsringen</b> står olika stationer uppradade i hörnen \u2013 varje hörn en egen övning att skicka in eleverna i mellan ronderna.",
+     how:"Föreläs 5 min, ring i gongen, kör en av övningarna nedan \u2013 växla mellan dem så det inte blir förutsägbart.",
+     listTitle:"Batteriet \u2013 aktiviteter att bryta med",
+     list:[
+       "<b>Turn &amp; teach:</b> vänd dig till grannen och förklara det jag nyss sa med egna ord.",
+       "<b>Two Things:</b> skriv ner två saker du minns (även från tidigare lektioner) \u2013 böckerna stängda. <i>(finger 5)</i>",
+       "<b>Jot Sketch:</b> 30 sek, rita en enkel bild som fångar nyckelidén. <i>(finger 9)</i>",
+       "<b>Säkerhetskoll:</b> en snabb fråga + ringa in \u201esäker / ganska säker / gissar\u201c. <i>(finger 6)</i>",
+       "<b>Kopplingsfrågan:</b> hur hänger det här ihop med det vi gjorde förra veckan? <i>(finger 8)</i>",
+       "<b>Mini-whiteboard:</b> alla svarar samtidigt på en tavla och håller upp \u2013 allas hämtning på en gång.",
+       "<b>30 sekunders skrivsvall:</b> skriv utan att lyfta pennan om det viktigaste hittills."
+     ],
      tags:["Uppmärksamhet","Deltagande","Välmående"]},
   5:{side:"left",rule:"Låt dem gräva",who:"Indiana Jones",
-     what:"<u>Aktiv hämtning</u>: att med stängd bok anstränga sig för att plocka fram ett svar ur minnet stärker minnet mer än att läsa eller höra det igen. Det är själva letandet som bygger spåret \u2013 inte återupprepningen. Passiv repetition känns lättare men fastnar sämre.",
-     pic:"Indy <b>gräver själv fram guldskatten ur gropen</b> med piska och spade. Ingen räcker honom den \u2013 han sliter fram den ur minnesgropen med egen hand.",
-     how:"\u201eTwo Things\u201c: böckerna stängda, be dem skriva ner två saker de minns från förra lektionen innan du börjar dagens \u2013 sedan stämmer ni av tillsammans.",
+     what:"<u>Utspridd och aktiv hämtning</u>: två tvillingprinciper. <i>Aktiv hämtning</i> \u2013 att med stängd bok anstränga sig för att plocka fram ett svar ur minnet \u2013 stärker minnet mer än att läsa eller höra det igen; det är själva letandet som bygger spåret, inte återupprepningen. <i>Utspridd övning (spacing)</i> är den självständiga andra halvan: hämtningen blir som starkast när den återkommer <b>fördelat över tid</b> \u2013 lite idag, igen om en vecka, igen om en månad \u2013 i stället för allt på en gång. Att låta minnet hinna blekna en aning mellan gångerna gör att varje ny utgrävning tränar hårdare och fäster djupare.",
+     pic:"Indy <b>gräver fram guldskatten ur gropen</b> med piska och spade \u2013 men han återvänder till <b>samma grop gång på gång, vid olika tillfällen</b>, och för varje gång sitter skatten lite djupare ner. Ingen räcker honom den; han sliter fram den själv, om och om igen.",
+     how:"\u201eTwo Things\u201c: böckerna stängda, be dem skriva två saker de minns \u2013 inte bara från förra lektionen utan även från för flera veckor sedan (\u201eblasts from the past\u201c), så samma stoff grävs upp flera gånger utspritt över terminen.",
      tags:["Minne","Deltagande"]},
   6:{side:"right",rule:"Hur säker är du?",who:"Charlton Heston (Moses)",
      what:"<u>Metakognition</u>: låt eleven skatta hur säker den är samtidigt som den svarar. Det motverkar illusionen av kunskap \u2013 att något känns bekant tolkas lätt som att man kan det, fast man bara känner igen det. När eleven tvingas sätta en säkerhetsnivå upptäcker den glappet mellan \u201ekänns bekant\u201c och \u201ekan faktiskt\u201c, och lär sig plugga på rätt saker istället för att invaggas i falsk trygghet.",
@@ -348,9 +372,16 @@ const RULES = {
      how:"Pausa efter ett nyckelbegrepp och be om en \u201eJot Sketch\u201c: 30 sekunder, böckerna stängda, rita en enkel bild som fångar idén \u2013 en pil, en gubbe, en symbol. Det behöver inte bli snyggt; poängen är att hjärnan tvingas översätta ordet till en bild, vilket skapar en extra minneskrok.",
      tags:["Minne","Uppmärksamhet"]},
   10:{side:"right",rule:"Säg vart ni ska",who:"Russell (Up)",
-     what:"<u>Signalering</u>: med språkliga markörer pekar du ut lektionens struktur och vad som är viktigt, utan att lägga till nytt innehåll. Det fungerar som en yttre ställning som avlastar arbetsminnet \u2013 eleven slipper gissa vad som ska hända och kan lägga kraften på innehållet. Att veta vart lektionen är på väg minskar också osäkerheten, och en elev som känner sig orienterad vågar mer.",
-     pic:"Russell <b>pekar entusiastiskt framåt längs en skylt med tre pilar</b> \u2013 \u201eförsta, andra, tredje!\u201c \u2013 scoutmärkena blänker medan han visar vägen.",
-     how:"Rama in: \u201eVi ska titta på tre punkter, den första är\u2026\u201c och markera vikt: \u201eDet här är det absolut viktigaste du behöver ta med dig idag.\u201c",
+     what:"<u>Signalering</u>: med språkliga markörer pekar du ut lektionens struktur och vad som är viktigt, utan att lägga till nytt innehåll. Det fungerar som en yttre ställning som avlastar arbetsminnet \u2013 eleven slipper gissa vad som ska hända och kan lägga kraften på innehållet. Att veta vart lektionen är på väg minskar också osäkerheten, och en elev som känner sig orienterad vågar mer. Mest kraft har de <b>talade markörerna medan du kör</b> \u2013 inte agendan på tavlan.",
+     pic:"Russell <b>pekar entusiastiskt framåt längs stigen</b> och på hans <b>scoutväst sitter fyra märken</b>, ett för varje sätt att visa vägen. \u201eFörsta, andra, tredje!\u201c \u2013 märkena blänker medan han pekar.",
+     how:"Väv in markörerna löpande medan du talar, inte bara i början \u2013 se de fyra märkena nedan.",
+     listTitle:"De fyra märkena \u2013 sätt att signalera",
+     list:[
+       "<b>Byggnadsställningen (struktur):</b> \u201eNu lämnar vi orsakerna och går över till konsekvenserna \u2013 punkt tre av fyra.\u201c",
+       "<b>Hjärtat (vikt):</b> \u201eOm ni bara minns en sak idag: det här. Lägg det på hjärtat.\u201c",
+       "<b>Kedjelänkarna (relation):</b> \u201eMärk att det här är precis tvärtom mot förra exemplet \u2013 och förklarar varför det hände.\u201c",
+       "<b>Filmremsan (för- och återblick):</b> \u201eNu ska jag visa tre orsaker\u2026\u201c (före) och \u201e\u2026så de tre orsakerna var alltså\u2026\u201c (efter)."
+     ],
      tags:["Uppmärksamhet","Välmående"]}
 };
 
@@ -391,6 +422,7 @@ function show(id){
         <p>${r.what}</p>
         <p class="pic">${r.pic}</p>
         <p><b>I klassrummet:</b> ${r.how}</p>
+        ${r.list ? `<div class="battery"><p class="battery-title">${r.listTitle||''}</p><ul>${r.list.map(li=>`<li>${li}</li>`).join('')}</ul></div>` : ''}
         <div class="tags">${tags}</div>
       </div>
     </div>`;
