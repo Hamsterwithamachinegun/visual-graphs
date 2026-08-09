@@ -284,39 +284,151 @@
     border-right:1.5px solid var(--line);
   }
 
-  /* ---- Welfare comparison list (step 8) ---- */
-  .whatelse{
-    margin:8px 0 6px;
+  /* ---- Heat strip (step 8) ---- */
+  .heat{ margin:2px 0 4px; }
+  .heat .cap{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;letter-spacing:.02em;color:var(--dim);
+    margin:0 0 8px;
+  }
+  .heat .striptrack{
+    position:relative;
+    user-select:none;
+    touch-action:none;
+  }
+  .heat .strip{
+    position:relative;
+    height:52px;
     border:1.5px solid var(--line);
     border-radius:3px;
+    /* population poorest->richest; cool until the far right, then glowing */
+    background:linear-gradient(90deg,
+      #edf1ef 0%,
+      #ecf0ee 60%,
+      #ebe9e2 74%,
+      #e6c6b4 85%,
+      #d98f6e 92%,
+      #c15a38 96.5%,
+      #a83a20 99%,
+      #8f2c15 100%);
     overflow:hidden;
   }
-  .whatelse .row{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:11px 14px;
-    border-top:1px solid var(--seam);
+  .heat .cursor{
+    position:absolute; top:-3px; bottom:-3px;
+    width:2px; background:var(--ink);
+    transform:translateX(-1px);
+    opacity:0; pointer-events:none;
+    transition:opacity .12s ease;
   }
-  .whatelse .row:first-child{ border-top:none; }
-  .whatelse .row .what{
-    flex:1;
+  .heat .striptrack.active .cursor{ opacity:1; }
+  .heat .ends{
+    display:flex; justify-content:space-between;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; color:var(--dim);
+    margin-top:6px;
+  }
+  .heat .axtitle2{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; color:var(--ink);
+    margin-top:2px;
+  }
+  .heat .tip{
+    position:absolute;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%);
+    background:var(--ink); color:var(--paper);
+    border-radius:3px; padding:8px 10px;
+    width:172px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; line-height:1.5;
+    opacity:0; pointer-events:none;
+    transition:opacity .12s ease;
+    z-index:5;
+  }
+  .heat .striptrack.active .tip{ opacity:1; }
+  .heat .tip .tprc{ color:#f3b8a4; font-weight:500; }
+  .heat .tip .tbig{
+    font-family:'Fraunces',serif; font-weight:900;
+    font-size:17px; display:block; margin:2px 0;
+  }
+  .heat .tip .tsub{ color:#c9c3b8; }
+  .heat .hint{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; color:var(--dim);
+    text-align:center; margin:8px 0 0;
+    font-style:normal;
+  }
+
+  /* ---- Welfare comparison bars (step 9) ---- */
+  .whatelse{
+    margin:8px 0 10px;
+  }
+  .wrow{
+    margin-bottom:14px;
+  }
+  .wrow:last-child{ margin-bottom:0; }
+  .wrow .wtop{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:5px;
+  }
+  .wrow .what{
     font-size:14px;
     color:var(--ink);
   }
-  .whatelse .row .much{
-    font-family:'Fraunces',serif;
-    font-weight:900;
-    font-size:clamp(17px,3vw,21px);
-    letter-spacing:-.01em;
-    color:var(--stamp);
+  .wrow .much{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--dim);
     white-space:nowrap;
+    flex-shrink:0;
   }
-  .whatelse .row .bud{
+  .wrow .bar{
+    position:relative;
+    height:26px;
+    background:transparent;
+  }
+  /* grey = full budget on shared kronor scale */
+  .wrow .total{
+    position:absolute;
+    top:0; left:0; bottom:0;
+    background:var(--budget, #e5ded0);
+    border:1.5px solid var(--line);
+    border-radius:3px;
+  }
+  /* red = the constant 185 bn, grows out on reveal */
+  .wrow .fill{
+    position:absolute;
+    top:0; left:0; bottom:0;
+    background:var(--stamp);
+    border:1.5px solid var(--stamp);
+    border-radius:3px;
+    width:0;
+    transition:width .9s cubic-bezier(.22,.61,.36,1);
+  }
+  .wrow.grow .fill{ width:var(--w); }
+  .wrow .fnum{
+    position:absolute;
+    top:50%; transform:translateY(-50%);
+    right:8px;
     font-family:'IBM Plex Mono',monospace;
     font-size:10px;
     color:var(--dim);
-    white-space:nowrap;
+    opacity:0;
+    transition:opacity .3s ease .5s;
+  }
+  .wrow.grow .fnum{ opacity:1; }
+  .wrow .fnum.on-red{
+    color:#fff;
+    right:auto; left:8px;
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    .wrow .fill{ transition:none; width:var(--w); }
+    .wrow .fnum{ transition:none; opacity:1; }
   }
 
   /* ---- Revenue comparison bar ---- */
@@ -712,38 +824,18 @@ const steps = {
     tag:"Varför bara i toppen?",
     tagClass:"private",
     title:"Kan en vanlig svensson göra samma sak?",
-    body:`<div class="curve">
-            <svg viewBox="0 0 360 232" role="img" aria-label="Kurva: andelen av inkomsten som ligger i holdingbolag, längs förmögenhetsfördelningen. Nära noll för vanligt folk, 50 till 60 procent i toppen.">
-              <!-- grid -->
-              <line class="grid" x1="60" y1="24"  x2="340" y2="24"/>
-              <line class="grid" x1="60" y1="89"  x2="340" y2="89"/>
-              <line class="grid" x1="60" y1="154" x2="340" y2="154"/>
-              <!-- axes -->
-              <line class="axis" x1="60" y1="24" x2="60" y2="154"/>
-              <line class="axis" x1="60" y1="154" x2="340" y2="154"/>
-              <!-- curve: flat along the bottom, then shoots up at the top -->
-              <path class="line" d="M 60 154 C 170 153, 230 142, 256 121 S 320 59, 340 31"/>
-              <!-- dots -->
-              <circle class="dot" cx="60"  cy="154" r="3"/>
-              <circle class="dot" cx="256" cy="121" r="3"/>
-              <circle class="dot" cx="340" cy="31"  r="3.5"/>
-              <!-- y axis tick labels -->
-              <text class="axlabel" x="54" y="27"  text-anchor="end">60%</text>
-              <text class="axlabel" x="54" y="92"  text-anchor="end">30%</text>
-              <text class="axlabel" x="54" y="157" text-anchor="end">0%</text>
-              <!-- y axis title (rotated) -->
-              <text class="axtitle" x="18" y="89" text-anchor="middle" transform="rotate(-90 18 89)">andel av inkomsten i innefickan</text>
-              <!-- x axis end labels -->
-              <text class="axlabel" x="60"  y="168" text-anchor="start">vanlig lön</text>
-              <text class="axlabel" x="340" y="168" text-anchor="end">miljardär</text>
-              <!-- x axis title -->
-              <text class="axtitle" x="200" y="196" text-anchor="middle">hur rik du är →</text>
-              <!-- point callouts -->
-              <text class="ptlabel" x="252" y="112" text-anchor="end">~15%</text>
-              <text class="ptlabel" x="336" y="26"  text-anchor="end">50–60%</text>
-            </svg>
+    body:`<div class="heat">
+            <p class="cap">Hur stor andel av inkomsten som göms i innefickan, längs hela befolkningen. Håll muspekaren (eller tryck) på remsan.</p>
+            <div class="striptrack" id="striptrack">
+              <div class="tip" id="striptip"></div>
+              <div class="strip"></div>
+              <div class="cursor" id="stripcursor"></div>
+            </div>
+            <div class="ends"><span>fattigast</span><span>rikast →</span></div>
+            <p class="axtitle2">befolkningen, fattigast till rikast</p>
+            <p class="hint" id="striphint">Nästan hela remsan är sval: de allra flesta gömmer nästan ingenting. Glöden sitter i en försvinnande liten kant längst till höger.</p>
           </div>
-          <p>Andelen inkomst som göms i innefickan är nästan noll för vanligt folk och skjuter i höjden först allra högst upp. Inget juridiskt hindrar dig, men tre trösklar gör att det inte lönar sig förrän man är rik:</p>
+          <p style="margin-top:14px;">Inget juridiskt hindrar dig, men tre trösklar gör att det inte lönar sig förrän man är rik:</p>
           <p><strong>Du måste ha pengar över.</strong> Idén bygger på att inkomsten kan ligga kvar och växa. En vanlig lön går åt till att leva.</p>
           <p><strong>Inkomsten måste komma som kapital, inte lön.</strong> Lön beskattas innan den når dig och kan inte gömmas i ett bolag. Du måste redan äga något som ger avkastning.</p>
           <p><strong>Beloppen måste vara stora.</strong> Att driva bolaget kostar, revisor, administration, rådgivning. De kostnaderna äter upp vinsten om beloppen inte är stora.</p>
@@ -756,25 +848,33 @@ const steps = {
     title:"185 miljarder, varje år",
     body:`<p>Skatten som faller bort i toppen är omkring <strong>185 miljarder kronor per år</strong>. Det motsvarar:</p>
           <div class="whatelse">
-            <div class="row">
-              <span class="what">Hela sjukvården</span>
-              <span class="much">≈ 40%</span>
-              <span class="bud">av 473 mdkr *</span>
+            <div class="wrow" style="--w:38.9%">
+              <div class="wtop"><span class="what">Hela sjukvården *</span><span class="much">185 av 473 mdkr</span></div>
+              <div class="bar">
+                <div class="total" style="width:99.4%;--budget:#b8cdd6"></div>
+                <div class="fill"><span class="fnum on-red">≈ 40%</span></div>
+              </div>
             </div>
-            <div class="row">
-              <span class="what">Hela skolan och utbildningen</span>
-              <span class="much">≈ 40%</span>
-              <span class="bud">av 476 mdkr †</span>
+            <div class="wrow" style="--w:38.9%">
+              <div class="wtop"><span class="what">Hela skolan och utbildningen †</span><span class="much">185 av 476 mdkr</span></div>
+              <div class="bar">
+                <div class="total" style="width:100%;--budget:#bccfb4"></div>
+                <div class="fill"><span class="fnum on-red">≈ 40%</span></div>
+              </div>
             </div>
-            <div class="row">
-              <span class="what">Alla ålderspensioner</span>
-              <span class="much">≈ 40%</span>
-              <span class="bud">av 470 mdkr ‡</span>
+            <div class="wrow" style="--w:38.9%">
+              <div class="wtop"><span class="what">Alla ålderspensioner ‡</span><span class="much">185 av 470 mdkr</span></div>
+              <div class="bar">
+                <div class="total" style="width:98.7%;--budget:#e0cfa6"></div>
+                <div class="fill"><span class="fnum on-red">≈ 40%</span></div>
+              </div>
             </div>
-            <div class="row">
-              <span class="what">Hela den svarta ekonomin</span>
-              <span class="much">lika mycket</span>
-              <span class="bud">~185 mdkr/år §</span>
+            <div class="wrow" style="--w:38.9%">
+              <div class="wtop"><span class="what">Hela den svarta ekonomin §</span><span class="much">~185 mdkr/år</span></div>
+              <div class="bar">
+                <div class="total" style="width:38.9%;--budget:#cfc8ba"></div>
+                <div class="fill"><span class="fnum on-red">allt</span></div>
+              </div>
             </div>
           </div>
           <p class="src" style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.6;color:var(--dim);margin:0 0 8px;">* Regionernas hälso- och sjukvård, 2025.&nbsp;&nbsp;† Utbildningsväsendet totalt, 2023.&nbsp;&nbsp;‡ Ålderspensioner, 2025.&nbsp;&nbsp;§ Svarta ekonomin (svartarbete, skattefusk, bidragsfusk), ESO-rapporten ”Svarta siffror”, 2026.</p>
@@ -796,6 +896,70 @@ function render(n){
     `<p class="tag ${s.tagClass}">${s.tag}</p>
      <h2>${s.title}</h2>
      ${s.body}`;
+
+  // step 8: wire the heat-strip hover/touch
+  if(n===8){
+    const track = document.getElementById('striptrack');
+    const tip = document.getElementById('striptip');
+    const cursor = document.getElementById('stripcursor');
+    if(track){
+      // hidden-share as a function of percentile p (0..100): ~0 until ~90, then steep
+      const shareAt = p => {
+        if(p < 90) return 0.2 + p*0.01;            // 0.2%..1.1%, basically flat
+        const t = (p-90)/10;                        // 0..1 across the top decile
+        return 1 + Math.pow(t, 3) * 58;             // rises to ~59% at p100
+      };
+      const peopleAt = p => {
+        // ~8 million adults; label the slice the pointer is in
+        if(p >= 99.99) return 'de översta ~800 personerna';
+        if(p >= 99.9)  return 'de översta ~8 000';
+        if(p >= 99)    return 'de översta ~80 000';
+        if(p >= 90)    return 'de översta ~800 000';
+        return 'de nedersta ~90 %';
+      };
+      const pctlLabel = p => {
+        if(p >= 99.99) return 'topp 0,01 %';
+        if(p >= 99.9)  return 'topp 0,1 %';
+        if(p >= 99)    return 'topp 1 %';
+        if(p >= 90)    return 'topp 10 %';
+        return 'percentil ' + Math.round(p);
+      };
+      const move = clientX => {
+        const r = track.getBoundingClientRect();
+        let f = (clientX - r.left) / r.width;
+        f = Math.max(0, Math.min(1, f));
+        const p = f*100;
+        const s = shareAt(p);
+        cursor.style.left = (f*100) + '%';
+        tip.style.left = (f*100) + '%';
+        tip.innerHTML =
+          `<span class="tprc">${pctlLabel(p)}</span>` +
+          `<span class="tbig">${s < 1.5 ? '≈ 1%' : '≈ ' + Math.round(s) + '%'}</span>` +
+          `<span class="tsub">av inkomsten göms här<br>(${peopleAt(p)})</span>`;
+      };
+      const on = e => {
+        track.classList.add('active');
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        move(x);
+      };
+      const off = () => track.classList.remove('active');
+      track.addEventListener('mousemove', on);
+      track.addEventListener('mouseleave', off);
+      track.addEventListener('touchstart', on, {passive:true});
+      track.addEventListener('touchmove', on, {passive:true});
+      track.addEventListener('touchend', off);
+    }
+  }
+
+
+  if(n===9){
+    const rows = explain.querySelectorAll('.wrow');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    rows.forEach((row,i)=>{
+      if(reduce){ row.classList.add('grow'); }
+      else { setTimeout(()=>row.classList.add('grow'), 120 + i*260); }
+    });
+  }
 
   // pockets
   ['p1','p2','p3','p5','p6'].forEach(id=>{
