@@ -236,6 +236,54 @@
     max-width:12ch;
   }
 
+  /* ---- Contrast figures (800 people vs 40% of care) ---- */
+  .contrast{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    margin:8px 0 16px;
+    border:1.5px solid var(--line);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .contrast .side{
+    flex:1;
+    padding:16px 16px 14px;
+  }
+  .contrast .side.people{ background:#faf7ef; }
+  .contrast .side.care{ background:var(--stamp); }
+  .contrast .n{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:clamp(30px,6.5vw,44px);
+    line-height:1;
+    letter-spacing:-.02em;
+    margin:0 0 6px;
+  }
+  .contrast .side.people .n{ color:var(--ink); }
+  .contrast .side.care .n{ color:#fff; }
+  .contrast .lbl{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    line-height:1.45;
+    margin:0;
+  }
+  .contrast .side.people .lbl{ color:var(--text2, #5a5650); color:#57524a; }
+  .contrast .side.care .lbl{ color:#f3e4de; }
+  .contrast .vs{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 4px;
+    background:var(--paper);
+    font-family:'Newsreader',serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--dim);
+    border-left:1.5px solid var(--line);
+    border-right:1.5px solid var(--line);
+  }
+
   /* ---- Revenue comparison bar ---- */
   .revbar{
     margin:22px 0 4px;
@@ -542,7 +590,7 @@
   <section class="sources">
     <h3>Källor</h3>
     <p>Ring, M., Seim, D. &amp; Zucman, G. (2026). <em>Personal Holding Companies, Tax Progressivity, and Inequality.</em> NBER Working Paper 35534. Arbetsutkast, ännu ej peer-review-granskat.</p>
-    <p>Siffror i korthet: effektiv skatt faller från omkring 50 % för övre medelklass till 15 till 20 % för de allra rikaste (topp 0,0005 %). Ungefär hälften av det fallet kan tillskrivas holdingbolag. Regressiviteten i toppen motsvarar ett tak på omkring 7 % av de totala skatteintäkterna. Räknat på Sveriges skatteintäkter 2024 (2 644 miljarder kronor) blir det cirka 185 miljarder per år, att jämföra med sjukvårdens 473 miljarder. Kronjämförelsen är vår egen, byggd på forskarnas andelssiffra och offentlig statistik (Ekonomifakta). Forskarna kallar 7 %-talet ett tak, inte en exakt prognos.</p>
+    <p>Siffror i korthet: effektiv skatt faller från omkring 50 % för övre medelklass till 15 till 20 % för de allra rikaste (topp 0,0005 %). Ungefär hälften av det fallet kan tillskrivas holdingbolag. Regressiviteten i toppen motsvarar ett tak på omkring 7 % av de totala skatteintäkterna. Räknat på Sveriges skatteintäkter 2024 (2 644 miljarder kronor) blir det cirka 185 miljarder per år, att jämföra med sjukvårdens 473 miljarder. Kronjämförelsen är vår egen, byggd på forskarnas andelssiffra och offentlig statistik (Ekonomifakta). Forskarna kallar 7 %-talet ett tak, inte en exakt prognos. Upplägget är också långt vanligare i Norden än i USA: 2020 fanns ungefär 1 holdingbolag per 150 vuxna i Sverige och Norge, mot cirka 1 per 100 000 i USA, där regler mot holdingbolag funnits sedan 1930-talet.</p>
   </section>
 
 
@@ -662,7 +710,20 @@ const steps = {
           <p>Andelen inkomst som göms i innefickan är nästan noll för vanligt folk och skjuter i höjden först allra högst upp. Inget juridiskt hindrar dig, men tre trösklar gör att det inte lönar sig förrän man är rik:</p>
           <p><strong>Du måste ha pengar över.</strong> Hela idén bygger på att inkomsten kan ligga kvar och växa. En vanlig lön går åt till att leva, så det finns inget att lämna kvar.</p>
           <p><strong>Inkomsten måste komma som kapital, inte lön.</strong> Lön beskattas innan den når dig och kan inte gömmas i ett bolag. Du måste alltså redan äga något som ger avkastning.</p>
-          <p><strong>Beloppen måste vara stora.</strong> Ett holdingbolag kostar att driva, revisor, administration, rådgivning. De kostnaderna äter upp vinsten om du inte har mycket stora belopp att gömma.</p>`,
+          <p><strong>Beloppen måste vara stora.</strong> Ett holdingbolag kostar att driva, revisor, administration, rådgivning. De kostnaderna äter upp vinsten om du inte har mycket stora belopp att gömma.</p>
+          <p>Det syns i vilka som faktiskt gör det. Nästan alla allra högst upp äger holdingbolag, strax under är det nästan ingen. En mycket liten krets, ställd mot vad som faller bort:</p>
+          <div class="contrast">
+            <div class="side people">
+              <p class="n">~800</p>
+              <p class="lbl">personer i toppen 0,01 % i Sverige — nästan alla med holdingbolag</p>
+            </div>
+            <div class="vs">mot</div>
+            <div class="side care">
+              <p class="n">~40%</p>
+              <p class="lbl">av hela sjukvården — så mycket skatt faller bort i toppen</p>
+            </div>
+          </div>
+          <p class="foot" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin:0;">De två talen står bredvid varandra, inte som en rät likhet: bortfallet gäller hela toppen, inte bara de 800.</p>`,
     coins:["c1","c2","c3"], groups:["p1","p2","p3"]
   }
 };
