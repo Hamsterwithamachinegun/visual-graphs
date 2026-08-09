@@ -284,6 +284,41 @@
     border-right:1.5px solid var(--line);
   }
 
+  /* ---- Welfare comparison list (step 8) ---- */
+  .whatelse{
+    margin:8px 0 6px;
+    border:1.5px solid var(--line);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .whatelse .row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:11px 14px;
+    border-top:1px solid var(--seam);
+  }
+  .whatelse .row:first-child{ border-top:none; }
+  .whatelse .row .what{
+    flex:1;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .whatelse .row .much{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:clamp(17px,3vw,21px);
+    letter-spacing:-.01em;
+    color:var(--stamp);
+    white-space:nowrap;
+  }
+  .whatelse .row .bud{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--dim);
+    white-space:nowrap;
+  }
+
   /* ---- Revenue comparison bar ---- */
   .revbar{
     margin:22px 0 4px;
@@ -554,6 +589,7 @@
         <button class="step-btn" data-step="6" role="tab" aria-selected="false">6</button>
         <button class="step-btn" data-step="7" role="tab" aria-selected="false">7</button>
         <button class="step-btn" data-step="8" role="tab" aria-selected="false">8</button>
+        <button class="step-btn" data-step="9" role="tab" aria-selected="false">9</button>
       </div>
 
       <div class="explain" id="explain" aria-live="polite">
@@ -708,22 +744,41 @@ const steps = {
             </svg>
           </div>
           <p>Andelen inkomst som göms i innefickan är nästan noll för vanligt folk och skjuter i höjden först allra högst upp. Inget juridiskt hindrar dig, men tre trösklar gör att det inte lönar sig förrän man är rik:</p>
-          <p><strong>Du måste ha pengar över.</strong> Hela idén bygger på att inkomsten kan ligga kvar och växa. En vanlig lön går åt till att leva, så det finns inget att lämna kvar.</p>
-          <p><strong>Inkomsten måste komma som kapital, inte lön.</strong> Lön beskattas innan den når dig och kan inte gömmas i ett bolag. Du måste alltså redan äga något som ger avkastning.</p>
-          <p><strong>Beloppen måste vara stora.</strong> Ett holdingbolag kostar att driva, revisor, administration, rådgivning. De kostnaderna äter upp vinsten om du inte har mycket stora belopp att gömma.</p>
-          <p>Det syns i vilka som faktiskt gör det. Nästan alla allra högst upp äger holdingbolag, strax under är det nästan ingen. En mycket liten krets, ställd mot vad som faller bort:</p>
-          <div class="contrast">
-            <div class="side people">
-              <p class="n">~800</p>
-              <p class="lbl">personer i toppen 0,01 % i Sverige — nästan alla med holdingbolag</p>
+          <p><strong>Du måste ha pengar över.</strong> Idén bygger på att inkomsten kan ligga kvar och växa. En vanlig lön går åt till att leva.</p>
+          <p><strong>Inkomsten måste komma som kapital, inte lön.</strong> Lön beskattas innan den når dig och kan inte gömmas i ett bolag. Du måste redan äga något som ger avkastning.</p>
+          <p><strong>Beloppen måste vara stora.</strong> Att driva bolaget kostar, revisor, administration, rådgivning. De kostnaderna äter upp vinsten om beloppen inte är stora.</p>
+          <p>Det syns i vilka som faktiskt gör det. I Sverige är toppen 0,01 % ungefär <strong>800 personer</strong>, och nästan alla i den gruppen äger holdingbolag. Strax under är det nästan ingen.</p>`,
+    coins:["c1","c2","c3"], groups:["p1","p2","p3"]
+  },
+  9:{
+    tag:"Vad kostar det oss?",
+    tagClass:"private",
+    title:"185 miljarder, varje år",
+    body:`<p>Skatten som faller bort i toppen är omkring <strong>185 miljarder kronor per år</strong>. Det motsvarar:</p>
+          <div class="whatelse">
+            <div class="row">
+              <span class="what">Hela sjukvården</span>
+              <span class="much">≈ 40%</span>
+              <span class="bud">av 473 mdkr *</span>
             </div>
-            <div class="vs">mot</div>
-            <div class="side care">
-              <p class="n">~40%</p>
-              <p class="lbl">av hela sjukvården — så mycket skatt faller bort i toppen</p>
+            <div class="row">
+              <span class="what">Hela skolan och utbildningen</span>
+              <span class="much">≈ 40%</span>
+              <span class="bud">av 476 mdkr †</span>
+            </div>
+            <div class="row">
+              <span class="what">Alla ålderspensioner</span>
+              <span class="much">≈ 40%</span>
+              <span class="bud">av 470 mdkr ‡</span>
+            </div>
+            <div class="row">
+              <span class="what">Hela den svarta ekonomin</span>
+              <span class="much">lika mycket</span>
+              <span class="bud">~185 mdkr/år §</span>
             </div>
           </div>
-          <p class="foot" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin:0;">De två talen står bredvid varandra, inte som en rät likhet: bortfallet gäller hela toppen, inte bara de 800.</p>`,
+          <p class="src" style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.6;color:var(--dim);margin:0 0 8px;">* Regionernas hälso- och sjukvård, 2025.&nbsp;&nbsp;† Utbildningsväsendet totalt, 2023.&nbsp;&nbsp;‡ Ålderspensioner, 2025.&nbsp;&nbsp;§ Svarta ekonomin (svartarbete, skattefusk, bidragsfusk), ESO-rapporten ”Svarta siffror”, 2026.</p>
+          <p class="foot" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin:0;">Storleksordningar sida vid sida, inte räta likheter. Det som försvinner lagligt i toppen är i samma härad som hela den svarta ekonomin, som tar långt större plats i debatten.</p>`,
     coins:["c1","c2","c3"], groups:["p1","p2","p3"]
   }
 };
@@ -751,7 +806,7 @@ function render(n){
   });
 
   // reforms reveal at the final step
-  reforms.style.opacity = n===8 ? "1" : ".35";
+  reforms.style.opacity = n===9 ? "1" : ".35";
 
   // buttons
   stepBtns.forEach(b=>{
@@ -760,16 +815,16 @@ function render(n){
     b.setAttribute('aria-selected', active);
   });
   prevBtn.disabled = n===1;
-  nextBtn.disabled = n===8;
+  nextBtn.disabled = n===9;
   current = n;
 }
 
 stepBtns.forEach(b=>b.addEventListener('click',()=>render(+b.dataset.step)));
 prevBtn.addEventListener('click',()=>{ if(current>1) render(current-1); });
-nextBtn.addEventListener('click',()=>{ if(current<8) render(current+1); });
+nextBtn.addEventListener('click',()=>{ if(current<9) render(current+1); });
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'&&current>1) render(current-1);
-  if(e.key==='ArrowRight'&&current<8) render(current+1);
+  if(e.key==='ArrowRight'&&current<9) render(current+1);
 });
 
 render(1);
