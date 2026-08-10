@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hindsight Almanac — $1,000 in 1980</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root{
+    --bg:#12140f;
+    --panel:#1b1e17;
+    --panel-2:#22261d;
+    --line:#33382a;
+    --line-soft:#282c21;
+    --ink:#ede9dc;
+    --ink-dim:#a8a693;
+    --ink-mute:#71715f;
+    --gold:#e0a336;
+    --gold-soft:#8a6a24;
+    --green:#8fc460;
+    --red:#d6664e;
+    --blue:#6ba3d6;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  a{color:var(--gold)}
+
+  /* ---- hero ---- */
+  .hero{padding:88px 0 40px;border-bottom:1px solid var(--line-soft);position:relative}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:22px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--gold)}
+  .hero h1{
+    font-family:'Fraunces',serif;font-weight:500;
+    font-size:clamp(2.6rem,7vw,5rem);line-height:1.02;letter-spacing:-.02em;
+    margin-bottom:24px;
+  }
+  .hero h1 em{font-style:italic;color:var(--gold)}
+  .lede{font-size:clamp(1.05rem,2vw,1.3rem);color:var(--ink-dim);max-width:60ch}
+  .hero-figures{
+    display:flex;flex-wrap:wrap;gap:36px;margin-top:44px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .fig .n{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--ink);line-height:1}
+  .fig .n .arrow{color:var(--gold-soft);margin:0 8px}
+  .fig .l{font-size:12px;color:var(--ink-mute);letter-spacing:.1em;text-transform:uppercase;margin-top:8px}
+
+  section{padding:64px 0}
+  .sec-head{margin-bottom:36px;max-width:70ch}
+  .sec-head .kicker{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:14px;
+  }
+  .sec-head h2{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.8rem,3.4vw,2.6rem);
+    letter-spacing:-.01em;line-height:1.1;margin-bottom:14px;
+  }
+  .sec-head p{color:var(--ink-dim);font-size:1.05rem}
+
+  /* ---- control deck ---- */
+  .deck{
+    position:sticky;top:0;z-index:40;background:rgba(18,20,15,.86);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+    padding:14px 0;
+  }
+  .deck-inner{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .deck .year{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.5rem;
+    color:var(--gold);min-width:120px;
+  }
+  .deck .year .sub{display:block;font-size:11px;color:var(--ink-mute);letter-spacing:.12em;font-weight:400;margin-top:2px}
+  .slider-shell{flex:1;min-width:220px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;
+    background:var(--line);border-radius:99px;outline:none;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--gold);border:3px solid var(--bg);cursor:pointer;
+    box-shadow:0 0 0 1px var(--gold);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px;height:20px;border-radius:50%;background:var(--gold);
+    border:3px solid var(--bg);cursor:pointer;box-shadow:0 0 0 1px var(--gold);
+  }
+  .ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+    font-size:10px;color:var(--ink-mute);margin-top:6px;letter-spacing:.05em}
+  .deck-btns{display:flex;gap:8px}
+  button.ctrl{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
+    padding:9px 14px;border-radius:8px;cursor:pointer;transition:.15s;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  button.ctrl:hover{border-color:var(--gold-soft);color:var(--gold)}
+  button.ctrl:active{transform:scale(.97)}
+  button.ctrl.play{background:var(--gold);color:#1a1608;border-color:var(--gold);font-weight:700}
+  button.ctrl.play:hover{color:#1a1608;filter:brightness(1.08)}
+  button.ctrl:disabled{opacity:.35;cursor:default}
+  button.ctrl:disabled:hover{border-color:var(--line);color:var(--ink)}
+
+  /* ---- twin tracks ---- */
+  .tracks{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:860px){.tracks{grid-template-columns:1fr}}
+  .track{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 22px 18px;position:relative;overflow:hidden;
+  }
+  .track::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--gold))}
+  .track.wealth{--accent:var(--gold)}
+  .track.survival{--accent:var(--green)}
+  .track-tag{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-mute);margin-bottom:16px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .track-tag b{color:var(--accent,var(--gold));font-weight:500}
+  .headline{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .big-n{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    font-size:clamp(2rem,4.4vw,3rem);line-height:1;color:var(--ink);
+  }
+  .headline .label{font-size:12px;color:var(--ink-mute);letter-spacing:.08em;text-transform:uppercase}
+  .sub-metric{text-align:right}
+  .sub-metric .v{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:1.15rem;color:var(--accent,var(--gold))}
+  .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+  .mini{background:var(--panel-2);border-radius:8px;padding:10px 12px}
+  .mini .k{font-size:11px;color:var(--ink-mute);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;display:flex;align-items:center;gap:5px}
+  .mini .val{font-family:'JetBrains Mono',monospace;font-size:.98rem;color:var(--ink);font-weight:500}
+  .step-card{border-top:1px solid var(--line-soft);padding-top:16px;margin-top:4px;min-height:150px}
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .step-ico{
+    width:38px;height:38px;border-radius:8px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:19px;
+    background:var(--panel-2);border:1px solid var(--line);
+  }
+  .step-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent,var(--gold));letter-spacing:.08em;font-weight:500}
+  .step-title{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:500;color:var(--ink);line-height:1.2}
+  .step-body{font-size:.92rem;color:var(--ink-dim);line-height:1.55}
+  .step-move{
+    margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--ink);
+  }
+  .step-move .pct{color:var(--green)}
+  .chart-box{position:relative;width:100%;height:170px;margin-top:18px}
+
+  /* ---- narrative / research ---- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;
+  }
+  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.3rem;margin-bottom:12px;color:var(--ink)}
+  .card p{color:var(--ink-dim);font-size:.98rem;margin-bottom:10px}
+  .card .num{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:500}
+
+  .ledger{width:100%;border-collapse:collapse;font-size:.9rem}
+  .ledger th{
+    text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mute);
+    padding:12px 14px;border-bottom:1px solid var(--line);font-weight:500;
+  }
+  .ledger td{padding:13px 14px;border-bottom:1px solid var(--line-soft);color:var(--ink-dim);vertical-align:top}
+  .ledger td:first-child{font-family:'JetBrains Mono',monospace;color:var(--gold);white-space:nowrap;font-size:.82rem}
+  .ledger td .mv{color:var(--ink);font-weight:500}
+  .ledger tr:hover td{background:rgba(224,163,54,.03)}
+  .ledger .num{font-family:'JetBrains Mono',monospace;color:var(--ink);white-space:nowrap}
+  .ledger .up{color:var(--green)}
+  .ledger .lg-loc{color:var(--gold-soft)}
+  .ledger .lg-loc svg{width:12px;height:12px;vertical-align:-1px}
+
+  .caveat{
+    background:linear-gradient(0deg,rgba(214,102,78,.05),rgba(214,102,78,.05)),var(--panel);
+    border:1px solid rgba(214,102,78,.28);border-radius:var(--radius);padding:22px 24px;
+  }
+  .caveat h3{font-family:'Fraunces',serif;color:var(--red);font-size:1.2rem;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .caveat ol{margin-left:20px;color:var(--ink-dim)}
+  .caveat li{margin-bottom:10px;padding-left:6px}
+  .caveat li b{color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0 64px;color:var(--ink-mute);font-size:.85rem}
+  footer .disc{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;max-width:76ch}
+
+  .foot-note{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-mute);margin-top:14px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+    html{scroll-behavior:auto}
+  }
+
+  .mini .k .ic{display:inline-flex;width:14px;height:14px;color:var(--ink-mute);vertical-align:-2px}
+  .mini .k .ic svg{width:14px;height:14px}
+  .step-ico svg{width:20px;height:20px}
+  .track.wealth .step-ico{color:var(--gold)}
+  .track.survival .step-ico{color:var(--green)}
+  .caveat h3 .ic-warn{display:inline-flex;width:20px;height:20px;color:var(--red)}
+  .caveat h3 .ic-warn svg{width:20px;height:20px}
+  button.ctrl svg{width:13px;height:13px;vertical-align:-1px}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">The Hindsight Almanac · 1980–2025</div>
+    <h1>You wake up in 1980<br>with <em>$1,000</em> and<br>45 years of memory.</h1>
+    <p class="lede">Most people give the same answer: buy Apple and hold forever. But the sharper edge a time traveler has is knowing when to <em>sell</em>. Below is the full play, dated to the month, with a plan for keeping the lights on while it all compounds.</p>
+    <div class="hero-figures">
+      <div class="fig"><div class="n">$1,000<span class="arrow">→</span>$1B</div><div class="l">Portfolio, 1980 → 2025</div></div>
+      <div class="fig"><div class="n">1,000,000×</div><div class="l">Cumulative multiple</div></div>
+      <div class="fig"><div class="n">~$550<span class="arrow">/mo</span></div><div class="l">Cost of living, 1980</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="deck" id="deck">
+  <div class="wrap deck-inner">
+    <div class="year"><span id="deck-year">1980</span><span class="sub" id="deck-phase">The starting stake</span></div>
+    <div class="slider-shell">
+      <input type="range" id="slider" min="0" max="13" value="0" step="1" aria-label="Timeline scrubber, drag to move both tracks through time">
+      <div class="ticks"><span>1980</span><span>1986</span><span>2000</span><span>2010</span><span>2025</span></div>
+    </div>
+    <div class="deck-btns">
+      <button class="ctrl" id="prev" aria-label="Previous step">‹ Prev</button>
+      <button class="ctrl play" id="play" aria-label="Play timeline"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7Z"/></svg> Play</button>
+      <button class="ctrl" id="next" aria-label="Next step">Next ›</button>
+    </div>
+  </div>
+</div>
+
+<section id="timelines">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">The synced ledger</div>
+      <h2>Two tracks, one clock</h2>
+      <p>One scrubber drives both. The left track follows the money as it moves between assets. The right one follows the person underneath it: the job, the rent, the cover story, and the city you wake up in. Drag it, or press play.</p>
+    </div>
+
+    <div class="tracks">
+      <!-- WEALTH -->
+      <div class="track wealth">
+        <div class="track-tag"><span>Track A</span><b>The Money</b></div>
+        <div class="headline">
+          <div>
+            <div class="label">Portfolio value</div>
+            <div class="big-n" id="w-value">$1,000</div>
+          </div>
+          <div class="sub-metric">
+            <div class="label">Multiple</div>
+            <div class="v" id="w-mult">1×</div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-head">
+            <div class="step-ico" id="w-ico"></div>
+            <div>
+              <div class="step-date" id="w-date">October 1980</div>
+              <div class="step-title" id="w-title">The starting stake</div>
+            </div>
+          </div>
+          <div class="step-body" id="w-body"></div>
+          <div class="step-move" id="w-move" style="display:none"></div>
+        </div>
+        <div class="chart-box"><canvas id="w-chart" role="img" aria-label="Log-scale chart of portfolio value from 1980 to 2025">Portfolio grows from $1,000 to over $1 billion.</canvas></div>
+      </div>
+
+      <!-- SURVIVAL -->
+      <div class="track survival">
+        <div class="track-tag"><span>Track B</span><b>Staying Afloat</b></div>
+        <div class="headline">
+          <div>
+            <div class="label">Living float · cash on hand</div>
+            <div class="big-n" id="s-float">$500</div>
+          </div>
+          <div class="sub-metric">
+            <div class="label">Based in</div>
+            <div class="v" id="s-loc">Las Vegas, NV</div>
+          </div>
+        </div>
+        <div class="mini-grid">
+          <div class="mini"><div class="k"><span class="ic" id="mi-job"></span>Income</div><div class="val" id="s-job">Casino sportsbook</div></div>
+          <div class="mini"><div class="k"><span class="ic" id="mi-cost"></span>Monthly cost</div><div class="val" id="s-cost">~$550/mo</div></div>
+        </div>
+        <div class="step-card" style="min-height:120px">
+          <div class="step-head">
+            <div class="step-ico" id="s-ico"></div>
+            <div>
+              <div class="step-date" id="s-date">October 1980</div>
+              <div class="step-title" id="s-title">Land in Las Vegas</div>
+            </div>
+          </div>
+          <div class="step-body" id="s-body"></div>
+        </div>
+        <div class="chart-box"><canvas id="s-chart" role="img" aria-label="Log-scale chart of monthly living costs from 1980 to 2025">Living costs stay small and flat while the portfolio grows past them.</canvas></div>
+      </div>
+    </div>
+    <p class="foot-note">Float figures show a comfortable cushion at each stage rather than a penny-precise balance, since real cash-on-hand would swing every time money moved between assets.</p>
+  </div>
+</section>
+
+<section id="nevada" style="border-top:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">The cover story</div>
+      <h2>Yes, you start in Nevada</h2>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Why Las Vegas, October 1980</h3>
+        <p>In 1980, legal sports betting existed in exactly one state. Everywhere else it ran illegally through cash bookies, who cap your bet sizes and get to decide whether you actually see a payout after eight straight wins.</p>
+        <p>Base yourself in Vegas for the betting window. Legal sportsbooks let you spread big bets across several casinos, and there is a bonus most people miss: casino winnings count as <span class="num">legitimate, reportable income</span>. A documented gambling win gives your first pile of cash a clean, boring origin story.</p>
+      </div>
+      <div class="card">
+        <h3>Then leave</h3>
+        <p>After the Super Bowl in January 1981, Nevada has done its job. The money sits in Apple and a brokerage account, and you can live anywhere cheap and pleasant.</p>
+        <p>One later move matters. Around <span class="num">2001</span> you want to be near the Bay Area to run the property play in person, buying <span class="num">San Jose</span> and <span class="num">San Francisco</span> homes at 2000 prices before they post the biggest metro gains in the country. The arc stays simple: <b style="color:var(--ink)">Nevada for the seed, the Bay Area for the bricks, anywhere you like for the rest.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="realestate">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">The research · property</div>
+      <h2>Where the bricks pay most</h2>
+      <p>No single lucky town wins this. The West Coast does, and the Bay Area leads it, over the 2000 to 2006 window. The catch is a hard exit date.</p>
+    </div>
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="card">
+        <h3>The 20-year champions</h3>
+        <p>Over the two decades from 2000, the largest metro home-price gains in the country belonged to <span class="num">San Jose (+235%)</span> and <span class="num">San Francisco (+219%)</span>. California and Hawaii topped every list, with a cluster of cities clearing a 200 percent rise over their 2000 prices.</p>
+        <p>Borrowing is what makes property worth including at all. You control a whole house with a small down payment, so a 200 percent gain on the home translates into a far larger return on the cash you actually put down.</p>
+      </div>
+      <div class="card">
+        <h3>The catch: sell by 2006</h3>
+        <p>You cannot simply buy and hold through it. From 2007 the average US home value fell about <span class="num">33%</span>, nearly wiping out every gain made from 2003 to 2006.</p>
+        <p>So the plan buys the 2000 dip and <b style="color:var(--ink)">sells at the 2006 peak</b>, capturing the borrowed-money run-up and stepping out ahead of the crash. One sober footnote: nationally, housing rose 196 percent since 2000 while the S&P rose 322 percent. Property earns its place through borrowing and diversification, not through raw appreciation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ledger" style="border-top:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">The full playbook</div>
+      <h2>Every move, dated</h2>
+      <p>The confirmed entry and exit points behind the timeline. Dollar figures stay deliberately conservative at each handoff.</p>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="ledger">
+      <thead><tr><th>When</th><th>Move</th><th>Detail</th><th>Value after</th></tr></thead>
+      <tbody id="ledger-body"></tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section id="caveats">
+  <div class="wrap">
+    <div class="caveat">
+      <h3><span class="ic-warn"></span>What this plan is quietly assuming</h3>
+      <ol>
+        <li><b>The sports seed is capped by the bookies.</b> Legal Nevada books set limits, and a bettor who goes eight-for-eight gets flagged fast. Your starting capital is held back by those limits far more than by anything you know.</li>
+        <li><b>Every "sell the top, buy the bottom" needs precise recall.</b> This is the assumption carrying the whole plan. Miss the timing and the constant rotation actually <em>underperforms</em> just holding Apple.</li>
+        <li><b>Bitcoin custody and liquidity.</b> Millions of early coins are worthless if you lose the key or leave them on Mt. Gox, which lost 850,000 BTC. And selling tens of millions of coins into thin early markets would crash the price against you.</li>
+        <li><b>Real estate is illiquid.</b> "Sell everything at the 2006 peak" reads cleaner on a timeline than it plays out when you are trying to offload several mortgaged Bay Area houses inside one window.</li>
+        <li><b>The survival problem was only ever real for one winter.</b> You needed a job and a cheap apartment for about six months in Nevada. Past that point the risks were a bookie who wouldn't pay, a lost key, or drawing attention, never the rent.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div style="font-family:'Fraunces',serif;font-size:1.4rem;color:var(--ink);margin-bottom:16px">The fortune was never in knowing <em style="color:var(--gold)">what</em> to buy.</div>
+    <p class="disc">A thought experiment, not financial advice. Prices and dates come from public historical records: the Apple, Microsoft and Tesla IPOs, gold and Bitcoin price histories, 1980 US cost-of-living data, and the results of the 1980 World Series and Super Bowl XV. Dollar projections are illustrative estimates of a disciplined best case, rounded down at each stage. Real outcomes would run into betting limits, taxes, liquidity, timing error, and plain luck. Time travel not included.</p>
+  </div>
+</footer>
+
+<script>
+const steps = [
+  {y:"1980",phase:"The starting stake",
+   w:{date:"October 1980",title:"The starting stake",ico:"flag",val:1000,move:"",
+      body:"You wake up with $1,000 and 45 years of hindsight. The plan is to bootstrap a bankroll on known sports results, then ride each asset only during its winning era, buying every bottom and selling every top."},
+   s:{date:"October 1980",title:"Land in Las Vegas",ico:"pin",loc:"Las Vegas, NV",job:"Casino sportsbook",cost:"~$550/mo",float:500,
+      body:"Base yourself in Nevada, the only state with legal sports betting in 1980. Split the $1,000 three ways: about $500 as a living float, $400 staked on games you already know, and a little held back for the Apple IPO."}},
+  {y:"1980",phase:"World Series",
+   w:{date:"Oct 14–21, 1980",title:"World Series: Phillies in 6",ico:"ball",val:25000,move:"$1,000 → $25,000 · <span class='pct'>+2,400%</span>",
+      body:"Bet each game as it comes. The Phillies win October 14, 15, 19 and 21. The Royals win as underdogs on the 17th and 18th, so back them those two nights. Six correct bets, pressing the whole bankroll each time."},
+   s:{date:"Oct 1980",title:"Bartend between bets",ico:"glass",loc:"Las Vegas, NV",job:"Bartending (cash)",cost:"~$550/mo",float:900,
+      body:"A cash-friendly service job covers the ~$550 monthly nut and gives you a boring, verifiable identity. At the $3.10 hourly minimum wage, even part-time hours clear your expenses."}},
+  {y:"1981",phase:"Super Bowl XV",
+   w:{date:"January 25, 1981",title:"Super Bowl XV: Raiders moneyline",ico:"football",val:60000,move:"$25,000 → $60,000 · <span class='pct'>+140%</span>",
+      body:"The Raiders were three-point underdogs and won 27 to 10 at the Superdome. Put the full bankroll on the moneyline. This is your last bet, since bookie limits cap the seed right about here."},
+   s:{date:"Jan 1981",title:"Sportsbook cashes out",ico:"cash",loc:"Las Vegas, NV",job:"Documented wins",cost:"~$550/mo",float:8000,
+      body:"The bankroll is now real and legally documented as Nevada gambling winnings, which is the cleanest origin story you could want for the capital gains you will report decades later."}},
+  {y:"1980",phase:"Apple IPO",
+   w:{date:"December 12, 1980",title:"Apple IPO @ $22",ico:"apple",val:60000,move:"Bankroll parked in AAPL · entry $22/share",
+      body:"Apple goes public partway through the betting run. Funnel the bankroll in as it grows. It is the only tech option on the board yet. Skip gold, which peaked at $850 in January 1980 and then bled out for twenty years."},
+   s:{date:"1981",title:"Quit the day job",ico:"luggage",loc:"Las Vegas, NV",job:"Living off float",cost:"~$550/mo",float:12000,
+      body:"With Apple bought, the bartending job has done its work. Set aside roughly two years of living float from the bankroll so you never have to sell an Apple share to buy groceries."}},
+  {y:"1985",phase:"Hold Apple",
+   w:{date:"1981–1986",title:"Hold Apple through the early run",ico:"chart_up",val:420000,move:"$60,000 → $420,000 · <span class='pct'>+600%</span>",
+      body:"Apple compounds through the early-1980s personal-computer boom. You hold and let it ride until a second horse comes to market."},
+   s:{date:"1981–1985",title:"Relocate, live lean",ico:"truck",loc:"Anywhere, USA",job:"Investor (self-funded)",cost:"~$600/mo",float:20000,
+      body:"Nevada has served its purpose. Move somewhere cheap and pleasant. Living costs stay tiny, under $8,000 a year, while Apple compounds untouched."}},
+  {y:"1986",phase:"Microsoft IPO",
+   w:{date:"March 13, 1986",title:"Microsoft IPO @ $21",ico:"window",val:420000,move:"Allocation split AAPL + MSFT",
+      body:"Microsoft goes public. Split the tech money between the two. Microsoft is the stronger horse across this stretch, rising 125 percent in 1987, 122 percent in 1991 and 115 percent in 1998."},
+   s:{date:"1986",title:"Set up an LLC",ico:"bank",loc:"Anywhere, USA",job:"'Private investor'",cost:"~$650/mo",float:40000,
+      body:"As the portfolio reaches six figures, set up a holding company and call yourself an investor. Every gain now reads as ordinary investment income, with no mystery cash and no audit flags."}},
+  {y:"1999",phase:"Tech supercycle",
+   w:{date:"1986–1999",title:"Ride the '90s tech supercycle",ico:"rocket",val:9000000,move:"$420,000 → $9,000,000 · <span class='pct'>+2,043%</span>",
+      body:"Both stocks climb hard through the decade. You compound them untouched, straight into the peak of the dot-com mania."},
+   s:{date:"1990s",title:"Comfortable, not flashy",ico:"home",loc:"Anywhere, USA",job:"Investment income",cost:"~$3,000/mo",float:150000,
+      body:"A comfortable $40,000 to $50,000 a year barely dents a portfolio that doubles every few years. Keep the spending quiet. Loud money invites questions."}},
+  {y:"2000",phase:"Sell the top",
+   w:{date:"March 2000",title:"Sell tech at the dot-com top",ico:"chart_dn",val:9000000,move:"Tech sold high · $9M in cash",
+      body:"The Nasdaq peaks in March 2000. You already know the crash is coming, so sell the tech book near the top. Microsoft then goes flat for a decade while you sit safely in cash."},
+   s:{date:"2000",title:"Cash buffer for the pivot",ico:"wallet",loc:"Anywhere, USA",job:"Investment income",cost:"~$4,000/mo",float:500000,
+      body:"Keep a fat cash buffer so you are never forced to sell an asset just to cover living costs. A few years of expenses parked in cash costs almost nothing at this scale."}},
+  {y:"2001",phase:"Gold + property",
+   w:{date:"2000–2001",title:"Gold @ $253 + Bay Area real estate",ico:"home",val:9000000,move:"Rotated into gold + San Jose / SF property",
+      body:"Gold bottoms near $253, so buy the low. Then borrow into Bay Area property. San Jose and San Francisco will climb 235 and 219 percent by 2020, the biggest metro gains in the country."},
+   s:{date:"2001",title:"Move to the Bay Area",ico:"bridge",loc:"San Francisco, CA",job:"Investment income",cost:"~$6,000/mo",float:800000,
+      body:"Relocate so you can run the property play in person. The higher cost of living barely registers against the portfolio, and you are the landlord now."}},
+  {y:"2005",phase:"Reload Apple",
+   w:{date:"2003–2006",title:"Reload Apple + ride gold up",ico:"chart_up",val:45000000,move:"$9M → $45,000,000 · <span class='pct'>+400%</span>",
+      body:"Buy Apple back heavily in 2003, before the iPod takes off. Ride gold from $253 toward $1,000, which it reaches in 2008. The Apple reload is the main engine here."},
+   s:{date:"2006",title:"Bank the property profit",ico:"banknote",loc:"San Francisco, CA",job:"Investment + rent",cost:"~$7,000/mo",float:2000000,
+      body:"Sell the Bay Area property at the 2006 peak. Rental income covered your living costs for years, and now the sale adds a large lump sum just ahead of the crash."}},
+  {y:"2010",phase:"Tesla + Bitcoin",
+   w:{date:"June 29, 2010",title:"Tesla IPO @ $17 + first Bitcoin",ico:"bitcoin",val:90000000,move:"$45M → $90,000,000 · <span class='pct'>+100%</span>",
+      body:"Rotate a slice into Tesla at its $17 IPO. Put a small $250,000 slice into Bitcoin at well under a cent a coin, which buys tens of millions of coins. Hold them yourself in cold storage."},
+   s:{date:"2010",title:"Financially independent",ico:"shades",loc:"Anywhere you like",job:"Living off gains",cost:"~$10,000/mo",float:5000000,
+      body:"Cost of living stops mattering. You now spend more in a month than you made in a whole year at the start. Keep a large permanent cash float and stop thinking about expenses."}},
+  {y:"2017",phase:"Bitcoin cycles",
+   w:{date:"Nov 2013 – Dec 2018",title:"Ride the first Bitcoin cycles",ico:"refresh",val:320000000,move:"$90M → $320,000,000 · <span class='pct'>+256%</span>",
+      body:"Sell in November 2013 near $1,100 and rebuy in 2015 near $200. Sell in December 2017 near $19,700 and rebuy in 2018 near $3,200. Each round trip multiplies the crypto slice."},
+   s:{date:"2013–2018",title:"Lifestyle on autopilot",ico:"plane",loc:"Anywhere you like",job:"Living off gains",cost:"~$15,000/mo",float:15000000,
+      body:"With the Bitcoin cycles running, the money refills your float many times over. The one job left is discretion, since a low profile keeps both the fortune and you safe."}},
+  {y:"2023",phase:"Generational wealth",
+   w:{date:"Nov 2021 – Oct 2025",title:"Final Bitcoin + tech cycles",ico:"diamond",val:1000000000,move:"$320M → $1,000,000,000 · <span class='pct'>+213%</span>",
+      body:"Sell Bitcoin in November 2021 near $69,000, rebuy in 2022 near $16,500, and sell in October 2025 near $126,000. Apple and Tesla ride the mobile-and-cloud decade alongside it."},
+   s:{date:"2021–2025",title:"Generational wealth",ico:"diamond",loc:"Anywhere you like",job:"Living off gains",cost:"~$25,000/mo",float:50000000,
+      body:"Living costs no longer register at all. The survival question was only ever genuine for those first six months in Las Vegas. After that it took care of itself."}},
+  {y:"2025",phase:"The finish line",
+   w:{date:"2025",title:"The finish line",ico:"trophy",val:1000000000,move:"Total: $1,000 → $1,000,000,000 · <span class='pct'>1,000,000×</span>",
+      body:"You started with $1,000 and a handful of sports scores and ended past a billion. What made it work was not knowing what to buy, since everyone knows to buy Apple. It was knowing exactly when to sell."},
+   s:{date:"2025",title:"The float was never the problem",ico:"check",loc:"Anywhere you like",job:"Living off gains",cost:"irrelevant",float:50000000,
+      body:"You needed a job and a cheap apartment for one winter in Nevada. Past that, the things that could sink you were a bookie who wouldn't pay, a lost key, or unwanted attention. Rent money never made the list."}}
+];
+
+const costData=[550,550,550,550,600,650,3000,4000,6000,7000,10000,15000,25000,25000];
+
+
+// --- line-icon set (stroke, inherits currentColor) ---
+const ICON = {
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  ball:'<circle cx="12" cy="12" r="8"/><path d="M8 5.5c2 2 6 2 8 0M8 18.5c2-2 6-2 8 0M5.5 8c2 2 2 6 0 8M18.5 8c-2 2-2 6 0 8"/>',
+  football:'<ellipse cx="12" cy="12" rx="9" ry="5.5"/><path d="M9 12h6M11 10v4M13 10v4"/>',
+  cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+  apple:'<path d="M15.5 8.5c1.6.4 2.5 2 2.5 4.2 0 2.8-2 5.8-3.6 5.8-1 0-1.4-.6-2.4-.6s-1.5.6-2.4.6C6.6 18.5 5 15.6 5 12.9c0-2.8 1.8-4.6 3.9-4.6.9 0 1.9.6 2.6.6.6 0 1.8-.7 3-.6"/><path d="M12.5 6.5c.3-1 1.2-2 2.3-2.2"/>',
+  chart_up:'<path d="M4 20V4M4 20h16M7 15l3-4 3 2 5-7"/>',
+  chart_dn:'<path d="M4 20V4M4 20h16M7 9l3 4 3-2 5 7"/>',
+  window:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M11 9v11"/>',
+  rocket:'<path d="M12 3c3 1 5 4 5 8l-2 2H9l-2-2c0-4 2-7 5-8Z"/><path d="M12 8v.01M9 15l-2 4 3-1M15 15l2 4-3-1"/>',
+  truck:'<path d="M3 6h11v9H3zM14 9h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>',
+  bank:'<path d="M4 10h16M5 10v7M9 10v7M15 10v7M19 10v7M3 20h18M12 3l8 4H4Z"/>',
+  home:'<path d="M4 11l8-6 8 6M6 10v9h12v-9"/>',
+  wallet:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M16 11h4v3h-4a1.5 1.5 0 0 1 0-3Z"/>',
+  bridge:'<path d="M2 9c4 3 16 3 20 0M4 9v9M20 9v9M9 12v6M15 12v6M2 18h20"/>',
+  banknote:'<rect x="2" y="7" width="20" height="10" rx="2"/><circle cx="12" cy="12" r="2.4"/><path d="M6 12h.01M18 12h.01"/>',
+  bitcoin:'<circle cx="12" cy="12" r="9"/><path d="M9.5 8h4a2 2 0 0 1 0 4h-4M9.5 12h4.3a2 2 0 0 1 0 4H9.5M9.5 8v8M11 6.5v1.5M11 16v1.5M13 6.5v1.5M13 16v1.5"/>',
+  refresh:'<path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/>',
+  diamond:'<path d="M6 4h12l3 5-9 11L3 9Z"/><path d="M3 9h18M9 4l-3 5 6 11 6-11-3-5"/>',
+  trophy:'<path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M10 14h4v3h-4zM8 20h8M9 17h6l1 3H8Z"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  pin:'<path d="M12 21s6-5.3 6-10a6 6 0 0 0-12 0c0 4.7 6 10 6 10Z"/><circle cx="12" cy="11" r="2.2"/>',
+  glass:'<path d="M5 4h14l-6 7v6M13 17h-2M9 20h6"/>',
+  briefcase:'<rect x="3" y="8" width="18" height="11" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  luggage:'<rect x="6" y="7" width="12" height="13" rx="2"/><path d="M9 7V4h6v3M10 11v5M14 11v5"/>',
+  investor:'<circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>',
+  shades:'<path d="M2 9h20M4 9l1 4a3 3 0 0 0 6 0V9M13 9v4a3 3 0 0 0 6 0l1-4"/>',
+  plane:'<path d="M10 4a1.4 1.4 0 0 1 2.6 0l1.2 7 6 3.5v2l-6-1.5-1 4 2 1.5v1.5l-3.5-1-3.5 1v-1.5l2-1.5-1-4L4 18.5v-2l6-3.5Z"/>',
+  receipt:'<path d="M6 3h12v18l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3L6 21V3Z"/><path d="M9 8h6M9 12h6"/>',
+  warn:'<path d="M12 4l9 16H3L12 4Z"/><path d="M12 10v4M12 17v.01"/>'
+};
+function svgIcon(key,size){size=size||20;return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICON[key]||'')+'</svg>';}
+
+const $=id=>document.getElementById(id);
+function fmtW(n){if(n>=1e9)return"$"+(n/1e9).toFixed(2).replace(/\.00$/,'')+"B";if(n>=1e6)return"$"+(n/1e6).toFixed(1).replace(/\.0$/,'')+"M";return"$"+Math.round(n).toLocaleString();}
+function fmtMult(n){const m=n/1000;if(m>=1e6)return(m/1e6).toFixed(1).replace(/\.0$/,'')+"M×";return Math.round(m).toLocaleString()+"×";}
+function fmtF(n){if(n>=1e6)return"$"+(n/1e6).toFixed(1).replace(/\.0$/,'')+"M";if(n>=1e3)return"$"+Math.round(n/1e3)+"K";return"$"+Math.round(n).toLocaleString();}
+
+let wChart,sChart;
+function buildCharts(){
+  const gridC=getComputedStyle(document.documentElement).getPropertyValue('--line-soft').trim();
+  const mute='#71715f';
+  wChart=new Chart($('w-chart'),{type:'line',
+    data:{labels:steps.map(s=>s.w.date),datasets:[{data:steps.map(s=>s.w.val),
+      borderColor:'#e0a336',borderWidth:2,tension:.3,fill:true,backgroundColor:'rgba(224,163,54,.10)',
+      pointRadius:steps.map((_,i)=>i===0?5:0),pointBackgroundColor:steps.map((_,i)=>i===0?'#e0a336':'transparent'),pointBorderColor:'transparent'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>steps[c[0].dataIndex].w.date,label:c=>fmtW(c.parsed.y)}}},
+      scales:{y:{type:'logarithmic',grid:{color:gridC},border:{display:false},ticks:{color:mute,font:{size:9,family:"'JetBrains Mono',monospace"},callback:v=>({1000:'$1K',10000:'$10K',100000:'$100K',1000000:'$1M',10000000:'$10M',100000000:'$100M',1000000000:'$1B'}[v]||null)}},
+        x:{grid:{display:false},border:{color:gridC},ticks:{color:mute,font:{size:9,family:"'JetBrains Mono',monospace"},autoSkip:true,maxTicksLimit:5,maxRotation:0}}}}});
+  sChart=new Chart($('s-chart'),{type:'line',
+    data:{labels:steps.map(s=>s.s.date),datasets:[{data:costData,
+      borderColor:'#8fc460',borderWidth:2,tension:.3,fill:true,backgroundColor:'rgba(143,196,96,.10)',
+      pointRadius:steps.map((_,i)=>i===0?5:0),pointBackgroundColor:steps.map((_,i)=>i===0?'#8fc460':'transparent'),pointBorderColor:'transparent'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>steps[c[0].dataIndex].s.date,label:c=>'$'+c.parsed.y.toLocaleString()+'/mo'}}},
+      scales:{y:{type:'logarithmic',grid:{color:gridC},border:{display:false},ticks:{color:mute,font:{size:9,family:"'JetBrains Mono',monospace"},callback:v=>({100:'$100',1000:'$1K',10000:'$10K'}[v]||null)}},
+        x:{grid:{display:false},border:{color:gridC},ticks:{color:mute,font:{size:9,family:"'JetBrains Mono',monospace"},autoSkip:true,maxTicksLimit:5,maxRotation:0}}}}});
+}
+
+function render(i){
+  const s=steps[i];
+  $('deck-year').textContent=s.y;$('deck-phase').textContent=s.phase;
+  $('w-value').textContent=fmtW(s.w.val);$('w-mult').textContent=fmtMult(s.w.val);
+  $('w-date').textContent=s.w.date;$('w-title').textContent=s.w.title;$('w-body').textContent=s.w.body;$('w-ico').innerHTML=svgIcon(s.w.ico,20);
+  if(s.w.move){$('w-move').style.display='block';$('w-move').innerHTML=s.w.move;}else{$('w-move').style.display='none';}
+  $('s-float').textContent=fmtF(s.s.float);$('s-loc').textContent=s.s.loc;$('s-job').textContent=s.s.job;$('s-cost').textContent=s.s.cost;
+  $('s-date').textContent=s.s.date;$('s-title').textContent=s.s.title;$('s-body').textContent=s.s.body;$('s-ico').innerHTML=svgIcon(s.s.ico,20);
+  [[wChart,'w'],[sChart,'s']].forEach(([c,k])=>{if(c){c.data.datasets[0].pointRadius=steps.map((_,idx)=>idx===i?6:0);c.data.datasets[0].pointBackgroundColor=steps.map((_,idx)=>idx===i?(k==='w'?'#e0a336':'#8fc460'):'transparent');c.update('none');}});
+  $('prev').disabled=(i===0);$('next').disabled=(i===steps.length-1);
+  $('slider').value=i;
+}
+
+let playing=false,timer=null;
+function stopPlay(){playing=false;clearInterval(timer);$('play').innerHTML='<svg viewBox=\'0 0 24 24\' width=\'13\' height=\'13\' fill=\'currentColor\' aria-hidden=\'true\'><path d=\'M7 5l12 7-12 7Z\'/></svg> Play';}
+$('play').addEventListener('click',()=>{
+  if(playing){stopPlay();return;}
+  if(+$('slider').value>=steps.length-1){render(0);}
+  playing=true;$('play').innerHTML='<svg viewBox=\'0 0 24 24\' width=\'13\' height=\'13\' fill=\'currentColor\' aria-hidden=\'true\'><path d=\'M7 5h4v14H7zM13 5h4v14h-4z\'/></svg> Pause';
+  timer=setInterval(()=>{let v=+$('slider').value;if(v>=steps.length-1){stopPlay();return;}render(v+1);},1900);
+});
+$('slider').addEventListener('input',e=>{stopPlay();render(+e.target.value);});
+$('prev').addEventListener('click',()=>{stopPlay();const v=+$('slider').value;if(v>0)render(v-1);});
+$('next').addEventListener('click',()=>{stopPlay();const v=+$('slider').value;if(v<steps.length-1)render(v+1);});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){$('prev').click();}else if(e.key==='ArrowRight'){$('next').click();}});
+
+// ledger
+$('ledger-body').innerHTML=steps.filter(s=>s.w.move).map(s=>{
+  const val=fmtW(s.w.val);
+  const up=s.w.move.includes('pct')?'up':'';
+  const pin=svgIcon('pin',12);const showLoc=s.s.loc!=='Anywhere, USA'&&s.s.loc!=='Anywhere you like';return `<tr><td>${s.w.date}</td><td class="mv">${s.w.title}</td><td>${showLoc?'<span class="lg-loc">'+pin+' '+s.s.loc+'</span> · ':''}${s.w.body.split('.')[0]}.</td><td class="num ${up}">${val}</td></tr>`;
+}).join('');
+
+buildCharts();
+render(0);
+
+$('mi-job').innerHTML=svgIcon('briefcase',14);
+$('mi-cost').innerHTML=svgIcon('receipt',14);
+document.querySelector('.ic-warn').innerHTML=svgIcon('warn',20);
+
+</script>
+</body>
+</html>
